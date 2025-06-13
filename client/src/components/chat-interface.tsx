@@ -268,7 +268,7 @@ export function ChatInterface() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4 transition-colors duration-300">
       {/* Controls - Theme Toggle and Size Selector */}
       <div className="fixed top-6 right-6 z-50 flex items-center space-x-3">
-        <Select value={interfaceSize} onValueChange={setInterfaceSize}>
+        <Select value={interfaceSize} onValueChange={(value) => setInterfaceSize(value as "normal" | "large" | "extra-large")}>
           <Button variant="outline" className="shadow-lg hover:shadow-xl transition-all duration-300 border-gray-300 dark:border-gray-600">
             <Settings className={`${sizeClasses.icon} mr-2`} />
             <span className={sizeClasses.textSm}>
@@ -327,17 +327,17 @@ export function ChatInterface() {
         </div>
 
         {/* Chat Messages */}
-        <div className="h-96 overflow-y-auto p-6 space-y-4 bg-gray-50 dark:bg-gray-900">
+        <div className={`h-96 overflow-y-auto ${sizeClasses.padding} ${sizeClasses.spacing} bg-gray-50 dark:bg-gray-900`}>
           {messages.length === 0 && (
-            <div className="flex items-start space-x-3">
-              <div className="w-8 h-8 bg-black bg-opacity-10 dark:bg-gray-700 rounded-full flex items-center justify-center flex-shrink-0">
-                <Heart className="w-4 h-4 text-black dark:text-white" />
+            <div className="flex items-start space-x-4">
+              <div className={`w-10 h-10 bg-black dark:bg-white rounded-full flex items-center justify-center flex-shrink-0 shadow-md`}>
+                <Heart className={`${sizeClasses.icon} text-white dark:text-black`} />
               </div>
-              <div className="bg-white dark:bg-gray-800 rounded-2xl rounded-tl-md p-4 shadow-sm border border-gray-400 dark:border-gray-700 max-w-xs">
-                <p className="text-gray-800 dark:text-gray-200 text-sm leading-relaxed">
+              <div className={`bg-white dark:bg-gray-800 rounded-2xl rounded-tl-md ${sizeClasses.padding} shadow-lg max-w-xs`}>
+                <p className={`text-gray-800 dark:text-gray-200 ${sizeClasses.text} leading-relaxed`}>
                   Welcome to Aran's all purpose home page. I'm not Aran. I'm just a silly little AI magician here to answer questions about Aran's products, services, designs, ideas, deep dark secrets, availability and contact information. You can ask me to list products and services currently on offer, request a meeting or to get in touch, or, if you know what you want to know about, just ask for that and I'll tell you what I have in my files that might be useful to you.
                 </p>
-                <span className="text-xs text-gray-500 dark:text-gray-400 mt-2 block">Just now</span>
+                <span className={`${sizeClasses.textXs} text-gray-500 dark:text-gray-400 mt-2 block`}>Just now</span>
               </div>
             </div>
           )}
@@ -345,23 +345,23 @@ export function ChatInterface() {
           {messages.map((msg) => (
             <div
               key={msg.id}
-              className={`flex items-start space-x-3 ${msg.role === "user" ? "justify-end" : ""}`}
+              className={`flex items-start space-x-4 ${msg.role === "user" ? "justify-end" : ""}`}
             >
               {msg.role === "assistant" && (
-                <div className="w-8 h-8 bg-black bg-opacity-10 dark:bg-gray-700 rounded-full flex items-center justify-center flex-shrink-0">
-                  <Heart className="w-4 h-4 text-black dark:text-white" />
+                <div className={`w-10 h-10 bg-black dark:bg-white rounded-full flex items-center justify-center flex-shrink-0 shadow-md`}>
+                  <Heart className={`${sizeClasses.icon} text-white dark:text-black`} />
                 </div>
               )}
               
               <div
-                className={`rounded-2xl p-4 shadow-sm max-w-md ${
+                className={`rounded-2xl ${sizeClasses.padding} shadow-lg max-w-md ${
                   msg.role === "user"
                     ? "bg-black dark:bg-gray-700 text-white rounded-tr-md"
-                    : "bg-white dark:bg-gray-800 border border-gray-400 dark:border-gray-700 text-gray-800 dark:text-gray-200 rounded-tl-md"
+                    : "bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-tl-md"
                 }`}
               >
-                <p className="text-sm leading-relaxed">{msg.content}</p>
-                <span className={`text-xs mt-2 block ${
+                <p className={`${sizeClasses.text} leading-relaxed`}>{msg.content}</p>
+                <span className={`${sizeClasses.textXs} mt-2 block ${
                   msg.role === "user" ? "text-gray-300" : "text-gray-500 dark:text-gray-400"
                 }`}>
                   {formatTime(msg.timestamp)}
@@ -369,19 +369,19 @@ export function ChatInterface() {
                 
                 {/* Action Buttons for specific bot responses */}
                 {msg.role === "assistant" && (
-                  <div className="space-y-2 mt-3">
+                  <div className={`${sizeClasses.spacing} mt-3`}>
                     {/* Admin Dashboard Button */}
                     {(msg.content.toLowerCase().includes("admin dashboard") || msg.content.toLowerCase().includes("admin access")) && (
                       <Button
                         variant="outline"
                         size="sm"
-                        className="w-full justify-start h-auto p-3 border-gray-500 hover:border-gray-600"
+                        className={`w-full justify-start h-auto ${sizeClasses.padding} border-0 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 shadow-sm hover:shadow-md transition-all duration-200`}
                         onClick={() => window.open("/admin-login", "_blank")}
                       >
-                        <Settings className="w-4 h-4 mr-2 text-gray-600" />
+                        <Settings className={`${sizeClasses.icon} mr-2 text-gray-600 dark:text-gray-300`} />
                         <div className="text-left">
-                          <p className="text-sm font-medium">Open Admin Dashboard</p>
-                          <p className="text-xs text-gray-500">Access content management system</p>
+                          <p className={`${sizeClasses.textSm} font-medium`}>Open Admin Dashboard</p>
+                          <p className={`${sizeClasses.textXs} text-gray-500 dark:text-gray-400`}>Access content management system</p>
                         </div>
                       </Button>
                     )}
@@ -392,20 +392,20 @@ export function ChatInterface() {
                         <Button
                           variant="outline"
                           size="sm"
-                          className="w-full justify-start h-auto p-3"
+                          className={`w-full justify-start h-auto ${sizeClasses.padding} border-0 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 shadow-sm hover:shadow-md transition-all duration-200`}
                           onClick={handleDownloadPDF}
                         >
-                          <Download className="w-4 h-4 mr-2 text-gray-600" />
+                          <Download className={`${sizeClasses.icon} mr-2 text-gray-600 dark:text-gray-300`} />
                           <div className="text-left">
-                            <p className="text-sm font-medium">Download Service Guide</p>
-                            <p className="text-xs text-gray-500">Complete overview of our offerings</p>
+                            <p className={`${sizeClasses.textSm} font-medium`}>Download Service Guide</p>
+                            <p className={`${sizeClasses.textXs} text-gray-500 dark:text-gray-400`}>Complete overview of our offerings</p>
                           </div>
                         </Button>
                         
                         <Button
                           variant="outline"
                           size="sm"
-                          className="w-full justify-start h-auto p-3"
+                          className={`w-full justify-start h-auto ${sizeClasses.padding} border-0 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 shadow-sm hover:shadow-md transition-all duration-200`}
                           onClick={() => setShowContactModal(true)}
                         >
                           <Phone className="w-4 h-4 mr-2 text-gray-600" />
@@ -455,7 +455,7 @@ export function ChatInterface() {
         </div>
 
         {/* Chat Input */}
-        <CardContent className="p-6 border-t border-gray-400 dark:border-gray-700">
+        <CardContent className={`${sizeClasses.padding} bg-white dark:bg-gray-800 rounded-b-lg shadow-sm`}>
           <form onSubmit={handleSendMessage} className="flex space-x-3">
             <div className="flex-1 relative">
               <Input
@@ -463,35 +463,35 @@ export function ChatInterface() {
                 placeholder="Type your message here..."
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                className="pr-10 rounded-xl bg-gray-50 dark:bg-gray-700 border-gray-400 dark:border-gray-600"
+                className={`${sizeClasses.input} pr-12 rounded-xl bg-gray-50 dark:bg-gray-700 border-0 shadow-inner ${sizeClasses.text}`}
               />
               <Button
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6"
+                className={`absolute right-2 top-1/2 transform -translate-y-1/2 ${sizeClasses.icon}`}
               >
-                <Mic className="h-4 w-4 text-gray-400" />
+                <Mic className={`${sizeClasses.icon} text-gray-400`} />
               </Button>
             </div>
             <Button
               type="submit"
               disabled={!message.trim() || sendMessageMutation.isPending}
-              className="bg-black hover:bg-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-xl shadow-md hover:shadow-lg"
+              className={`${sizeClasses.button} bg-black hover:bg-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200`}
             >
-              <Send className="h-4 w-4" />
+              <Send className={sizeClasses.icon} />
             </Button>
           </form>
           
           {/* Quick Actions */}
           {quickActions.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-4">
+            <div className={`flex flex-wrap gap-2 mt-4 ${sizeClasses.spacing}`}>
               {quickActions.map((action) => (
                 <Button
                   key={action.id}
                   variant="outline"
                   size="sm"
-                  className="text-xs rounded-full"
+                  className={`${sizeClasses.textSm} rounded-full border-0 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 shadow-sm hover:shadow-md transition-all duration-200`}
                   onClick={() => handleQuickMessage(action.message)}
                 >
                   {action.label}
