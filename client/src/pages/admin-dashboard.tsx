@@ -1002,6 +1002,342 @@ export default function AdminDashboard() {
               )}
             </div>
           </TabsContent>
+
+          <TabsContent value="availability" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                Availability Calendar
+              </h3>
+              <Dialog open={showAvailabilityDialog} onOpenChange={setShowAvailabilityDialog}>
+                <DialogTrigger asChild>
+                  <Button onClick={resetAvailabilityForm} className="bg-black hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-black">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Availability
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-md bg-white dark:bg-gray-800 border border-gray-400 dark:border-gray-600">
+                  <DialogHeader>
+                    <DialogTitle className="text-gray-800 dark:text-gray-200">
+                      {editingAvailability ? "Edit Availability" : "Add Availability"}
+                    </DialogTitle>
+                  </DialogHeader>
+                  <form onSubmit={handleAvailabilitySubmit} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="date">Date</Label>
+                      <Input
+                        id="date"
+                        type="date"
+                        value={availabilityForm.date}
+                        onChange={(e) => setAvailabilityForm({ ...availabilityForm, date: e.target.value })}
+                        required
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="startTime">Start Time</Label>
+                        <Input
+                          id="startTime"
+                          type="time"
+                          value={availabilityForm.startTime}
+                          onChange={(e) => setAvailabilityForm({ ...availabilityForm, startTime: e.target.value })}
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="endTime">End Time</Label>
+                        <Input
+                          id="endTime"
+                          type="time"
+                          value={availabilityForm.endTime}
+                          onChange={(e) => setAvailabilityForm({ ...availabilityForm, endTime: e.target.value })}
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="note">Note (optional)</Label>
+                      <Textarea
+                        id="note"
+                        value={availabilityForm.note}
+                        onChange={(e) => setAvailabilityForm({ ...availabilityForm, note: e.target.value })}
+                        placeholder="e.g., Out of office, Limited availability"
+                        rows={2}
+                      />
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        id="isAvailable"
+                        checked={availabilityForm.isAvailable}
+                        onCheckedChange={(checked) => setAvailabilityForm({ ...availabilityForm, isAvailable: checked })}
+                      />
+                      <Label htmlFor="isAvailable">Available</Label>
+                    </div>
+                    <div className="flex justify-end space-x-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setShowAvailabilityDialog(false)}
+                        className="border-gray-400 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        type="submit"
+                        disabled={createAvailabilityMutation.isPending || updateAvailabilityMutation.isPending}
+                        className="bg-black hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-black"
+                      >
+                        {editingAvailability ? "Update" : "Create"} Availability
+                      </Button>
+                    </div>
+                  </form>
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            <div className="grid gap-4">
+              {availability.map((avail) => (
+                <Card key={avail.id} className="border-gray-400 dark:border-gray-600 bg-white dark:bg-gray-800">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <div className={`w-3 h-3 rounded-full ${avail.isAvailable ? 'bg-green-500' : 'bg-red-500'}`} />
+                        <CardTitle className="text-lg text-gray-800 dark:text-gray-200">
+                          {new Date(avail.date).toLocaleDateString()}
+                        </CardTitle>
+                        <Badge variant={avail.isAvailable ? "default" : "secondary"} className={avail.isAvailable ? "bg-black text-white dark:bg-white dark:text-black" : ""}>
+                          {avail.isAvailable ? "Available" : "Unavailable"}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          onClick={() => editAvailability(avail)}
+                          size="sm"
+                          variant="outline"
+                          className="border-gray-400 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          onClick={() => deleteAvailabilityMutation.mutate(avail.id)}
+                          size="sm"
+                          variant="outline"
+                          disabled={deleteAvailabilityMutation.isPending}
+                          className="border-gray-400 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                      <strong>Time:</strong> {avail.startTime} - {avail.endTime}
+                    </p>
+                    {avail.note && (
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        <strong>Note:</strong> {avail.note}
+                      </p>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+              {availability.length === 0 && (
+                <Card className="border-gray-400 dark:border-gray-600 bg-white dark:bg-gray-800">
+                  <CardContent className="text-center py-8">
+                    <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <span className="text-2xl">📅</span>
+                    </div>
+                    <p className="text-gray-600 dark:text-gray-400">
+                      No availability set yet. Add your available dates and times.
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="standard-responses" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                Standard Responses
+              </h3>
+              <Dialog open={showStandardResponseDialog} onOpenChange={setShowStandardResponseDialog}>
+                <DialogTrigger asChild>
+                  <Button onClick={resetStandardResponseForm} className="bg-black hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-black">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Standard Response
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl bg-white dark:bg-gray-800 border border-gray-400 dark:border-gray-600">
+                  <DialogHeader>
+                    <DialogTitle className="text-gray-800 dark:text-gray-200">
+                      {editingStandardResponse ? "Edit Standard Response" : "Add Standard Response"}
+                    </DialogTitle>
+                  </DialogHeader>
+                  <form onSubmit={handleStandardResponseSubmit} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="title">Title</Label>
+                      <Input
+                        id="title"
+                        value={standardResponseForm.title}
+                        onChange={(e) => setStandardResponseForm({ ...standardResponseForm, title: e.target.value })}
+                        placeholder="e.g., Pricing Information"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="questionType">Question Type</Label>
+                      <Select
+                        value={standardResponseForm.questionType}
+                        onValueChange={(value) => setStandardResponseForm({ ...standardResponseForm, questionType: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select question type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="pricing">Pricing</SelectItem>
+                          <SelectItem value="support">Support</SelectItem>
+                          <SelectItem value="scheduling">Scheduling</SelectItem>
+                          <SelectItem value="general">General</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="response">Response</Label>
+                      <Textarea
+                        id="response"
+                        value={standardResponseForm.response}
+                        onChange={(e) => setStandardResponseForm({ ...standardResponseForm, response: e.target.value })}
+                        placeholder="Enter the standard response text..."
+                        required
+                        rows={4}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="keywords">Keywords (comma-separated)</Label>
+                      <Input
+                        id="keywords"
+                        value={standardResponseForm.keywords?.join(', ') || ''}
+                        onChange={(e) => {
+                          const keywords = e.target.value.split(',').map(k => k.trim()).filter(k => k.length > 0);
+                          setStandardResponseForm({ ...standardResponseForm, keywords });
+                        }}
+                        placeholder="e.g., price, cost, pricing, fee"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="priority">Priority (1-10)</Label>
+                        <Input
+                          id="priority"
+                          type="number"
+                          min="1"
+                          max="10"
+                          value={standardResponseForm.priority}
+                          onChange={(e) => setStandardResponseForm({ ...standardResponseForm, priority: parseInt(e.target.value) || 1 })}
+                          required
+                        />
+                      </div>
+                      <div className="flex items-center space-x-2 pt-6">
+                        <Switch
+                          id="isActive"
+                          checked={standardResponseForm.isActive}
+                          onCheckedChange={(checked) => setStandardResponseForm({ ...standardResponseForm, isActive: checked })}
+                        />
+                        <Label htmlFor="isActive">Active</Label>
+                      </div>
+                    </div>
+                    <div className="flex justify-end space-x-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setShowStandardResponseDialog(false)}
+                        className="border-gray-400 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        type="submit"
+                        disabled={createStandardResponseMutation.isPending || updateStandardResponseMutation.isPending}
+                        className="bg-black hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-black"
+                      >
+                        {editingStandardResponse ? "Update" : "Create"} Standard Response
+                      </Button>
+                    </div>
+                  </form>
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            <div className="grid gap-4">
+              {standardResponses.map((response) => (
+                <Card key={response.id} className="border-gray-400 dark:border-gray-600 bg-white dark:bg-gray-800">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-5 h-5 text-gray-700 dark:text-gray-300">💬</div>
+                        <CardTitle className="text-lg text-gray-800 dark:text-gray-200">{response.title}</CardTitle>
+                        <Badge variant={response.isActive ? "default" : "secondary"} className={response.isActive ? "bg-black text-white dark:bg-white dark:text-black" : ""}>
+                          {response.isActive ? "Active" : "Inactive"}
+                        </Badge>
+                        <Badge variant="outline" className="border-gray-400 dark:border-gray-600">
+                          {response.questionType}
+                        </Badge>
+                        <Badge variant="outline" className="border-gray-400 dark:border-gray-600">
+                          Priority: {response.priority}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          onClick={() => editStandardResponse(response)}
+                          size="sm"
+                          variant="outline"
+                          className="border-gray-400 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          onClick={() => deleteStandardResponseMutation.mutate(response.id)}
+                          size="sm"
+                          variant="outline"
+                          disabled={deleteStandardResponseMutation.isPending}
+                          className="border-gray-400 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-700 dark:text-gray-300 mb-3">
+                      {response.response}
+                    </p>
+                    {response.keywords && response.keywords.length > 0 && (
+                      <div className="mb-2">
+                        <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Keywords: </span>
+                        <span className="text-sm text-gray-600 dark:text-gray-400">
+                          {response.keywords.join(', ')}
+                        </span>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+              {standardResponses.length === 0 && (
+                <Card className="border-gray-400 dark:border-gray-600 bg-white dark:bg-gray-800">
+                  <CardContent className="text-center py-8">
+                    <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <span className="text-2xl">💬</span>
+                    </div>
+                    <p className="text-gray-600 dark:text-gray-400">
+                      No standard responses yet. Create responses for common questions to improve response consistency.
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </TabsContent>
         </Tabs>
       </div>
     </div>
