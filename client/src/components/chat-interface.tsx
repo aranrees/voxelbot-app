@@ -257,7 +257,7 @@ export function ChatInterface() {
         <div className="h-96 overflow-y-auto p-6 space-y-4 bg-gray-50 dark:bg-gray-900">
           {messages.length === 0 && (
             <div className="flex items-start space-x-3">
-              <div className="w-8 h-8 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
+              <div className="w-8 h-8 bg-black dark:bg-gray-700 rounded-full flex items-center justify-center flex-shrink-0">
                 <Bot className="w-4 h-4 text-white" />
               </div>
               <div className="bg-white dark:bg-gray-800 rounded-2xl rounded-tl-md p-4 shadow-sm border border-gray-200 dark:border-gray-700 max-w-xs">
@@ -275,7 +275,7 @@ export function ChatInterface() {
               className={`flex items-start space-x-3 ${msg.role === "user" ? "justify-end" : ""}`}
             >
               {msg.role === "assistant" && (
-                <div className="w-8 h-8 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
+                <div className="w-8 h-8 bg-black dark:bg-gray-700 rounded-full flex items-center justify-center flex-shrink-0">
                   <Bot className="w-4 h-4 text-white" />
                 </div>
               )}
@@ -283,13 +283,13 @@ export function ChatInterface() {
               <div
                 className={`rounded-2xl p-4 shadow-sm max-w-md ${
                   msg.role === "user"
-                    ? "bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-tr-md"
+                    ? "bg-black dark:bg-gray-700 text-white rounded-tr-md"
                     : "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 rounded-tl-md"
                 }`}
               >
                 <p className="text-sm leading-relaxed">{msg.content}</p>
                 <span className={`text-xs mt-2 block ${
-                  msg.role === "user" ? "text-indigo-100" : "text-gray-500 dark:text-gray-400"
+                  msg.role === "user" ? "text-gray-300" : "text-gray-500 dark:text-gray-400"
                 }`}>
                   {formatTime(msg.timestamp)}
                 </span>
@@ -302,10 +302,10 @@ export function ChatInterface() {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="w-full justify-start h-auto p-3 border-purple-200 hover:border-purple-300"
+                        className="w-full justify-start h-auto p-3 border-gray-300 hover:border-gray-400"
                         onClick={() => window.open("/admin-login", "_blank")}
                       >
-                        <Settings className="w-4 h-4 mr-2 text-purple-500" />
+                        <Settings className="w-4 h-4 mr-2 text-gray-600" />
                         <div className="text-left">
                           <p className="text-sm font-medium">Open Admin Dashboard</p>
                           <p className="text-xs text-gray-500">Access content management system</p>
@@ -322,7 +322,7 @@ export function ChatInterface() {
                           className="w-full justify-start h-auto p-3"
                           onClick={handleDownloadPDF}
                         >
-                          <Download className="w-4 h-4 mr-2 text-indigo-500" />
+                          <Download className="w-4 h-4 mr-2 text-gray-600" />
                           <div className="text-left">
                             <p className="text-sm font-medium">Download Service Guide</p>
                             <p className="text-xs text-gray-500">Complete overview of our offerings</p>
@@ -335,7 +335,7 @@ export function ChatInterface() {
                           className="w-full justify-start h-auto p-3"
                           onClick={() => setShowContactModal(true)}
                         >
-                          <Phone className="w-4 h-4 mr-2 text-green-500" />
+                          <Phone className="w-4 h-4 mr-2 text-gray-600" />
                           <div className="text-left">
                             <p className="text-sm font-medium">Get Contact Information</p>
                             <p className="text-xs text-gray-500">Phone, email, and office details</p>
@@ -348,7 +348,7 @@ export function ChatInterface() {
                           className="w-full justify-start h-auto p-3"
                           onClick={() => setShowAppointmentModal(true)}
                         >
-                          <Calendar className="w-4 h-4 mr-2 text-purple-500" />
+                          <Calendar className="w-4 h-4 mr-2 text-gray-600" />
                           <div className="text-left">
                             <p className="text-sm font-medium">Schedule Consultation</p>
                             <p className="text-xs text-gray-500">Book a free 30-minute consultation</p>
@@ -365,7 +365,7 @@ export function ChatInterface() {
           {/* Typing Indicator */}
           {isTyping && (
             <div className="flex items-start space-x-3">
-              <div className="w-8 h-8 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
+              <div className="w-8 h-8 bg-black dark:bg-gray-700 rounded-full flex items-center justify-center flex-shrink-0">
                 <Bot className="w-4 h-4 text-white" />
               </div>
               <div className="bg-white dark:bg-gray-800 rounded-2xl rounded-tl-md p-4 shadow-sm border border-gray-200 dark:border-gray-700">
@@ -404,7 +404,7 @@ export function ChatInterface() {
             <Button
               type="submit"
               disabled={!message.trim() || sendMessageMutation.isPending}
-              className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 rounded-xl shadow-md hover:shadow-lg"
+              className="bg-black hover:bg-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-xl shadow-md hover:shadow-lg"
             >
               <Send className="h-4 w-4" />
             </Button>
