@@ -229,6 +229,19 @@ export function ChatInterface() {
     }
   };
 
+  const getMessageBubbleWidth = () => {
+    switch (chatWidth) {
+      case "narrow":
+        return "max-w-xs";
+      case "wide":
+        return "max-w-lg";
+      case "extra-wide":
+        return "max-w-2xl";
+      default:
+        return "max-w-md";
+    }
+  };
+
   const getSizeClasses = () => {
     switch (interfaceSize) {
       case "large":
@@ -360,7 +373,7 @@ export function ChatInterface() {
               <div className={`w-10 h-10 bg-black dark:bg-white rounded-full flex items-center justify-center flex-shrink-0 shadow-md`}>
                 <Heart className={`${sizeClasses.icon} text-white dark:text-black`} />
               </div>
-              <div className={`bg-white dark:bg-gray-800 rounded-2xl rounded-tl-md ${sizeClasses.padding} shadow-lg max-w-xs`}>
+              <div className={`bg-white dark:bg-gray-800 rounded-2xl rounded-tl-md ${sizeClasses.padding} shadow-lg ${getMessageBubbleWidth()}`}>
                 <p className={`text-gray-800 dark:text-gray-200 ${sizeClasses.text} leading-relaxed`}>
                   Welcome to Aran's all purpose home page. I'm not Aran. I'm just a silly little AI magician here to answer questions about Aran's products, services, designs, ideas, deep dark secrets, availability and contact information. You can ask me to list products and services currently on offer, request a meeting or to get in touch, or, if you know what you want to know about, just ask for that and I'll tell you what I have in my files that might be useful to you.
                 </p>
@@ -381,7 +394,7 @@ export function ChatInterface() {
               )}
               
               <div
-                className={`rounded-2xl ${sizeClasses.padding} shadow-lg max-w-md ${
+                className={`rounded-2xl ${sizeClasses.padding} shadow-lg ${getMessageBubbleWidth()} ${
                   msg.role === "user"
                     ? "bg-black dark:bg-gray-700 text-white rounded-tr-md"
                     : "bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-tl-md"
@@ -468,7 +481,7 @@ export function ChatInterface() {
               <div className={`w-10 h-10 bg-black dark:bg-white rounded-full flex items-center justify-center flex-shrink-0 shadow-md`}>
                 <Heart className={`${sizeClasses.icon} text-white dark:text-black`} />
               </div>
-              <div className={`bg-white dark:bg-gray-800 rounded-2xl rounded-tl-md ${sizeClasses.padding} shadow-lg`}>
+              <div className={`bg-white dark:bg-gray-800 rounded-2xl rounded-tl-md ${sizeClasses.padding} shadow-lg ${getMessageBubbleWidth()}`}>
                 <div className="flex space-x-1">
                   <div className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce"></div>
                   <div className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
