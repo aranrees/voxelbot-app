@@ -472,14 +472,14 @@ export default function AdminDashboard() {
 
             <div className="grid gap-6">
               {documents.map((document) => (
-                <Card key={document.id}>
+                <Card key={document.id} className="border-gray-400 dark:border-gray-600 bg-white dark:bg-gray-800">
                   <CardHeader>
                     <div className="flex justify-between items-start">
                       <div>
-                        <CardTitle className="flex items-center space-x-2">
+                        <CardTitle className="flex items-center space-x-2 text-gray-800 dark:text-gray-200">
                           <FileText className="w-5 h-5" />
                           <span>{document.title}</span>
-                          <Badge variant={document.isActive ? "default" : "secondary"}>
+                          <Badge variant={document.isActive ? "default" : "secondary"} className={document.isActive ? "bg-black text-white dark:bg-white dark:text-black" : ""}>
                             {document.isActive ? "Active" : "Inactive"}
                           </Badge>
                         </CardTitle>
@@ -492,6 +492,7 @@ export default function AdminDashboard() {
                           variant="outline"
                           size="sm"
                           onClick={() => editDocument(document)}
+                          className="border-gray-400 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
                         >
                           <Edit className="w-4 h-4" />
                         </Button>
@@ -499,6 +500,7 @@ export default function AdminDashboard() {
                           variant="outline"
                           size="sm"
                           onClick={() => deleteDocumentMutation.mutate(document.id)}
+                          className="border-gray-400 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -522,7 +524,7 @@ export default function AdminDashboard() {
                 </Card>
               ))}
               {documents.length === 0 && (
-                <Card>
+                <Card className="border-gray-400 dark:border-gray-600 bg-white dark:bg-gray-800">
                   <CardContent className="text-center py-8">
                     <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                     <p className="text-gray-600 dark:text-gray-400">
@@ -541,14 +543,14 @@ export default function AdminDashboard() {
               </h3>
               <Dialog open={showInstructionDialog} onOpenChange={setShowInstructionDialog}>
                 <DialogTrigger asChild>
-                  <Button onClick={resetInstructionForm}>
+                  <Button onClick={resetInstructionForm} className="bg-black hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-black">
                     <Plus className="w-4 h-4 mr-2" />
                     Add Instruction
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-2xl">
+                <DialogContent className="max-w-2xl bg-white dark:bg-gray-800 border border-gray-400 dark:border-gray-600">
                   <DialogHeader>
-                    <DialogTitle>
+                    <DialogTitle className="text-gray-800 dark:text-gray-200">
                       {editingInstruction ? "Edit AI Instruction" : "Add New AI Instruction"}
                     </DialogTitle>
                   </DialogHeader>
@@ -597,12 +599,14 @@ export default function AdminDashboard() {
                         type="button"
                         variant="outline"
                         onClick={() => setShowInstructionDialog(false)}
+                        className="border-gray-400 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
                       >
                         Cancel
                       </Button>
                       <Button
                         type="submit"
                         disabled={createInstructionMutation.isPending || updateInstructionMutation.isPending}
+                        className="bg-black hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-black"
                       >
                         {editingInstruction ? "Update" : "Create"}
                       </Button>
@@ -614,17 +618,17 @@ export default function AdminDashboard() {
 
             <div className="grid gap-6">
               {aiInstructions.map((instruction) => (
-                <Card key={instruction.id}>
+                <Card key={instruction.id} className="border-gray-400 dark:border-gray-600 bg-white dark:bg-gray-800">
                   <CardHeader>
                     <div className="flex justify-between items-start">
                       <div>
-                        <CardTitle className="flex items-center space-x-2">
+                        <CardTitle className="flex items-center space-x-2 text-gray-800 dark:text-gray-200">
                           <Brain className="w-5 h-5" />
                           <span>{instruction.title}</span>
-                          <Badge variant={instruction.isActive ? "default" : "secondary"}>
+                          <Badge variant={instruction.isActive ? "default" : "secondary"} className={instruction.isActive ? "bg-black text-white dark:bg-white dark:text-black" : ""}>
                             {instruction.isActive ? "Active" : "Inactive"}
                           </Badge>
-                          <Badge variant="outline">
+                          <Badge variant="outline" className="border-gray-400 dark:border-gray-600">
                             Priority: {instruction.priority}
                           </Badge>
                         </CardTitle>
@@ -634,6 +638,7 @@ export default function AdminDashboard() {
                           variant="outline"
                           size="sm"
                           onClick={() => editInstruction(instruction)}
+                          className="border-gray-400 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
                         >
                           <Edit className="w-4 h-4" />
                         </Button>
@@ -641,6 +646,7 @@ export default function AdminDashboard() {
                           variant="outline"
                           size="sm"
                           onClick={() => deleteInstructionMutation.mutate(instruction.id)}
+                          className="border-gray-400 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -655,7 +661,7 @@ export default function AdminDashboard() {
                 </Card>
               ))}
               {aiInstructions.length === 0 && (
-                <Card>
+                <Card className="border-gray-400 dark:border-gray-600 bg-white dark:bg-gray-800">
                   <CardContent className="text-center py-8">
                     <Brain className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                     <p className="text-gray-600 dark:text-gray-400">
