@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Moon, Sun, Send, Phone, Mail, MapPin, Clock, Download, Calendar, Mic, Bot, Settings, RotateCcw } from "lucide-react";
+import { Moon, Sun, Send, Phone, Mail, MapPin, Clock, Download, Calendar, Mic, Heart, Settings, RotateCcw } from "lucide-react";
 
 interface ChatMessage {
   id: number;
@@ -230,7 +230,7 @@ export function ChatInterface() {
         <div className="bg-white dark:bg-gray-900 p-6 text-black dark:text-white rounded-t-lg border-b border-gray-400 dark:border-gray-700">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-black bg-opacity-10 dark:bg-white dark:bg-opacity-20 rounded-full flex items-center justify-center">
-              <Bot className="w-5 h-5 text-black dark:text-white" />
+              <Heart className="w-5 h-5 text-black dark:text-white" />
             </div>
             <div className="flex-1">
               <h2 className="text-xl font-semibold">Infomage</h2>
@@ -258,7 +258,7 @@ export function ChatInterface() {
           {messages.length === 0 && (
             <div className="flex items-start space-x-3">
               <div className="w-8 h-8 bg-black dark:bg-gray-700 rounded-full flex items-center justify-center flex-shrink-0">
-                <Bot className="w-4 h-4 text-white" />
+                <Heart className="w-4 h-4 text-white" />
               </div>
               <div className="bg-white dark:bg-gray-800 rounded-2xl rounded-tl-md p-4 shadow-sm border border-gray-400 dark:border-gray-700 max-w-xs">
                 <p className="text-gray-800 dark:text-gray-200 text-sm leading-relaxed">
@@ -276,7 +276,7 @@ export function ChatInterface() {
             >
               {msg.role === "assistant" && (
                 <div className="w-8 h-8 bg-black dark:bg-gray-700 rounded-full flex items-center justify-center flex-shrink-0">
-                  <Bot className="w-4 h-4 text-white" />
+                  <Heart className="w-4 h-4 text-white" />
                 </div>
               )}
               
@@ -366,7 +366,7 @@ export function ChatInterface() {
           {isTyping && (
             <div className="flex items-start space-x-3">
               <div className="w-8 h-8 bg-black dark:bg-gray-700 rounded-full flex items-center justify-center flex-shrink-0">
-                <Bot className="w-4 h-4 text-white" />
+                <Heart className="w-4 h-4 text-white" />
               </div>
               <div className="bg-white dark:bg-gray-800 rounded-2xl rounded-tl-md p-4 shadow-sm border border-gray-400 dark:border-gray-700">
                 <div className="flex space-x-1">
