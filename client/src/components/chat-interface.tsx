@@ -289,54 +289,7 @@ export function ChatInterface() {
   const sizeClasses = getSizeClasses();
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4 transition-colors duration-300">
-      {/* Controls - Width, Size, and Theme Selectors */}
-      <div className="fixed top-6 right-6 z-50 flex items-center space-x-3">
-        <Select value={chatWidth} onValueChange={(value) => setChatWidth(value as "narrow" | "normal" | "wide" | "extra-wide")}>
-          <SelectTrigger className="w-auto shadow-lg hover:shadow-xl transition-all duration-300 border-gray-300 dark:border-gray-600">
-            <span className={sizeClasses.textSm}>
-              {chatWidth === "narrow" ? "Narrow" : 
-               chatWidth === "wide" ? "Wide" : 
-               chatWidth === "extra-wide" ? "Extra Wide" : "Normal"}
-            </span>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="narrow">Narrow Width</SelectItem>
-            <SelectItem value="normal">Normal Width</SelectItem>
-            <SelectItem value="wide">Wide Width</SelectItem>
-            <SelectItem value="extra-wide">Extra Wide</SelectItem>
-          </SelectContent>
-        </Select>
-        
-        <Select value={interfaceSize} onValueChange={(value) => setInterfaceSize(value as "normal" | "large" | "extra-large")}>
-          <SelectTrigger className="w-auto shadow-lg hover:shadow-xl transition-all duration-300 border-gray-300 dark:border-gray-600">
-            <Settings className={`${sizeClasses.icon} mr-2`} />
-            <span className={sizeClasses.textSm}>
-              {interfaceSize === "normal" ? "Normal" : 
-               interfaceSize === "large" ? "Large" : "Extra Large"}
-            </span>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="normal">Normal Size</SelectItem>
-            <SelectItem value="large">Large Size</SelectItem>
-            <SelectItem value="extra-large">Extra Large Size</SelectItem>
-          </SelectContent>
-        </Select>
-        
-        <Button
-          onClick={toggleTheme}
-          variant="outline"
-          size="icon"
-          className="shadow-lg hover:shadow-xl transition-all duration-300 border-gray-300 dark:border-gray-600"
-        >
-          {theme === "dark" ? (
-            <Sun className={`${sizeClasses.icon} text-gray-600 dark:text-gray-300`} />
-          ) : (
-            <Moon className={`${sizeClasses.icon} text-gray-600 dark:text-gray-300`} />
-          )}
-        </Button>
-      </div>
-
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col items-center justify-center p-4 transition-colors duration-300">
       {/* Chat Container - Seamless with Shadow */}
       <Card className={`w-full ${getWidthClass()} mx-auto shadow-2xl dark:shadow-gray-900/50 border-0 bg-white dark:bg-gray-800`}>
         {/* Chat Header */}
@@ -542,6 +495,75 @@ export function ChatInterface() {
           )}
         </CardContent>
       </Card>
+
+      {/* Controls Section */}
+      <div className="mt-6 flex flex-wrap items-center justify-center gap-6">
+        {/* Chat Width Control */}
+        <div className="flex flex-col items-center space-y-2">
+          <Label className={`${sizeClasses.textSm} font-medium text-gray-700 dark:text-gray-300`}>
+            Chat Width
+          </Label>
+          <Select value={chatWidth} onValueChange={(value) => setChatWidth(value as "narrow" | "normal" | "wide" | "extra-wide")}>
+            <SelectTrigger className="w-32 shadow-lg hover:shadow-xl transition-all duration-300 border-gray-300 dark:border-gray-600">
+              <span className={sizeClasses.textSm}>
+                {chatWidth === "narrow" ? "Narrow" : 
+                 chatWidth === "wide" ? "Wide" : 
+                 chatWidth === "extra-wide" ? "Extra Wide" : "Normal"}
+              </span>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="narrow">Narrow</SelectItem>
+              <SelectItem value="normal">Normal</SelectItem>
+              <SelectItem value="wide">Wide</SelectItem>
+              <SelectItem value="extra-wide">Extra Wide</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
+        {/* Text Size Control */}
+        <div className="flex flex-col items-center space-y-2">
+          <Label className={`${sizeClasses.textSm} font-medium text-gray-700 dark:text-gray-300`}>
+            Text Size
+          </Label>
+          <Select value={interfaceSize} onValueChange={(value) => setInterfaceSize(value as "normal" | "large" | "extra-large")}>
+            <SelectTrigger className="w-32 shadow-lg hover:shadow-xl transition-all duration-300 border-gray-300 dark:border-gray-600">
+              <span className={sizeClasses.textSm}>
+                {interfaceSize === "normal" ? "Normal" : 
+                 interfaceSize === "large" ? "Large" : "Extra Large"}
+              </span>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="normal">Normal</SelectItem>
+              <SelectItem value="large">Large</SelectItem>
+              <SelectItem value="extra-large">Extra Large</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
+        {/* Theme Toggle */}
+        <div className="flex flex-col items-center space-y-2">
+          <Label className={`${sizeClasses.textSm} font-medium text-gray-700 dark:text-gray-300`}>
+            Theme
+          </Label>
+          <Button
+            onClick={toggleTheme}
+            variant="outline"
+            className="w-32 shadow-lg hover:shadow-xl transition-all duration-300 border-gray-300 dark:border-gray-600"
+          >
+            {theme === "dark" ? (
+              <>
+                <Sun className={`${sizeClasses.icon} mr-2 text-gray-600 dark:text-gray-300`} />
+                <span className={sizeClasses.textSm}>Light Mode</span>
+              </>
+            ) : (
+              <>
+                <Moon className={`${sizeClasses.icon} mr-2 text-gray-600 dark:text-gray-300`} />
+                <span className={sizeClasses.textSm}>Dark Mode</span>
+              </>
+            )}
+          </Button>
+        </div>
+      </div>
 
       {/* Contact Modal */}
       <Dialog open={showContactModal} onOpenChange={setShowContactModal}>
