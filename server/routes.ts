@@ -42,8 +42,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const validatedData = insertChatMessageSchema.parse(req.body);
       
-      // Check for secret phrase first
-      if (validatedData.content && validatedData.content.toLowerCase().trim() === "honey, i'm home") {
+      // Check for secret phrase first - normalize text by removing punctuation and extra spaces
+      const normalizedContent = validatedData.content?.toLowerCase()
+        .replace(/[.,!?]/g, '')
+        .replace(/'/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+      
+      if (normalizedContent === "honey im home") {
         const userMessage = await storage.createChatMessage(validatedData);
         const aiMessage = await storage.createChatMessage({
           content: "Welcome home! Here's your admin access: [Admin Dashboard](/admin)",
