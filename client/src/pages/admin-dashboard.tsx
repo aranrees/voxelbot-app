@@ -242,6 +242,100 @@ export default function AdminDashboard() {
     },
   });
 
+  // Availability mutations
+  const createAvailabilityMutation = useMutation({
+    mutationFn: async (data: InsertAvailability) => {
+      const response = await apiRequest("POST", "/api/admin/availability", data);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/availability"] });
+      setShowAvailabilityDialog(false);
+      resetAvailabilityForm();
+      toast({ title: "Success", description: "Availability created successfully!" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to create availability", variant: "destructive" });
+    },
+  });
+
+  const updateAvailabilityMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: Partial<InsertAvailability> }) => {
+      const response = await apiRequest("PUT", `/api/admin/availability/${id}`, data);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/availability"] });
+      setShowAvailabilityDialog(false);
+      resetAvailabilityForm();
+      toast({ title: "Success", description: "Availability updated successfully!" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to update availability", variant: "destructive" });
+    },
+  });
+
+  const deleteAvailabilityMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await apiRequest("DELETE", `/api/admin/availability/${id}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/availability"] });
+      toast({ title: "Success", description: "Availability deleted successfully!" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to delete availability", variant: "destructive" });
+    },
+  });
+
+  // Standard Response mutations
+  const createStandardResponseMutation = useMutation({
+    mutationFn: async (data: InsertStandardResponse) => {
+      const response = await apiRequest("POST", "/api/admin/standard-responses", data);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/standard-responses"] });
+      setShowStandardResponseDialog(false);
+      resetStandardResponseForm();
+      toast({ title: "Success", description: "Standard response created successfully!" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to create standard response", variant: "destructive" });
+    },
+  });
+
+  const updateStandardResponseMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: Partial<InsertStandardResponse> }) => {
+      const response = await apiRequest("PUT", `/api/admin/standard-responses/${id}`, data);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/standard-responses"] });
+      setShowStandardResponseDialog(false);
+      resetStandardResponseForm();
+      toast({ title: "Success", description: "Standard response updated successfully!" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to update standard response", variant: "destructive" });
+    },
+  });
+
+  const deleteStandardResponseMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await apiRequest("DELETE", `/api/admin/standard-responses/${id}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/standard-responses"] });
+      toast({ title: "Success", description: "Standard response deleted successfully!" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to delete standard response", variant: "destructive" });
+    },
+  });
+
   const resetDocumentForm = () => {
     setDocumentForm({
       title: "",
@@ -273,6 +367,29 @@ export default function AdminDashboard() {
     setEditingQuickAction(null);
   };
 
+  const resetAvailabilityForm = () => {
+    setAvailabilityForm({
+      date: "",
+      startTime: "09:00",
+      endTime: "17:00",
+      isAvailable: true,
+      note: ""
+    });
+    setEditingAvailability(null);
+  };
+
+  const resetStandardResponseForm = () => {
+    setStandardResponseForm({
+      title: "",
+      questionType: "general",
+      response: "",
+      keywords: [],
+      isActive: true,
+      priority: 5
+    });
+    setEditingStandardResponse(null);
+  };
+
   const handleDocumentSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (editingDocument) {
@@ -297,6 +414,24 @@ export default function AdminDashboard() {
       updateQuickActionMutation.mutate({ id: editingQuickAction.id, data: quickActionForm });
     } else {
       createQuickActionMutation.mutate(quickActionForm);
+    }
+  };
+
+  const handleAvailabilitySubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (editingAvailability) {
+      updateAvailabilityMutation.mutate({ id: editingAvailability.id, data: availabilityForm });
+    } else {
+      createAvailabilityMutation.mutate(availabilityForm);
+    }
+  };
+
+  const handleStandardResponseSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (editingStandardResponse) {
+      updateStandardResponseMutation.mutate({ id: editingStandardResponse.id, data: standardResponseForm });
+    } else {
+      createStandardResponseMutation.mutate(standardResponseForm);
     }
   };
 
@@ -332,6 +467,31 @@ export default function AdminDashboard() {
       isActive: action.isActive
     });
     setShowQuickActionDialog(true);
+  };
+
+  const editAvailability = (availability: Availability) => {
+    setEditingAvailability(availability);
+    setAvailabilityForm({
+      date: availability.date,
+      startTime: availability.startTime,
+      endTime: availability.endTime,
+      isAvailable: availability.isAvailable,
+      note: availability.note || ""
+    });
+    setShowAvailabilityDialog(true);
+  };
+
+  const editStandardResponse = (response: StandardResponse) => {
+    setEditingStandardResponse(response);
+    setStandardResponseForm({
+      title: response.title,
+      questionType: response.questionType,
+      response: response.response,
+      keywords: response.keywords || [],
+      isActive: response.isActive,
+      priority: response.priority
+    });
+    setShowStandardResponseDialog(true);
   };
 
   const handleTagsChange = (tagsString: string) => {
@@ -401,10 +561,12 @@ export default function AdminDashboard() {
         </div>
 
         <Tabs defaultValue="documents" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 bg-white dark:bg-gray-800 border border-gray-400 dark:border-gray-600">
+          <TabsList className="grid w-full grid-cols-5 bg-white dark:bg-gray-800 border border-gray-400 dark:border-gray-600">
             <TabsTrigger value="documents" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">Documents</TabsTrigger>
             <TabsTrigger value="instructions" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">AI Instructions</TabsTrigger>
             <TabsTrigger value="quick-actions" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">Quick Actions</TabsTrigger>
+            <TabsTrigger value="availability" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">Availability</TabsTrigger>
+            <TabsTrigger value="standard-responses" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">Standard Responses</TabsTrigger>
           </TabsList>
 
           <TabsContent value="documents" className="space-y-6">
