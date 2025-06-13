@@ -155,7 +155,7 @@ export class DatabaseStorage implements IStorage {
     const result = await db
       .delete(documents)
       .where(eq(documents.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount || 0) > 0;
   }
 
   async getAiInstructions(): Promise<AiInstruction[]> {
@@ -204,7 +204,7 @@ export class DatabaseStorage implements IStorage {
     const result = await db
       .delete(aiInstructions)
       .where(eq(aiInstructions.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount || 0) > 0;
   }
 }
 

@@ -5,9 +5,10 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY_ENV_VAR || "your-openai-api-key"
 });
 
-export async function getChatResponse(message: string, conversationHistory: Array<{role: string, content: string}> = []): Promise<string> {
+export async function getChatResponse(message: string, conversationHistory: Array<{role: string, content: string}> = [], documents: any[] = [], aiInstructions: any[] = []): Promise<string> {
   try {
-    const systemPrompt = `You are a helpful AI assistant for a business. You can help customers with:
+    // Build enhanced system prompt with admin-defined content
+    let systemPrompt = `You are a helpful AI assistant for a business. You can help customers with:
     - Information about products and services
     - Providing contact information
     - Helping them download service guides and PDFs
@@ -23,6 +24,30 @@ export async function getChatResponse(message: string, conversationHistory: Arra
     - Business Hours: Mon-Fri 9:00 AM - 6:00 PM, Sat 10:00 AM - 4:00 PM
 
     Keep responses conversational and concise.`;
+
+    // Add AI instructions if available
+    if (aiInstructions.length > 0) {
+      systemPrompt += "\n\nSpecial Instructions:\n";
+      aiInstructions
+        .filter(instruction => instruction.isActive)
+        .sort((a, b) => b.priority - a.priority)
+        .forEach(instruction => {
+          systemPrompt += `- ${instruction.instruction}\n`;
+        });
+    }
+
+    // Add knowledge base from documents if available
+    if (documents.length > 0) {
+      systemPrompt += "\n\nKnowledge Base:\n";
+      documents
+        .filter(doc => doc.isActive)
+        .forEach(doc => {
+          systemPrompt += `\n**${doc.title}** (${doc.type}):\n${doc.content}\n`;
+          if (doc.tags && doc.tags.length > 0) {
+            systemPrompt += `Tags: ${doc.tags.join(', ')}\n`;
+          }
+        });
+    }
 
     const messages = [
       { role: "system", content: systemPrompt },
