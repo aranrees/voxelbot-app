@@ -464,6 +464,7 @@ export function ChatInterface() {
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 className={`${sizeClasses.input} pr-12 rounded-xl bg-gray-50 dark:bg-gray-700 border-0 shadow-inner`}
+                style={{ fontSize: interfaceSize === 'extra-large' ? '1.25rem' : interfaceSize === 'large' ? '1.125rem' : '1rem' }}
               />
               <Button
                 type="button"
