@@ -227,25 +227,25 @@ export function ChatInterface() {
       {/* Chat Container */}
       <Card className="w-full max-w-2xl mx-auto shadow-2xl border-gray-200 dark:border-gray-700">
         {/* Chat Header */}
-        <div className="bg-black dark:bg-gray-900 p-6 text-white rounded-t-lg">
+        <div className="bg-white dark:bg-gray-900 p-6 text-black dark:text-white rounded-t-lg border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-              <Bot className="w-5 h-5" />
+            <div className="w-10 h-10 bg-black bg-opacity-10 dark:bg-white dark:bg-opacity-20 rounded-full flex items-center justify-center">
+              <Bot className="w-5 h-5 text-black dark:text-white" />
             </div>
             <div className="flex-1">
               <h2 className="text-xl font-semibold">AI Assistant</h2>
-              <p className="text-gray-300 text-sm">Here to help with products, services & appointments</p>
+              <p className="text-gray-600 dark:text-gray-300 text-sm">Here to help with products, services & appointments</p>
             </div>
             <div className="flex items-center space-x-3">
               <div className="flex items-center space-x-1">
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>
-                <span className="text-xs text-gray-300">Online</span>
+                <div className="w-2 h-2 bg-gray-500 dark:bg-gray-400 rounded-full animate-pulse"></div>
+                <span className="text-xs text-gray-600 dark:text-gray-300">Online</span>
               </div>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setShowResetConfirm(true)}
-                className="text-gray-300 hover:text-white hover:bg-gray-800"
+                className="text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800"
               >
                 <RotateCcw className="w-4 h-4" />
               </Button>
