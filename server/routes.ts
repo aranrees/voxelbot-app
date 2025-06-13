@@ -49,8 +49,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .replace(/\s+/g, ' ')
         .trim();
       
-      console.log('Normalized content:', normalizedContent);
-      
       // Define all accepted secret phrase patterns
       const secretPatterns = [
         /honey\s+i\s*m\s+home/,
@@ -62,11 +60,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         /honey\s+i\s+am\s+back/
       ];
       
-      const isSecretPhrase = secretPatterns.some(pattern => {
-        const matches = pattern.test(normalizedContent);
-        console.log(`Pattern ${pattern} matches: ${matches}`);
-        return matches;
-      });
+      const isSecretPhrase = secretPatterns.some(pattern => pattern.test(normalizedContent));
       
       if (isSecretPhrase) {
         const userMessage = await storage.createChatMessage(validatedData);
