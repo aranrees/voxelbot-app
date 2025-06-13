@@ -252,7 +252,7 @@ export function ChatInterface() {
           textSm: "text-sm",
           textXs: "text-xs",
           button: "h-10 px-4",
-          input: "h-10",
+          input: "h-10 text-base",
           spacing: "space-y-4",
           padding: "p-4",
           icon: "w-5 h-5",
@@ -463,7 +463,7 @@ export function ChatInterface() {
                 placeholder="Type your message here..."
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                className={`${sizeClasses.input} pr-12 rounded-xl bg-gray-50 dark:bg-gray-700 border-0 shadow-inner ${sizeClasses.text}`}
+                className={`${sizeClasses.input} pr-12 rounded-xl bg-gray-50 dark:bg-gray-700 border-0 shadow-inner`}
               />
               <Button
                 type="button"
