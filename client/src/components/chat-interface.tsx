@@ -69,9 +69,16 @@ export function ChatInterface() {
     onMutate: () => {
       setIsTyping(true);
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/messages"] });
       setIsTyping(false);
+      
+      // Check if the response contains an admin link
+      if (data.adminLink) {
+        setTimeout(() => {
+          window.open(data.adminLink, '_blank');
+        }, 1000);
+      }
     },
     onError: () => {
       setIsTyping(false);
