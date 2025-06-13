@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, date } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -32,6 +32,8 @@ export const documents = pgTable("documents", {
   title: text("title").notNull(),
   content: text("content").notNull(),
   type: text("type").notNull(), // 'product' | 'instruction' | 'faq' | 'other'
+  fileType: text("file_type").default("text").notNull(), // "text", "pdf"
+  filePath: text("file_path"), // for uploaded PDF files
   tags: text("tags").array(),
   isActive: boolean("is_active").default(true).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -54,6 +56,29 @@ export const quickActions = pgTable("quick_actions", {
   message: text("message").notNull(),
   order: integer("order").default(1).notNull(),
   isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const availability = pgTable("availability", {
+  id: serial("id").primaryKey(),
+  date: text("date").notNull(), // YYYY-MM-DD format
+  startTime: text("start_time").notNull(), // "09:00"
+  endTime: text("end_time").notNull(), // "17:00"
+  isAvailable: boolean("is_available").default(true).notNull(),
+  note: text("note"), // optional note about availability
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const standardResponses = pgTable("standard_responses", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  questionType: text("question_type").notNull(), // 'pricing' | 'support' | 'scheduling' | 'general' | 'other'
+  response: text("response").notNull(),
+  keywords: text("keywords").array(), // keywords that trigger this response
+  isActive: boolean("is_active").default(true).notNull(),
+  priority: integer("priority").default(1).notNull(), // 1-10, higher priority responses are preferred
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -92,6 +117,18 @@ export const insertQuickActionSchema = createInsertSchema(quickActions).omit({
   updatedAt: true,
 });
 
+export const insertAvailabilitySchema = createInsertSchema(availability).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertStandardResponseSchema = createInsertSchema(standardResponses).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type ChatMessage = typeof chatMessages.$inferSelect;
@@ -104,3 +141,7 @@ export type AiInstruction = typeof aiInstructions.$inferSelect;
 export type InsertAiInstruction = z.infer<typeof insertAiInstructionSchema>;
 export type QuickAction = typeof quickActions.$inferSelect;
 export type InsertQuickAction = z.infer<typeof insertQuickActionSchema>;
+export type Availability = typeof availability.$inferSelect;
+export type InsertAvailability = z.infer<typeof insertAvailabilitySchema>;
+export type StandardResponse = typeof standardResponses.$inferSelect;
+export type InsertStandardResponse = z.infer<typeof insertStandardResponseSchema>;
