@@ -233,8 +233,8 @@ export function ChatInterface() {
               <Bot className="w-5 h-5 text-black dark:text-white" />
             </div>
             <div className="flex-1">
-              <h2 className="text-xl font-semibold">AI Assistant</h2>
-              <p className="text-gray-600 dark:text-gray-300 text-sm">Here to help with products, services & appointments</p>
+              <h2 className="text-xl font-semibold">Infomage</h2>
+              <p className="text-gray-600 dark:text-gray-300 text-sm">here to help</p>
             </div>
             <div className="flex items-center space-x-3">
               <div className="flex items-center space-x-1">
