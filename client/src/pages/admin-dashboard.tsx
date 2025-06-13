@@ -14,7 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Moon, Sun, Plus, Edit, Trash2, FileText, Brain, LogOut, MessageSquare, Zap } from "lucide-react";
+import { Moon, Sun, Plus, Edit, Trash2, FileText, Brain, LogOut, MessageSquare, Zap, Heart } from "lucide-react";
 import type { Document, AiInstruction, QuickAction, InsertDocument, InsertAiInstruction, InsertQuickAction } from "@shared/schema";
 
 export default function AdminDashboard() {
@@ -311,15 +311,15 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
       {/* Header */}
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-400 dark:border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
-                <Brain className="w-5 h-5 text-white" />
+              <div className="w-8 h-8 bg-black dark:bg-white rounded-lg flex items-center justify-center">
+                <Heart className="w-5 h-5 text-white dark:text-black" />
               </div>
               <h1 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
-                Admin Dashboard
+                Infomage Admin
               </h1>
             </div>
             <div className="flex items-center space-x-4">
@@ -327,6 +327,7 @@ export default function AdminDashboard() {
                 variant="outline"
                 size="sm"
                 onClick={() => window.open("/", "_blank")}
+                className="border-gray-400 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
               >
                 <MessageSquare className="w-4 h-4 mr-2" />
                 View Chat
@@ -335,6 +336,7 @@ export default function AdminDashboard() {
                 onClick={toggleTheme}
                 variant="outline"
                 size="icon"
+                className="border-gray-400 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
               >
                 {theme === "dark" ? (
                   <Sun className="h-4 w-4" />
@@ -346,6 +348,7 @@ export default function AdminDashboard() {
                 onClick={() => logoutMutation.mutate()}
                 variant="outline"
                 size="sm"
+                className="border-gray-400 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
               >
                 <LogOut className="w-4 h-4 mr-2" />
                 Logout
@@ -367,10 +370,10 @@ export default function AdminDashboard() {
         </div>
 
         <Tabs defaultValue="documents" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="documents">Documents</TabsTrigger>
-            <TabsTrigger value="instructions">AI Instructions</TabsTrigger>
-            <TabsTrigger value="quick-actions">Quick Actions</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3 bg-white dark:bg-gray-800 border border-gray-400 dark:border-gray-600">
+            <TabsTrigger value="documents" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">Documents</TabsTrigger>
+            <TabsTrigger value="instructions" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">AI Instructions</TabsTrigger>
+            <TabsTrigger value="quick-actions" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">Quick Actions</TabsTrigger>
           </TabsList>
 
           <TabsContent value="documents" className="space-y-6">
@@ -380,14 +383,14 @@ export default function AdminDashboard() {
               </h3>
               <Dialog open={showDocumentDialog} onOpenChange={setShowDocumentDialog}>
                 <DialogTrigger asChild>
-                  <Button onClick={resetDocumentForm}>
+                  <Button onClick={resetDocumentForm} className="bg-black hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-black">
                     <Plus className="w-4 h-4 mr-2" />
                     Add Document
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto bg-white dark:bg-gray-800 border border-gray-400 dark:border-gray-600">
                   <DialogHeader>
-                    <DialogTitle>
+                    <DialogTitle className="text-gray-800 dark:text-gray-200">
                       {editingDocument ? "Edit Document" : "Add New Document"}
                     </DialogTitle>
                   </DialogHeader>
@@ -450,12 +453,14 @@ export default function AdminDashboard() {
                         type="button"
                         variant="outline"
                         onClick={() => setShowDocumentDialog(false)}
+                        className="border-gray-400 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
                       >
                         Cancel
                       </Button>
                       <Button
                         type="submit"
                         disabled={createDocumentMutation.isPending || updateDocumentMutation.isPending}
+                        className="bg-black hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-black"
                       >
                         {editingDocument ? "Update" : "Create"}
                       </Button>
