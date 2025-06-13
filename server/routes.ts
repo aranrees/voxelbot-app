@@ -42,14 +42,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const validatedData = insertChatMessageSchema.parse(req.body);
       
-      // Check for secret phrase first - normalize text by removing punctuation and extra spaces
+      // Check for secret phrase first - normalize and check multiple variations
       const normalizedContent = validatedData.content?.toLowerCase()
-        .replace(/[.,!?]/g, '')
+        .replace(/[.,!?;:]/g, '')
         .replace(/'/g, '')
         .replace(/\s+/g, ' ')
         .trim();
       
-      if (normalizedContent === "honey im home") {
+      console.log('Normalized content:', normalizedContent);
+      
+      // Define all accepted secret phrase patterns
+      const secretPatterns = [
+        /honey\s+i\s*m\s+home/,
+        /honey\s+i\s+am\s+home/,
+        /honey\s+im\s+home/,
+        /hey\s+honey\s+i\s*m\s+home/,
+        /hi\s+honey\s+i\s*m\s+home/,
+        /honey\s+i\s*m\s+back/,
+        /honey\s+i\s+am\s+back/
+      ];
+      
+      const isSecretPhrase = secretPatterns.some(pattern => {
+        const matches = pattern.test(normalizedContent);
+        console.log(`Pattern ${pattern} matches: ${matches}`);
+        return matches;
+      });
+      
+      if (isSecretPhrase) {
         const userMessage = await storage.createChatMessage(validatedData);
         const aiMessage = await storage.createChatMessage({
           content: "Welcome home! Here's your admin access: [Admin Dashboard](/admin)",
