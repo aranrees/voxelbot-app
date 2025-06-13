@@ -408,23 +408,23 @@ export function ChatInterface() {
                           className={`w-full justify-start h-auto ${sizeClasses.padding} border-0 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 shadow-sm hover:shadow-md transition-all duration-200`}
                           onClick={() => setShowContactModal(true)}
                         >
-                          <Phone className="w-4 h-4 mr-2 text-gray-600" />
+                          <Phone className={`${sizeClasses.icon} mr-2 text-gray-600 dark:text-gray-300`} />
                           <div className="text-left">
-                            <p className="text-sm font-medium">Get Contact Information</p>
-                            <p className="text-xs text-gray-500">Phone, email, and office details</p>
+                            <p className={`${sizeClasses.textSm} font-medium`}>Get Contact Information</p>
+                            <p className={`${sizeClasses.textXs} text-gray-500 dark:text-gray-400`}>Phone, email, and office details</p>
                           </div>
                         </Button>
                         
                         <Button
                           variant="outline"
                           size="sm"
-                          className="w-full justify-start h-auto p-3"
+                          className={`w-full justify-start h-auto ${sizeClasses.padding} border-0 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 shadow-sm hover:shadow-md transition-all duration-200`}
                           onClick={() => setShowAppointmentModal(true)}
                         >
-                          <Calendar className="w-4 h-4 mr-2 text-gray-600" />
+                          <Calendar className={`${sizeClasses.icon} mr-2 text-gray-600 dark:text-gray-300`} />
                           <div className="text-left">
-                            <p className="text-sm font-medium">Schedule Consultation</p>
-                            <p className="text-xs text-gray-500">Book a free 30-minute consultation</p>
+                            <p className={`${sizeClasses.textSm} font-medium`}>Schedule Consultation</p>
+                            <p className={`${sizeClasses.textXs} text-gray-500 dark:text-gray-400`}>Book a free 30-minute consultation</p>
                           </div>
                         </Button>
                       </>
@@ -437,11 +437,11 @@ export function ChatInterface() {
 
           {/* Typing Indicator */}
           {isTyping && (
-            <div className="flex items-start space-x-3">
-              <div className="w-8 h-8 bg-black bg-opacity-10 dark:bg-gray-700 rounded-full flex items-center justify-center flex-shrink-0">
-                <Heart className="w-4 h-4 text-black dark:text-white" />
+            <div className="flex items-start space-x-4">
+              <div className={`w-10 h-10 bg-black dark:bg-white rounded-full flex items-center justify-center flex-shrink-0 shadow-md`}>
+                <Heart className={`${sizeClasses.icon} text-white dark:text-black`} />
               </div>
-              <div className="bg-white dark:bg-gray-800 rounded-2xl rounded-tl-md p-4 shadow-sm border border-gray-400 dark:border-gray-700">
+              <div className={`bg-white dark:bg-gray-800 rounded-2xl rounded-tl-md ${sizeClasses.padding} shadow-lg`}>
                 <div className="flex space-x-1">
                   <div className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce"></div>
                   <div className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
