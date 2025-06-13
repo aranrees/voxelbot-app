@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertChatMessageSchema, insertAppointmentSchema, insertDocumentSchema, insertAiInstructionSchema } from "@shared/schema";
+import { insertChatMessageSchema, insertAppointmentSchema, insertDocumentSchema, insertAiInstructionSchema, insertQuickActionSchema } from "@shared/schema";
 import { getChatResponse } from "./lib/openai";
 import { setupAuth } from "./auth";
 import path from "path";
@@ -279,6 +279,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ message: "AI instruction deleted successfully" });
     } catch (error) {
       res.status(500).json({ message: "Failed to delete AI instruction" });
+    }
+  });
+
+  // Quick Actions management (admin only)
+  app.get("/api/admin/quick-actions", requireAuth, async (req, res) => {
+    try {
+      const actions = await storage.getQuickActions();
+      res.json(actions);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch quick actions" });
+    }
+  });
+
+  app.post("/api/admin/quick-actions", requireAuth, async (req, res) => {
+    try {
+      const validatedData = insertQuickActionSchema.parse(req.body);
+      const action = await storage.createQuickAction(validatedData);
+      res.json(action);
+    } catch (error) {
+      console.error("Quick action creation error:", error);
+      res.status(400).json({ message: "Failed to create quick action" });
+    }
+  });
+
+  app.put("/api/admin/quick-actions/:id", requireAuth, async (req, res) => {
+    try {
+      const validatedData = insertQuickActionSchema.partial().parse(req.body);
+      const action = await storage.updateQuickAction(parseInt(req.params.id), validatedData);
+      if (!action) {
+        return res.status(404).json({ message: "Quick action not found" });
+      }
+      res.json(action);
+    } catch (error) {
+      res.status(400).json({ message: "Failed to update quick action" });
+    }
+  });
+
+  app.delete("/api/admin/quick-actions/:id", requireAuth, async (req, res) => {
+    try {
+      const success = await storage.deleteQuickAction(parseInt(req.params.id));
+      if (!success) {
+        return res.status(404).json({ message: "Quick action not found" });
+      }
+      res.json({ message: "Quick action deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete quick action" });
+    }
+  });
+
+  // Public endpoint for getting active quick actions
+  app.get("/api/quick-actions", async (req, res) => {
+    try {
+      const actions = await storage.getActiveQuickActions();
+      res.json(actions);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch quick actions" });
     }
   });
 

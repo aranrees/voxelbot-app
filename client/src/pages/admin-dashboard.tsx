@@ -14,8 +14,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Moon, Sun, Plus, Edit, Trash2, FileText, Brain, LogOut, MessageSquare } from "lucide-react";
-import type { Document, AiInstruction, InsertDocument, InsertAiInstruction } from "@shared/schema";
+import { Moon, Sun, Plus, Edit, Trash2, FileText, Brain, LogOut, MessageSquare, Zap } from "lucide-react";
+import type { Document, AiInstruction, QuickAction, InsertDocument, InsertAiInstruction, InsertQuickAction } from "@shared/schema";
 
 export default function AdminDashboard() {
   const { user, logoutMutation } = useAuth();
@@ -25,8 +25,10 @@ export default function AdminDashboard() {
   
   const [showDocumentDialog, setShowDocumentDialog] = useState(false);
   const [showInstructionDialog, setShowInstructionDialog] = useState(false);
+  const [showQuickActionDialog, setShowQuickActionDialog] = useState(false);
   const [editingDocument, setEditingDocument] = useState<Document | null>(null);
   const [editingInstruction, setEditingInstruction] = useState<AiInstruction | null>(null);
+  const [editingQuickAction, setEditingQuickAction] = useState<QuickAction | null>(null);
   
   const [documentForm, setDocumentForm] = useState<InsertDocument>({
     title: "",
@@ -43,6 +45,13 @@ export default function AdminDashboard() {
     isActive: true
   });
 
+  const [quickActionForm, setQuickActionForm] = useState<InsertQuickAction>({
+    label: "",
+    message: "",
+    order: 1,
+    isActive: true
+  });
+
   // Fetch documents
   const { data: documents = [] } = useQuery<Document[]>({
     queryKey: ["/api/admin/documents"],
@@ -51,6 +60,11 @@ export default function AdminDashboard() {
   // Fetch AI instructions
   const { data: aiInstructions = [] } = useQuery<AiInstruction[]>({
     queryKey: ["/api/admin/ai-instructions"],
+  });
+
+  // Fetch quick actions
+  const { data: quickActions = [] } = useQuery<QuickAction[]>({
+    queryKey: ["/api/admin/quick-actions"],
   });
 
   // Document mutations
