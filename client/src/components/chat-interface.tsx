@@ -59,6 +59,11 @@ export function ChatInterface() {
     queryKey: ["/api/contact"],
   });
 
+  // Fetch quick actions
+  const { data: quickActions = [] } = useQuery<QuickAction[]>({
+    queryKey: ["/api/quick-actions"],
+  });
+
   // Send message mutation
   const sendMessageMutation = useMutation({
     mutationFn: async (content: string) => {
@@ -412,32 +417,21 @@ export function ChatInterface() {
           </form>
           
           {/* Quick Actions */}
-          <div className="flex flex-wrap gap-2 mt-4">
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-xs rounded-full"
-              onClick={() => handleQuickMessage("Tell me about your services")}
-            >
-              Services Info
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-xs rounded-full"
-              onClick={() => handleQuickMessage("What are your pricing options?")}
-            >
-              Pricing
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-xs rounded-full"
-              onClick={() => handleQuickMessage("How can I contact support?")}
-            >
-              Support
-            </Button>
-          </div>
+          {quickActions.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-4">
+              {quickActions.map((action) => (
+                <Button
+                  key={action.id}
+                  variant="outline"
+                  size="sm"
+                  className="text-xs rounded-full"
+                  onClick={() => handleQuickMessage(action.message)}
+                >
+                  {action.label}
+                </Button>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
 
