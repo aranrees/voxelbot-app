@@ -262,7 +262,7 @@ export function ChatInterface() {
               </div>
               <div className="bg-white dark:bg-gray-800 rounded-2xl rounded-tl-md p-4 shadow-sm border border-gray-400 dark:border-gray-700 max-w-xs">
                 <p className="text-gray-800 dark:text-gray-200 text-sm leading-relaxed">
-                  Hello! I'm here to help you learn about our products and services. I can share contact information, help you download resources, or schedule appointments. How can I assist you today?
+                  Welcome to Aran's all purpose home page. I'm not Aran. I'm just a silly little AI magician here to answer questions about Aran's products, services, designs, ideas, deep dark secrets, availability and contact information. You can ask me to list products and services currently on offer, request a meeting or to get in touch, or, if you know what you want to know about, just ask for that and I'll tell you what I have in my files that might be useful to you.
                 </p>
                 <span className="text-xs text-gray-500 dark:text-gray-400 mt-2 block">Just now</span>
               </div>
