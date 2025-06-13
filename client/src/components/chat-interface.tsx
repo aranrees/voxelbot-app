@@ -269,13 +269,13 @@ export function ChatInterface() {
       {/* Controls - Theme Toggle and Size Selector */}
       <div className="fixed top-6 right-6 z-50 flex items-center space-x-3">
         <Select value={interfaceSize} onValueChange={(value) => setInterfaceSize(value as "normal" | "large" | "extra-large")}>
-          <Button variant="outline" className="shadow-lg hover:shadow-xl transition-all duration-300 border-gray-300 dark:border-gray-600">
+          <SelectTrigger className="w-auto shadow-lg hover:shadow-xl transition-all duration-300 border-gray-300 dark:border-gray-600">
             <Settings className={`${sizeClasses.icon} mr-2`} />
             <span className={sizeClasses.textSm}>
               {interfaceSize === "normal" ? "Normal" : 
                interfaceSize === "large" ? "Large" : "Extra Large"}
             </span>
-          </Button>
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value="normal">Normal Size</SelectItem>
             <SelectItem value="large">Large Size</SelectItem>
@@ -485,13 +485,13 @@ export function ChatInterface() {
           
           {/* Quick Actions */}
           {quickActions.length > 0 && (
-            <div className={`flex flex-wrap gap-2 mt-4 ${sizeClasses.spacing}`}>
+            <div className={`flex flex-wrap items-center gap-2 mt-4`}>
               {quickActions.map((action) => (
                 <Button
                   key={action.id}
                   variant="outline"
                   size="sm"
-                  className={`${sizeClasses.textSm} rounded-full border-0 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 shadow-sm hover:shadow-md transition-all duration-200`}
+                  className={`${sizeClasses.textSm} rounded-full border-0 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 shadow-sm hover:shadow-md transition-all duration-200 flex-shrink-0`}
                   onClick={() => handleQuickMessage(action.message)}
                 >
                   {action.label}
