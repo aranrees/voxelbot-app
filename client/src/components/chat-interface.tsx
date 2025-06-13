@@ -28,7 +28,7 @@ interface ContactInfo {
 }
 
 export function ChatInterface() {
-  const { theme, toggleTheme } = useTheme();
+  const { theme, setTheme, toggleTheme } = useTheme();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
@@ -39,6 +39,7 @@ export function ChatInterface() {
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [interfaceSize, setInterfaceSize] = useState<"normal" | "large" | "extra-large">("normal");
   const [chatWidth, setChatWidth] = useState<"narrow" | "normal" | "wide" | "extra-wide">("normal");
+  const [themeMode, setThemeMode] = useState<"light" | "dark" | "bonkers">("light");
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
@@ -216,6 +217,38 @@ export function ChatInterface() {
     });
   };
 
+  const generateRandomColor = () => {
+    const colors = [
+      'bg-red-500', 'bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-purple-500',
+      'bg-pink-500', 'bg-indigo-500', 'bg-orange-500', 'bg-teal-500', 'bg-cyan-500',
+      'bg-lime-500', 'bg-emerald-500', 'bg-violet-500', 'bg-fuchsia-500', 'bg-rose-500'
+    ];
+    return colors[Math.floor(Math.random() * colors.length)];
+  };
+
+  const getBonkersColors = () => ({
+    background: generateRandomColor(),
+    chatBg: generateRandomColor(),
+    headerBg: generateRandomColor(),
+    messageBg: generateRandomColor(),
+    userMessageBg: generateRandomColor(),
+    buttonBg: generateRandomColor(),
+    inputBg: generateRandomColor()
+  });
+
+  const bonkersColors = themeMode === "bonkers" ? getBonkersColors() : null;
+
+  const handleThemeChange = (newTheme: "light" | "dark" | "bonkers") => {
+    setThemeMode(newTheme);
+    if (newTheme === "light") {
+      setTheme("light");
+    } else if (newTheme === "dark") {
+      setTheme("dark");
+    } else {
+      setTheme("light"); // Use light as base for bonkers mode
+    }
+  };
+
   const getWidthClass = () => {
     switch (chatWidth) {
       case "narrow":
@@ -289,9 +322,9 @@ export function ChatInterface() {
   const sizeClasses = getSizeClasses();
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col items-center justify-center p-4 transition-colors duration-300">
+    <div className={`min-h-screen ${bonkersColors ? bonkersColors.background : 'bg-gray-50 dark:bg-gray-900'} flex flex-col items-center justify-center p-4 transition-colors duration-300`}>
       {/* Chat Container - Seamless with Shadow */}
-      <Card className={`w-full ${getWidthClass()} mx-auto shadow-2xl dark:shadow-gray-900/50 border-0 bg-white dark:bg-gray-800`}>
+      <Card className={`w-full ${getWidthClass()} mx-auto shadow-2xl dark:shadow-gray-900/50 border-0 ${bonkersColors ? bonkersColors.chatBg : 'bg-white dark:bg-gray-800'}`}>
         {/* Chat Header */}
         <div className={`bg-white dark:bg-gray-800 ${sizeClasses.padding} text-black dark:text-white rounded-t-lg shadow-sm`}>
           <div className="flex items-center space-x-4">
@@ -540,28 +573,24 @@ export function ChatInterface() {
           </Select>
         </div>
         
-        {/* Theme Toggle */}
+        {/* Theme Selector */}
         <div className="flex flex-col items-center space-y-2">
           <Label className={`${sizeClasses.textSm} font-medium text-gray-700 dark:text-gray-300`}>
             Theme
           </Label>
-          <Button
-            onClick={toggleTheme}
-            variant="outline"
-            className="w-32 shadow-lg hover:shadow-xl transition-all duration-300 border-gray-300 dark:border-gray-600"
-          >
-            {theme === "dark" ? (
-              <>
-                <Sun className={`${sizeClasses.icon} mr-2 text-gray-600 dark:text-gray-300`} />
-                <span className={sizeClasses.textSm}>Light Mode</span>
-              </>
-            ) : (
-              <>
-                <Moon className={`${sizeClasses.icon} mr-2 text-gray-600 dark:text-gray-300`} />
-                <span className={sizeClasses.textSm}>Dark Mode</span>
-              </>
-            )}
-          </Button>
+          <Select value={themeMode} onValueChange={handleThemeChange}>
+            <SelectTrigger className="w-32 shadow-lg hover:shadow-xl transition-all duration-300 border-gray-300 dark:border-gray-600">
+              <span className={sizeClasses.textSm}>
+                {themeMode === "light" ? "Light" : 
+                 themeMode === "dark" ? "Dark" : "Bonkers"}
+              </span>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="light">Light</SelectItem>
+              <SelectItem value="dark">Dark</SelectItem>
+              <SelectItem value="bonkers">Bonkers</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
