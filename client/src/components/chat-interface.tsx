@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Moon, Sun, Send, Phone, Mail, MapPin, Clock, Download, Calendar, Mic, Bot } from "lucide-react";
+import { Moon, Sun, Send, Phone, Mail, MapPin, Clock, Download, Calendar, Mic, Bot, Settings } from "lucide-react";
 
 interface ChatMessage {
   id: number;
@@ -263,46 +263,67 @@ export function ChatInterface() {
                 </span>
                 
                 {/* Action Buttons for specific bot responses */}
-                {msg.role === "assistant" && (msg.content.toLowerCase().includes("download") || msg.content.toLowerCase().includes("contact") || msg.content.toLowerCase().includes("appointment")) && (
+                {msg.role === "assistant" && (
                   <div className="space-y-2 mt-3">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full justify-start h-auto p-3"
-                      onClick={handleDownloadPDF}
-                    >
-                      <Download className="w-4 h-4 mr-2 text-indigo-500" />
-                      <div className="text-left">
-                        <p className="text-sm font-medium">Download Service Guide</p>
-                        <p className="text-xs text-gray-500">Complete overview of our offerings</p>
-                      </div>
-                    </Button>
+                    {/* Admin Dashboard Button */}
+                    {(msg.content.toLowerCase().includes("admin dashboard") || msg.content.toLowerCase().includes("admin access")) && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full justify-start h-auto p-3 border-purple-200 hover:border-purple-300"
+                        onClick={() => window.open("/admin-login", "_blank")}
+                      >
+                        <Settings className="w-4 h-4 mr-2 text-purple-500" />
+                        <div className="text-left">
+                          <p className="text-sm font-medium">Open Admin Dashboard</p>
+                          <p className="text-xs text-gray-500">Access content management system</p>
+                        </div>
+                      </Button>
+                    )}
                     
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full justify-start h-auto p-3"
-                      onClick={() => setShowContactModal(true)}
-                    >
-                      <Phone className="w-4 h-4 mr-2 text-green-500" />
-                      <div className="text-left">
-                        <p className="text-sm font-medium">Get Contact Information</p>
-                        <p className="text-xs text-gray-500">Phone, email, and office details</p>
-                      </div>
-                    </Button>
-                    
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full justify-start h-auto p-3"
-                      onClick={() => setShowAppointmentModal(true)}
-                    >
-                      <Calendar className="w-4 h-4 mr-2 text-purple-500" />
-                      <div className="text-left">
-                        <p className="text-sm font-medium">Schedule Consultation</p>
-                        <p className="text-xs text-gray-500">Book a free 30-minute consultation</p>
-                      </div>
-                    </Button>
+                    {/* Standard action buttons */}
+                    {(msg.content.toLowerCase().includes("download") || msg.content.toLowerCase().includes("contact") || msg.content.toLowerCase().includes("appointment")) && (
+                      <>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full justify-start h-auto p-3"
+                          onClick={handleDownloadPDF}
+                        >
+                          <Download className="w-4 h-4 mr-2 text-indigo-500" />
+                          <div className="text-left">
+                            <p className="text-sm font-medium">Download Service Guide</p>
+                            <p className="text-xs text-gray-500">Complete overview of our offerings</p>
+                          </div>
+                        </Button>
+                        
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full justify-start h-auto p-3"
+                          onClick={() => setShowContactModal(true)}
+                        >
+                          <Phone className="w-4 h-4 mr-2 text-green-500" />
+                          <div className="text-left">
+                            <p className="text-sm font-medium">Get Contact Information</p>
+                            <p className="text-xs text-gray-500">Phone, email, and office details</p>
+                          </div>
+                        </Button>
+                        
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full justify-start h-auto p-3"
+                          onClick={() => setShowAppointmentModal(true)}
+                        >
+                          <Calendar className="w-4 h-4 mr-2 text-purple-500" />
+                          <div className="text-left">
+                            <p className="text-sm font-medium">Schedule Consultation</p>
+                            <p className="text-xs text-gray-500">Book a free 30-minute consultation</p>
+                          </div>
+                        </Button>
+                      </>
+                    )}
                   </div>
                 )}
               </div>
