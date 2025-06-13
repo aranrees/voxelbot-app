@@ -680,14 +680,14 @@ export default function AdminDashboard() {
               </h3>
               <Dialog open={showQuickActionDialog} onOpenChange={setShowQuickActionDialog}>
                 <DialogTrigger asChild>
-                  <Button onClick={resetQuickActionForm}>
+                  <Button onClick={resetQuickActionForm} className="bg-black hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-black">
                     <Plus className="w-4 h-4 mr-2" />
                     Add Quick Action
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-md">
+                <DialogContent className="max-w-md bg-white dark:bg-gray-800 border border-gray-400 dark:border-gray-600">
                   <DialogHeader>
-                    <DialogTitle>
+                    <DialogTitle className="text-gray-800 dark:text-gray-200">
                       {editingQuickAction ? "Edit Quick Action" : "Add Quick Action"}
                     </DialogTitle>
                   </DialogHeader>
@@ -737,12 +737,14 @@ export default function AdminDashboard() {
                         type="button"
                         variant="outline"
                         onClick={() => setShowQuickActionDialog(false)}
+                        className="border-gray-400 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
                       >
                         Cancel
                       </Button>
                       <Button
                         type="submit"
                         disabled={createQuickActionMutation.isPending || updateQuickActionMutation.isPending}
+                        className="bg-black hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-black"
                       >
                         {editingQuickAction ? "Update" : "Create"} Quick Action
                       </Button>
@@ -754,13 +756,13 @@ export default function AdminDashboard() {
 
             <div className="grid gap-4">
               {quickActions.map((action) => (
-                <Card key={action.id}>
+                <Card key={action.id} className="border-gray-400 dark:border-gray-600 bg-white dark:bg-gray-800">
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-2">
-                        <Zap className="w-5 h-5 text-yellow-500" />
-                        <CardTitle className="text-lg">{action.label}</CardTitle>
-                        <Badge variant={action.isActive ? "default" : "secondary"}>
+                        <Zap className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+                        <CardTitle className="text-lg text-gray-800 dark:text-gray-200">{action.label}</CardTitle>
+                        <Badge variant={action.isActive ? "default" : "secondary"} className={action.isActive ? "bg-black text-white dark:bg-white dark:text-black" : ""}>
                           {action.isActive ? "Active" : "Inactive"}
                         </Badge>
                       </div>
@@ -769,6 +771,7 @@ export default function AdminDashboard() {
                           onClick={() => editQuickAction(action)}
                           size="sm"
                           variant="outline"
+                          className="border-gray-400 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
                         >
                           <Edit className="w-4 h-4" />
                         </Button>
@@ -777,6 +780,7 @@ export default function AdminDashboard() {
                           size="sm"
                           variant="outline"
                           disabled={deleteQuickActionMutation.isPending}
+                          className="border-gray-400 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -794,7 +798,7 @@ export default function AdminDashboard() {
                 </Card>
               ))}
               {quickActions.length === 0 && (
-                <Card>
+                <Card className="border-gray-400 dark:border-gray-600 bg-white dark:bg-gray-800">
                   <CardContent className="text-center py-8">
                     <Zap className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                     <p className="text-gray-600 dark:text-gray-400">
