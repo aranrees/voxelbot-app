@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Moon, Sun, Send, Phone, Mail, MapPin, Clock, Download, Calendar, Mic, Heart, Settings, RotateCcw } from "lucide-react";
+import type { QuickAction } from "@shared/schema";
 
 interface ChatMessage {
   id: number;

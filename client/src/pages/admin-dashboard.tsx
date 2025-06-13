@@ -161,6 +161,56 @@ export default function AdminDashboard() {
     },
   });
 
+  // Quick action mutations
+  const createQuickActionMutation = useMutation({
+    mutationFn: async (data: InsertQuickAction) => {
+      const response = await apiRequest("POST", "/api/admin/quick-actions", data);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/quick-actions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/quick-actions"] });
+      setShowQuickActionDialog(false);
+      resetQuickActionForm();
+      toast({ title: "Success", description: "Quick action created successfully!" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to create quick action", variant: "destructive" });
+    },
+  });
+
+  const updateQuickActionMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: Partial<InsertQuickAction> }) => {
+      const response = await apiRequest("PUT", `/api/admin/quick-actions/${id}`, data);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/quick-actions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/quick-actions"] });
+      setShowQuickActionDialog(false);
+      resetQuickActionForm();
+      toast({ title: "Success", description: "Quick action updated successfully!" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to update quick action", variant: "destructive" });
+    },
+  });
+
+  const deleteQuickActionMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await apiRequest("DELETE", `/api/admin/quick-actions/${id}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/quick-actions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/quick-actions"] });
+      toast({ title: "Success", description: "Quick action deleted successfully!" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to delete quick action", variant: "destructive" });
+    },
+  });
+
   const resetDocumentForm = () => {
     setDocumentForm({
       title: "",
@@ -182,6 +232,16 @@ export default function AdminDashboard() {
     setEditingInstruction(null);
   };
 
+  const resetQuickActionForm = () => {
+    setQuickActionForm({
+      label: "",
+      message: "",
+      order: 1,
+      isActive: true
+    });
+    setEditingQuickAction(null);
+  };
+
   const handleDocumentSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (editingDocument) {
@@ -197,6 +257,15 @@ export default function AdminDashboard() {
       updateInstructionMutation.mutate({ id: editingInstruction.id, data: instructionForm });
     } else {
       createInstructionMutation.mutate(instructionForm);
+    }
+  };
+
+  const handleQuickActionSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (editingQuickAction) {
+      updateQuickActionMutation.mutate({ id: editingQuickAction.id, data: quickActionForm });
+    } else {
+      createQuickActionMutation.mutate(quickActionForm);
     }
   };
 
@@ -221,6 +290,17 @@ export default function AdminDashboard() {
       isActive: instruction.isActive
     });
     setShowInstructionDialog(true);
+  };
+
+  const editQuickAction = (action: QuickAction) => {
+    setEditingQuickAction(action);
+    setQuickActionForm({
+      label: action.label,
+      message: action.message,
+      order: action.order,
+      isActive: action.isActive
+    });
+    setShowQuickActionDialog(true);
   };
 
   const handleTagsChange = (tagsString: string) => {
@@ -287,9 +367,10 @@ export default function AdminDashboard() {
         </div>
 
         <Tabs defaultValue="documents" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="documents">Documents</TabsTrigger>
             <TabsTrigger value="instructions">AI Instructions</TabsTrigger>
+            <TabsTrigger value="quick-actions">Quick Actions</TabsTrigger>
           </TabsList>
 
           <TabsContent value="documents" className="space-y-6">
@@ -574,6 +655,139 @@ export default function AdminDashboard() {
                     <Brain className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                     <p className="text-gray-600 dark:text-gray-400">
                       No AI instructions yet. Add instructions to customize the AI's behavior.
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="quick-actions" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                Quick Action Buttons
+              </h3>
+              <Dialog open={showQuickActionDialog} onOpenChange={setShowQuickActionDialog}>
+                <DialogTrigger asChild>
+                  <Button onClick={resetQuickActionForm}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Quick Action
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>
+                      {editingQuickAction ? "Edit Quick Action" : "Add Quick Action"}
+                    </DialogTitle>
+                  </DialogHeader>
+                  <form onSubmit={handleQuickActionSubmit} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="label">Button Label</Label>
+                      <Input
+                        id="label"
+                        value={quickActionForm.label}
+                        onChange={(e) => setQuickActionForm({ ...quickActionForm, label: e.target.value })}
+                        placeholder="e.g., Product Info"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="message">Message to Send</Label>
+                      <Textarea
+                        id="message"
+                        value={quickActionForm.message}
+                        onChange={(e) => setQuickActionForm({ ...quickActionForm, message: e.target.value })}
+                        placeholder="e.g., Can you tell me about your products and services?"
+                        required
+                        rows={3}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="order">Display Order</Label>
+                      <Input
+                        id="order"
+                        type="number"
+                        min="1"
+                        value={quickActionForm.order}
+                        onChange={(e) => setQuickActionForm({ ...quickActionForm, order: parseInt(e.target.value) || 1 })}
+                        required
+                      />
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        id="active"
+                        checked={quickActionForm.isActive}
+                        onCheckedChange={(checked) => setQuickActionForm({ ...quickActionForm, isActive: checked })}
+                      />
+                      <Label htmlFor="active">Active</Label>
+                    </div>
+                    <div className="flex justify-end space-x-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setShowQuickActionDialog(false)}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        type="submit"
+                        disabled={createQuickActionMutation.isPending || updateQuickActionMutation.isPending}
+                      >
+                        {editingQuickAction ? "Update" : "Create"} Quick Action
+                      </Button>
+                    </div>
+                  </form>
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            <div className="grid gap-4">
+              {quickActions.map((action) => (
+                <Card key={action.id}>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <Zap className="w-5 h-5 text-yellow-500" />
+                        <CardTitle className="text-lg">{action.label}</CardTitle>
+                        <Badge variant={action.isActive ? "default" : "secondary"}>
+                          {action.isActive ? "Active" : "Inactive"}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          onClick={() => editQuickAction(action)}
+                          size="sm"
+                          variant="outline"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          onClick={() => deleteQuickActionMutation.mutate(action.id)}
+                          size="sm"
+                          variant="outline"
+                          disabled={deleteQuickActionMutation.isPending}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                      <strong>Message:</strong> {action.message}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      Order: {action.order} | Created: {new Date(action.createdAt).toLocaleDateString()}
+                    </p>
+                  </CardContent>
+                </Card>
+              ))}
+              {quickActions.length === 0 && (
+                <Card>
+                  <CardContent className="text-center py-8">
+                    <Zap className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-600 dark:text-gray-400">
+                      No quick actions yet. Add quick action buttons to help users start conversations.
                     </p>
                   </CardContent>
                 </Card>
