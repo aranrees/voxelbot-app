@@ -559,12 +559,41 @@ export function ChatInterface() {
             </div>
             <Button
               type="submit"
-              className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"
+              className="w-full bg-black hover:bg-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600"
               disabled={createAppointmentMutation.isPending}
             >
               {createAppointmentMutation.isPending ? "Scheduling..." : "Schedule Appointment"}
             </Button>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reset Chat Confirmation Dialog */}
+      <Dialog open={showResetConfirm} onOpenChange={setShowResetConfirm}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Reset Chat</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-gray-600 dark:text-gray-300">
+              Are you sure you want to clear all chat messages? This action cannot be undone.
+            </p>
+          </div>
+          <div className="flex gap-3 justify-end">
+            <Button
+              variant="outline"
+              onClick={() => setShowResetConfirm(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => resetChatMutation.mutate()}
+              disabled={resetChatMutation.isPending}
+              className="bg-black hover:bg-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600"
+            >
+              {resetChatMutation.isPending ? "Resetting..." : "Reset Chat"}
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
