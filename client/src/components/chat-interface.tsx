@@ -225,9 +225,9 @@ export function ChatInterface() {
       </Button>
 
       {/* Chat Container */}
-      <Card className="w-full max-w-2xl mx-auto shadow-2xl border-gray-200 dark:border-gray-700">
+      <Card className="w-full max-w-2xl mx-auto shadow-2xl border-gray-400 dark:border-gray-700">
         {/* Chat Header */}
-        <div className="bg-white dark:bg-gray-900 p-6 text-black dark:text-white rounded-t-lg border-b border-gray-200 dark:border-gray-700">
+        <div className="bg-white dark:bg-gray-900 p-6 text-black dark:text-white rounded-t-lg border-b border-gray-400 dark:border-gray-700">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-black bg-opacity-10 dark:bg-white dark:bg-opacity-20 rounded-full flex items-center justify-center">
               <Bot className="w-5 h-5 text-black dark:text-white" />
@@ -260,7 +260,7 @@ export function ChatInterface() {
               <div className="w-8 h-8 bg-black dark:bg-gray-700 rounded-full flex items-center justify-center flex-shrink-0">
                 <Bot className="w-4 h-4 text-white" />
               </div>
-              <div className="bg-white dark:bg-gray-800 rounded-2xl rounded-tl-md p-4 shadow-sm border border-gray-200 dark:border-gray-700 max-w-xs">
+              <div className="bg-white dark:bg-gray-800 rounded-2xl rounded-tl-md p-4 shadow-sm border border-gray-400 dark:border-gray-700 max-w-xs">
                 <p className="text-gray-800 dark:text-gray-200 text-sm leading-relaxed">
                   Hello! I'm here to help you learn about our products and services. I can share contact information, help you download resources, or schedule appointments. How can I assist you today?
                 </p>
@@ -284,7 +284,7 @@ export function ChatInterface() {
                 className={`rounded-2xl p-4 shadow-sm max-w-md ${
                   msg.role === "user"
                     ? "bg-black dark:bg-gray-700 text-white rounded-tr-md"
-                    : "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 rounded-tl-md"
+                    : "bg-white dark:bg-gray-800 border border-gray-400 dark:border-gray-700 text-gray-800 dark:text-gray-200 rounded-tl-md"
                 }`}
               >
                 <p className="text-sm leading-relaxed">{msg.content}</p>
@@ -302,7 +302,7 @@ export function ChatInterface() {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="w-full justify-start h-auto p-3 border-gray-300 hover:border-gray-400"
+                        className="w-full justify-start h-auto p-3 border-gray-500 hover:border-gray-600"
                         onClick={() => window.open("/admin-login", "_blank")}
                       >
                         <Settings className="w-4 h-4 mr-2 text-gray-600" />
@@ -368,7 +368,7 @@ export function ChatInterface() {
               <div className="w-8 h-8 bg-black dark:bg-gray-700 rounded-full flex items-center justify-center flex-shrink-0">
                 <Bot className="w-4 h-4 text-white" />
               </div>
-              <div className="bg-white dark:bg-gray-800 rounded-2xl rounded-tl-md p-4 shadow-sm border border-gray-200 dark:border-gray-700">
+              <div className="bg-white dark:bg-gray-800 rounded-2xl rounded-tl-md p-4 shadow-sm border border-gray-400 dark:border-gray-700">
                 <div className="flex space-x-1">
                   <div className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce"></div>
                   <div className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
@@ -382,7 +382,7 @@ export function ChatInterface() {
         </div>
 
         {/* Chat Input */}
-        <CardContent className="p-6 border-t border-gray-200 dark:border-gray-700">
+        <CardContent className="p-6 border-t border-gray-400 dark:border-gray-700">
           <form onSubmit={handleSendMessage} className="flex space-x-3">
             <div className="flex-1 relative">
               <Input
@@ -390,7 +390,7 @@ export function ChatInterface() {
                 placeholder="Type your message here..."
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                className="pr-10 rounded-xl bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600"
+                className="pr-10 rounded-xl bg-gray-50 dark:bg-gray-700 border-gray-400 dark:border-gray-600"
               />
               <Button
                 type="button"
