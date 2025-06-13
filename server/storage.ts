@@ -1,4 +1,4 @@
-import { users, chatMessages, appointments, documents, aiInstructions, quickActions, type User, type InsertUser, type ChatMessage, type InsertChatMessage, type Appointment, type InsertAppointment, type Document, type InsertDocument, type AiInstruction, type InsertAiInstruction, type QuickAction, type InsertQuickAction } from "@shared/schema";
+import { users, chatMessages, appointments, documents, aiInstructions, quickActions, availability, standardResponses, type User, type InsertUser, type ChatMessage, type InsertChatMessage, type Appointment, type InsertAppointment, type Document, type InsertDocument, type AiInstruction, type InsertAiInstruction, type QuickAction, type InsertQuickAction, type Availability, type InsertAvailability, type StandardResponse, type InsertStandardResponse } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
 import session from "express-session";
@@ -45,6 +45,21 @@ export interface IStorage {
   createQuickAction(action: InsertQuickAction): Promise<QuickAction>;
   updateQuickAction(id: number, action: Partial<InsertQuickAction>): Promise<QuickAction | undefined>;
   deleteQuickAction(id: number): Promise<boolean>;
+  
+  // Availability
+  getAvailability(): Promise<Availability[]>;
+  getAvailabilityByDate(date: string): Promise<Availability | undefined>;
+  createAvailability(availability: InsertAvailability): Promise<Availability>;
+  updateAvailability(id: number, availability: Partial<InsertAvailability>): Promise<Availability | undefined>;
+  deleteAvailability(id: number): Promise<boolean>;
+  
+  // Standard Responses
+  getStandardResponses(): Promise<StandardResponse[]>;
+  getActiveStandardResponses(): Promise<StandardResponse[]>;
+  getStandardResponse(id: number): Promise<StandardResponse | undefined>;
+  createStandardResponse(response: InsertStandardResponse): Promise<StandardResponse>;
+  updateStandardResponse(id: number, response: Partial<InsertStandardResponse>): Promise<StandardResponse | undefined>;
+  deleteStandardResponse(id: number): Promise<boolean>;
   
   sessionStore: session.Store;
 }
@@ -264,6 +279,93 @@ export class DatabaseStorage implements IStorage {
 
   async deleteQuickAction(id: number): Promise<boolean> {
     const result = await db.delete(quickActions).where(eq(quickActions.id, id));
+    return (result.rowCount || 0) > 0;
+  }
+
+  // Availability methods
+  async getAvailability(): Promise<Availability[]> {
+    const results = await db
+      .select()
+      .from(availability)
+      .orderBy(availability.date, availability.startTime);
+    return results;
+  }
+
+  async getAvailabilityByDate(date: string): Promise<Availability | undefined> {
+    const [result] = await db
+      .select()
+      .from(availability)
+      .where(eq(availability.date, date));
+    return result || undefined;
+  }
+
+  async createAvailability(insertAvailability: InsertAvailability): Promise<Availability> {
+    const [result] = await db
+      .insert(availability)
+      .values(insertAvailability)
+      .returning();
+    return result;
+  }
+
+  async updateAvailability(id: number, updateData: Partial<InsertAvailability>): Promise<Availability | undefined> {
+    const [result] = await db
+      .update(availability)
+      .set({ ...updateData, updatedAt: new Date() })
+      .where(eq(availability.id, id))
+      .returning();
+    return result || undefined;
+  }
+
+  async deleteAvailability(id: number): Promise<boolean> {
+    const result = await db.delete(availability).where(eq(availability.id, id));
+    return (result.rowCount || 0) > 0;
+  }
+
+  // Standard Responses methods
+  async getStandardResponses(): Promise<StandardResponse[]> {
+    const results = await db
+      .select()
+      .from(standardResponses)
+      .orderBy(standardResponses.priority, standardResponses.title);
+    return results;
+  }
+
+  async getActiveStandardResponses(): Promise<StandardResponse[]> {
+    const results = await db
+      .select()
+      .from(standardResponses)
+      .where(eq(standardResponses.isActive, true))
+      .orderBy(standardResponses.priority, standardResponses.title);
+    return results;
+  }
+
+  async getStandardResponse(id: number): Promise<StandardResponse | undefined> {
+    const [result] = await db
+      .select()
+      .from(standardResponses)
+      .where(eq(standardResponses.id, id));
+    return result || undefined;
+  }
+
+  async createStandardResponse(insertResponse: InsertStandardResponse): Promise<StandardResponse> {
+    const [response] = await db
+      .insert(standardResponses)
+      .values(insertResponse)
+      .returning();
+    return response;
+  }
+
+  async updateStandardResponse(id: number, updateData: Partial<InsertStandardResponse>): Promise<StandardResponse | undefined> {
+    const [response] = await db
+      .update(standardResponses)
+      .set({ ...updateData, updatedAt: new Date() })
+      .where(eq(standardResponses.id, id))
+      .returning();
+    return response || undefined;
+  }
+
+  async deleteStandardResponse(id: number): Promise<boolean> {
+    const result = await db.delete(standardResponses).where(eq(standardResponses.id, id));
     return (result.rowCount || 0) > 0;
   }
 }
