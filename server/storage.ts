@@ -15,6 +15,7 @@ export interface IStorage {
   // Chat messages
   getChatMessages(limit?: number): Promise<ChatMessage[]>;
   createChatMessage(message: InsertChatMessage): Promise<ChatMessage>;
+  resetChatMessages(): Promise<void>;
   
   // Appointments
   getAppointments(): Promise<Appointment[]>;
@@ -83,6 +84,10 @@ export class DatabaseStorage implements IStorage {
       .values(insertMessage)
       .returning();
     return message;
+  }
+
+  async resetChatMessages(): Promise<void> {
+    await db.delete(chatMessages);
   }
 
   async getAppointments(): Promise<Appointment[]> {

@@ -101,6 +101,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Reset chat messages
+  app.delete("/api/messages", async (req, res) => {
+    try {
+      await storage.resetChatMessages();
+      res.json({ message: "Chat history cleared" });
+    } catch (error) {
+      console.error("Reset chat error:", error);
+      res.status(500).json({ message: "Failed to reset chat" });
+    }
+  });
+
   // Appointment endpoints
   app.get("/api/appointments", async (req, res) => {
     try {

@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Moon, Sun, Send, Phone, Mail, MapPin, Clock, Download, Calendar, Mic, Bot, Settings } from "lucide-react";
+import { Moon, Sun, Send, Phone, Mail, MapPin, Clock, Download, Calendar, Mic, Bot, Settings, RotateCcw } from "lucide-react";
 
 interface ChatMessage {
   id: number;
@@ -35,6 +35,7 @@ export function ChatInterface() {
   const [isTyping, setIsTyping] = useState(false);
   const [showContactModal, setShowContactModal] = useState(false);
   const [showAppointmentModal, setShowAppointmentModal] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
@@ -85,6 +86,29 @@ export function ChatInterface() {
       toast({
         title: "Error",
         description: "Failed to send message. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Reset chat mutation
+  const resetChatMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("DELETE", "/api/messages");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/messages"] });
+      setShowResetConfirm(false);
+      toast({
+        title: "Chat Reset",
+        description: "Chat history has been cleared.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to reset chat. Please try again.",
         variant: "destructive",
       });
     },
@@ -203,20 +227,28 @@ export function ChatInterface() {
       {/* Chat Container */}
       <Card className="w-full max-w-2xl mx-auto shadow-2xl border-gray-200 dark:border-gray-700">
         {/* Chat Header */}
-        <div className="bg-gradient-to-r from-indigo-500 to-purple-600 dark:from-indigo-600 dark:to-purple-700 p-6 text-white rounded-t-lg">
+        <div className="bg-black dark:bg-gray-900 p-6 text-white rounded-t-lg">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
               <Bot className="w-5 h-5" />
             </div>
-            <div>
+            <div className="flex-1">
               <h2 className="text-xl font-semibold">AI Assistant</h2>
-              <p className="text-indigo-100 text-sm">Here to help with products, services & appointments</p>
+              <p className="text-gray-300 text-sm">Here to help with products, services & appointments</p>
             </div>
-            <div className="ml-auto">
+            <div className="flex items-center space-x-3">
               <div className="flex items-center space-x-1">
-                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                <span className="text-xs text-indigo-100">Online</span>
+                <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>
+                <span className="text-xs text-gray-300">Online</span>
               </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowResetConfirm(true)}
+                className="text-gray-300 hover:text-white hover:bg-gray-800"
+              >
+                <RotateCcw className="w-4 h-4" />
+              </Button>
             </div>
           </div>
         </div>
