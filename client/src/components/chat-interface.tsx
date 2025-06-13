@@ -38,6 +38,7 @@ export function ChatInterface() {
   const [showAppointmentModal, setShowAppointmentModal] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [interfaceSize, setInterfaceSize] = useState<"normal" | "large" | "extra-large">("normal");
+  const [chatWidth, setChatWidth] = useState<"narrow" | "normal" | "wide" | "extra-wide">("normal");
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
@@ -215,11 +216,23 @@ export function ChatInterface() {
     });
   };
 
+  const getWidthClass = () => {
+    switch (chatWidth) {
+      case "narrow":
+        return "max-w-md";
+      case "wide":
+        return "max-w-4xl";
+      case "extra-wide":
+        return "max-w-6xl";
+      default:
+        return "max-w-2xl";
+    }
+  };
+
   const getSizeClasses = () => {
     switch (interfaceSize) {
       case "large":
         return {
-          container: "max-w-6xl",
           text: "text-lg",
           textSm: "text-base",
           textXs: "text-sm",
@@ -233,7 +246,6 @@ export function ChatInterface() {
         };
       case "extra-large":
         return {
-          container: "max-w-7xl",
           text: "text-xl",
           textSm: "text-lg",
           textXs: "text-base",
@@ -247,7 +259,6 @@ export function ChatInterface() {
         };
       default:
         return {
-          container: "max-w-4xl",
           text: "text-base",
           textSm: "text-sm",
           textXs: "text-xs",
@@ -266,8 +277,24 @@ export function ChatInterface() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4 transition-colors duration-300">
-      {/* Controls - Theme Toggle and Size Selector */}
+      {/* Controls - Width, Size, and Theme Selectors */}
       <div className="fixed top-6 right-6 z-50 flex items-center space-x-3">
+        <Select value={chatWidth} onValueChange={(value) => setChatWidth(value as "narrow" | "normal" | "wide" | "extra-wide")}>
+          <SelectTrigger className="w-auto shadow-lg hover:shadow-xl transition-all duration-300 border-gray-300 dark:border-gray-600">
+            <span className={sizeClasses.textSm}>
+              {chatWidth === "narrow" ? "Narrow" : 
+               chatWidth === "wide" ? "Wide" : 
+               chatWidth === "extra-wide" ? "Extra Wide" : "Normal"}
+            </span>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="narrow">Narrow Width</SelectItem>
+            <SelectItem value="normal">Normal Width</SelectItem>
+            <SelectItem value="wide">Wide Width</SelectItem>
+            <SelectItem value="extra-wide">Extra Wide</SelectItem>
+          </SelectContent>
+        </Select>
+        
         <Select value={interfaceSize} onValueChange={(value) => setInterfaceSize(value as "normal" | "large" | "extra-large")}>
           <SelectTrigger className="w-auto shadow-lg hover:shadow-xl transition-all duration-300 border-gray-300 dark:border-gray-600">
             <Settings className={`${sizeClasses.icon} mr-2`} />
@@ -298,7 +325,7 @@ export function ChatInterface() {
       </div>
 
       {/* Chat Container - Seamless with Shadow */}
-      <Card className={`w-full ${sizeClasses.container} mx-auto shadow-2xl dark:shadow-gray-900/50 border-0 bg-white dark:bg-gray-800`}>
+      <Card className={`w-full ${getWidthClass()} mx-auto shadow-2xl dark:shadow-gray-900/50 border-0 bg-white dark:bg-gray-800`}>
         {/* Chat Header */}
         <div className={`bg-white dark:bg-gray-800 ${sizeClasses.padding} text-black dark:text-white rounded-t-lg shadow-sm`}>
           <div className="flex items-center space-x-4">
