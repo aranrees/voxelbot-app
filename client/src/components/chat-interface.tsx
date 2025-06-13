@@ -37,6 +37,7 @@ export function ChatInterface() {
   const [showContactModal, setShowContactModal] = useState(false);
   const [showAppointmentModal, setShowAppointmentModal] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [interfaceSize, setInterfaceSize] = useState<"normal" | "large" | "extra-large">("normal");
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
@@ -214,46 +215,112 @@ export function ChatInterface() {
     });
   };
 
+  const getSizeClasses = () => {
+    switch (interfaceSize) {
+      case "large":
+        return {
+          container: "max-w-6xl",
+          text: "text-lg",
+          textSm: "text-base",
+          textXs: "text-sm",
+          button: "h-12 px-6 text-lg",
+          input: "h-12 text-lg",
+          spacing: "space-y-6",
+          padding: "p-6",
+          icon: "w-6 h-6",
+          heading: "text-3xl",
+          subheading: "text-xl"
+        };
+      case "extra-large":
+        return {
+          container: "max-w-7xl",
+          text: "text-xl",
+          textSm: "text-lg",
+          textXs: "text-base",
+          button: "h-14 px-8 text-xl",
+          input: "h-14 text-xl",
+          spacing: "space-y-8",
+          padding: "p-8",
+          icon: "w-7 h-7",
+          heading: "text-4xl",
+          subheading: "text-2xl"
+        };
+      default:
+        return {
+          container: "max-w-4xl",
+          text: "text-base",
+          textSm: "text-sm",
+          textXs: "text-xs",
+          button: "h-10 px-4",
+          input: "h-10",
+          spacing: "space-y-4",
+          padding: "p-4",
+          icon: "w-5 h-5",
+          heading: "text-2xl",
+          subheading: "text-lg"
+        };
+    }
+  };
+
+  const sizeClasses = getSizeClasses();
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4 transition-colors duration-300">
-      {/* Theme Toggle Button */}
-      <Button
-        onClick={toggleTheme}
-        variant="outline"
-        size="icon"
-        className="fixed top-6 right-6 z-50 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
-      >
-        {theme === "dark" ? (
-          <Sun className="h-5 w-5 text-gray-600 dark:text-gray-300" />
-        ) : (
-          <Moon className="h-5 w-5 text-gray-600 dark:text-gray-300" />
-        )}
-      </Button>
+      {/* Controls - Theme Toggle and Size Selector */}
+      <div className="fixed top-6 right-6 z-50 flex items-center space-x-3">
+        <Select value={interfaceSize} onValueChange={setInterfaceSize}>
+          <Button variant="outline" className="shadow-lg hover:shadow-xl transition-all duration-300 border-gray-300 dark:border-gray-600">
+            <Settings className={`${sizeClasses.icon} mr-2`} />
+            <span className={sizeClasses.textSm}>
+              {interfaceSize === "normal" ? "Normal" : 
+               interfaceSize === "large" ? "Large" : "Extra Large"}
+            </span>
+          </Button>
+          <SelectContent>
+            <SelectItem value="normal">Normal Size</SelectItem>
+            <SelectItem value="large">Large Size</SelectItem>
+            <SelectItem value="extra-large">Extra Large Size</SelectItem>
+          </SelectContent>
+        </Select>
+        
+        <Button
+          onClick={toggleTheme}
+          variant="outline"
+          size="icon"
+          className="shadow-lg hover:shadow-xl transition-all duration-300 border-gray-300 dark:border-gray-600"
+        >
+          {theme === "dark" ? (
+            <Sun className={`${sizeClasses.icon} text-gray-600 dark:text-gray-300`} />
+          ) : (
+            <Moon className={`${sizeClasses.icon} text-gray-600 dark:text-gray-300`} />
+          )}
+        </Button>
+      </div>
 
-      {/* Chat Container */}
-      <Card className="w-full max-w-2xl mx-auto shadow-2xl border-gray-400 dark:border-gray-700">
+      {/* Chat Container - Seamless with Shadow */}
+      <Card className={`w-full ${sizeClasses.container} mx-auto shadow-2xl dark:shadow-gray-900/50 border-0 bg-white dark:bg-gray-800`}>
         {/* Chat Header */}
-        <div className="bg-white dark:bg-gray-900 p-6 text-black dark:text-white rounded-t-lg border-b border-gray-400 dark:border-gray-700">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-black bg-opacity-10 dark:bg-white dark:bg-opacity-20 rounded-full flex items-center justify-center">
-              <Heart className="w-5 h-5 text-black dark:text-white" />
+        <div className={`bg-white dark:bg-gray-800 ${sizeClasses.padding} text-black dark:text-white rounded-t-lg shadow-sm`}>
+          <div className="flex items-center space-x-4">
+            <div className={`w-12 h-12 bg-black dark:bg-white rounded-full flex items-center justify-center shadow-lg`}>
+              <Heart className={`${sizeClasses.icon} text-white dark:text-black`} />
             </div>
             <div className="flex-1">
-              <h2 className="text-xl font-semibold">Infomage</h2>
-              <p className="text-gray-600 dark:text-gray-300 text-sm">here to help</p>
+              <h2 className={`${sizeClasses.heading} font-semibold`}>Infomage</h2>
+              <p className={`text-gray-600 dark:text-gray-300 ${sizeClasses.textSm}`}>here to help</p>
             </div>
             <div className="flex items-center space-x-3">
-              <div className="flex items-center space-x-1">
-                <div className="w-2 h-2 bg-gray-500 dark:bg-gray-400 rounded-full animate-pulse"></div>
-                <span className="text-xs text-gray-600 dark:text-gray-300">Online</span>
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span className={`${sizeClasses.textXs} text-gray-600 dark:text-gray-300`}>Online</span>
               </div>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setShowResetConfirm(true)}
-                className="text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800"
+                className={`text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 ${sizeClasses.button}`}
               >
-                <RotateCcw className="w-4 h-4" />
+                <RotateCcw className={sizeClasses.icon} />
               </Button>
             </div>
           </div>
