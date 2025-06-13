@@ -15,7 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Moon, Sun, Plus, Edit, Trash2, FileText, Brain, LogOut, MessageSquare, Zap, Heart } from "lucide-react";
-import type { Document, AiInstruction, QuickAction, InsertDocument, InsertAiInstruction, InsertQuickAction } from "@shared/schema";
+import type { Document, AiInstruction, QuickAction, Availability, StandardResponse, InsertDocument, InsertAiInstruction, InsertQuickAction, InsertAvailability, InsertStandardResponse } from "@shared/schema";
 
 export default function AdminDashboard() {
   const { user, logoutMutation } = useAuth();
@@ -26,9 +26,13 @@ export default function AdminDashboard() {
   const [showDocumentDialog, setShowDocumentDialog] = useState(false);
   const [showInstructionDialog, setShowInstructionDialog] = useState(false);
   const [showQuickActionDialog, setShowQuickActionDialog] = useState(false);
+  const [showAvailabilityDialog, setShowAvailabilityDialog] = useState(false);
+  const [showStandardResponseDialog, setShowStandardResponseDialog] = useState(false);
   const [editingDocument, setEditingDocument] = useState<Document | null>(null);
   const [editingInstruction, setEditingInstruction] = useState<AiInstruction | null>(null);
   const [editingQuickAction, setEditingQuickAction] = useState<QuickAction | null>(null);
+  const [editingAvailability, setEditingAvailability] = useState<Availability | null>(null);
+  const [editingStandardResponse, setEditingStandardResponse] = useState<StandardResponse | null>(null);
   
   const [documentForm, setDocumentForm] = useState<InsertDocument>({
     title: "",
@@ -52,6 +56,23 @@ export default function AdminDashboard() {
     isActive: true
   });
 
+  const [availabilityForm, setAvailabilityForm] = useState<InsertAvailability>({
+    date: "",
+    startTime: "09:00",
+    endTime: "17:00",
+    isAvailable: true,
+    note: ""
+  });
+
+  const [standardResponseForm, setStandardResponseForm] = useState<InsertStandardResponse>({
+    title: "",
+    questionType: "general",
+    response: "",
+    keywords: [],
+    isActive: true,
+    priority: 5
+  });
+
   // Fetch documents
   const { data: documents = [] } = useQuery<Document[]>({
     queryKey: ["/api/admin/documents"],
@@ -65,6 +86,16 @@ export default function AdminDashboard() {
   // Fetch quick actions
   const { data: quickActions = [] } = useQuery<QuickAction[]>({
     queryKey: ["/api/admin/quick-actions"],
+  });
+
+  // Fetch availability
+  const { data: availability = [] } = useQuery<Availability[]>({
+    queryKey: ["/api/admin/availability"],
+  });
+
+  // Fetch standard responses
+  const { data: standardResponses = [] } = useQuery<StandardResponse[]>({
+    queryKey: ["/api/admin/standard-responses"],
   });
 
   // Document mutations

@@ -338,6 +338,121 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin Availability Management
+  app.get("/api/admin/availability", requireAuth, async (req, res) => {
+    try {
+      const availability = await storage.getAvailability();
+      res.json(availability);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch availability" });
+    }
+  });
+
+  app.post("/api/admin/availability", requireAuth, async (req, res) => {
+    try {
+      const validatedData = insertAvailabilitySchema.parse(req.body);
+      const availability = await storage.createAvailability(validatedData);
+      res.status(201).json(availability);
+    } catch (error) {
+      res.status(400).json({ message: "Failed to create availability" });
+    }
+  });
+
+  app.put("/api/admin/availability/:id", requireAuth, async (req, res) => {
+    try {
+      const validatedData = insertAvailabilitySchema.partial().parse(req.body);
+      const availability = await storage.updateAvailability(parseInt(req.params.id), validatedData);
+      if (!availability) {
+        return res.status(404).json({ message: "Availability not found" });
+      }
+      res.json(availability);
+    } catch (error) {
+      res.status(400).json({ message: "Failed to update availability" });
+    }
+  });
+
+  app.delete("/api/admin/availability/:id", requireAuth, async (req, res) => {
+    try {
+      const success = await storage.deleteAvailability(parseInt(req.params.id));
+      if (!success) {
+        return res.status(404).json({ message: "Availability not found" });
+      }
+      res.json({ message: "Availability deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete availability" });
+    }
+  });
+
+  // Admin Standard Responses Management
+  app.get("/api/admin/standard-responses", requireAuth, async (req, res) => {
+    try {
+      const responses = await storage.getStandardResponses();
+      res.json(responses);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch standard responses" });
+    }
+  });
+
+  app.post("/api/admin/standard-responses", requireAuth, async (req, res) => {
+    try {
+      const validatedData = insertStandardResponseSchema.parse(req.body);
+      const response = await storage.createStandardResponse(validatedData);
+      res.status(201).json(response);
+    } catch (error) {
+      res.status(400).json({ message: "Failed to create standard response" });
+    }
+  });
+
+  app.put("/api/admin/standard-responses/:id", requireAuth, async (req, res) => {
+    try {
+      const validatedData = insertStandardResponseSchema.partial().parse(req.body);
+      const response = await storage.updateStandardResponse(parseInt(req.params.id), validatedData);
+      if (!response) {
+        return res.status(404).json({ message: "Standard response not found" });
+      }
+      res.json(response);
+    } catch (error) {
+      res.status(400).json({ message: "Failed to update standard response" });
+    }
+  });
+
+  app.delete("/api/admin/standard-responses/:id", requireAuth, async (req, res) => {
+    try {
+      const success = await storage.deleteStandardResponse(parseInt(req.params.id));
+      if (!success) {
+        return res.status(404).json({ message: "Standard response not found" });
+      }
+      res.json({ message: "Standard response deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete standard response" });
+    }
+  });
+
+  // Public endpoints for availability and standard responses
+  app.get("/api/availability", async (req, res) => {
+    try {
+      const { date } = req.query;
+      if (date) {
+        const availability = await storage.getAvailabilityByDate(date as string);
+        res.json(availability || null);
+      } else {
+        const availability = await storage.getAvailability();
+        res.json(availability);
+      }
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch availability" });
+    }
+  });
+
+  app.get("/api/standard-responses", async (req, res) => {
+    try {
+      const responses = await storage.getActiveStandardResponses();
+      res.json(responses);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch standard responses" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
