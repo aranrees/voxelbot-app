@@ -1,4 +1,4 @@
-import { users, chatMessages, appointments, documents, aiInstructions, type User, type InsertUser, type ChatMessage, type InsertChatMessage, type Appointment, type InsertAppointment, type Document, type InsertDocument, type AiInstruction, type InsertAiInstruction } from "@shared/schema";
+import { users, chatMessages, appointments, documents, aiInstructions, quickActions, type User, type InsertUser, type ChatMessage, type InsertChatMessage, type Appointment, type InsertAppointment, type Document, type InsertDocument, type AiInstruction, type InsertAiInstruction, type QuickAction, type InsertQuickAction } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
 import session from "express-session";
@@ -37,6 +37,14 @@ export interface IStorage {
   createAiInstruction(instruction: InsertAiInstruction): Promise<AiInstruction>;
   updateAiInstruction(id: number, instruction: Partial<InsertAiInstruction>): Promise<AiInstruction | undefined>;
   deleteAiInstruction(id: number): Promise<boolean>;
+  
+  // Quick Actions
+  getQuickActions(): Promise<QuickAction[]>;
+  getActiveQuickActions(): Promise<QuickAction[]>;
+  getQuickAction(id: number): Promise<QuickAction | undefined>;
+  createQuickAction(action: InsertQuickAction): Promise<QuickAction>;
+  updateQuickAction(id: number, action: Partial<InsertQuickAction>): Promise<QuickAction | undefined>;
+  deleteQuickAction(id: number): Promise<boolean>;
   
   sessionStore: session.Store;
 }
@@ -209,6 +217,53 @@ export class DatabaseStorage implements IStorage {
     const result = await db
       .delete(aiInstructions)
       .where(eq(aiInstructions.id, id));
+    return (result.rowCount || 0) > 0;
+  }
+
+  async getQuickActions(): Promise<QuickAction[]> {
+    const results = await db
+      .select()
+      .from(quickActions)
+      .orderBy(quickActions.order);
+    return results;
+  }
+
+  async getActiveQuickActions(): Promise<QuickAction[]> {
+    const results = await db
+      .select()
+      .from(quickActions)
+      .where(eq(quickActions.isActive, true))
+      .orderBy(quickActions.order);
+    return results;
+  }
+
+  async getQuickAction(id: number): Promise<QuickAction | undefined> {
+    const [result] = await db
+      .select()
+      .from(quickActions)
+      .where(eq(quickActions.id, id));
+    return result || undefined;
+  }
+
+  async createQuickAction(insertAction: InsertQuickAction): Promise<QuickAction> {
+    const [action] = await db
+      .insert(quickActions)
+      .values(insertAction)
+      .returning();
+    return action;
+  }
+
+  async updateQuickAction(id: number, updateData: Partial<InsertQuickAction>): Promise<QuickAction | undefined> {
+    const [action] = await db
+      .update(quickActions)
+      .set({ ...updateData, updatedAt: new Date() })
+      .where(eq(quickActions.id, id))
+      .returning();
+    return action || undefined;
+  }
+
+  async deleteQuickAction(id: number): Promise<boolean> {
+    const result = await db.delete(quickActions).where(eq(quickActions.id, id));
     return (result.rowCount || 0) > 0;
   }
 }

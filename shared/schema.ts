@@ -48,6 +48,16 @@ export const aiInstructions = pgTable("ai_instructions", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+export const quickActions = pgTable("quick_actions", {
+  id: serial("id").primaryKey(),
+  label: text("label").notNull(),
+  message: text("message").notNull(),
+  order: integer("order").default(1).notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -76,6 +86,12 @@ export const insertAiInstructionSchema = createInsertSchema(aiInstructions).omit
   updatedAt: true,
 });
 
+export const insertQuickActionSchema = createInsertSchema(quickActions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type ChatMessage = typeof chatMessages.$inferSelect;
@@ -86,3 +102,5 @@ export type Document = typeof documents.$inferSelect;
 export type InsertDocument = z.infer<typeof insertDocumentSchema>;
 export type AiInstruction = typeof aiInstructions.$inferSelect;
 export type InsertAiInstruction = z.infer<typeof insertAiInstructionSchema>;
+export type QuickAction = typeof quickActions.$inferSelect;
+export type InsertQuickAction = z.infer<typeof insertQuickActionSchema>;
