@@ -257,8 +257,8 @@ export function ChatInterface() {
         <div className="h-96 overflow-y-auto p-6 space-y-4 bg-gray-50 dark:bg-gray-900">
           {messages.length === 0 && (
             <div className="flex items-start space-x-3">
-              <div className="w-8 h-8 bg-black dark:bg-gray-700 rounded-full flex items-center justify-center flex-shrink-0">
-                <Heart className="w-4 h-4 text-white" />
+              <div className="w-8 h-8 bg-black bg-opacity-10 dark:bg-gray-700 rounded-full flex items-center justify-center flex-shrink-0">
+                <Heart className="w-4 h-4 text-black dark:text-white" />
               </div>
               <div className="bg-white dark:bg-gray-800 rounded-2xl rounded-tl-md p-4 shadow-sm border border-gray-400 dark:border-gray-700 max-w-xs">
                 <p className="text-gray-800 dark:text-gray-200 text-sm leading-relaxed">
@@ -275,8 +275,8 @@ export function ChatInterface() {
               className={`flex items-start space-x-3 ${msg.role === "user" ? "justify-end" : ""}`}
             >
               {msg.role === "assistant" && (
-                <div className="w-8 h-8 bg-black dark:bg-gray-700 rounded-full flex items-center justify-center flex-shrink-0">
-                  <Heart className="w-4 h-4 text-white" />
+                <div className="w-8 h-8 bg-black bg-opacity-10 dark:bg-gray-700 rounded-full flex items-center justify-center flex-shrink-0">
+                  <Heart className="w-4 h-4 text-black dark:text-white" />
                 </div>
               )}
               
@@ -365,8 +365,8 @@ export function ChatInterface() {
           {/* Typing Indicator */}
           {isTyping && (
             <div className="flex items-start space-x-3">
-              <div className="w-8 h-8 bg-black dark:bg-gray-700 rounded-full flex items-center justify-center flex-shrink-0">
-                <Heart className="w-4 h-4 text-white" />
+              <div className="w-8 h-8 bg-black bg-opacity-10 dark:bg-gray-700 rounded-full flex items-center justify-center flex-shrink-0">
+                <Heart className="w-4 h-4 text-black dark:text-white" />
               </div>
               <div className="bg-white dark:bg-gray-800 rounded-2xl rounded-tl-md p-4 shadow-sm border border-gray-400 dark:border-gray-700">
                 <div className="flex space-x-1">
