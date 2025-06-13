@@ -326,7 +326,7 @@ export function ChatInterface() {
       {/* Chat Container - Seamless with Shadow */}
       <Card className={`w-full ${getWidthClass()} mx-auto shadow-2xl dark:shadow-gray-900/50 border-0 ${bonkersColors ? bonkersColors.chatBg : 'bg-white dark:bg-gray-800'}`}>
         {/* Chat Header */}
-        <div className={`bg-white dark:bg-gray-800 ${sizeClasses.padding} text-black dark:text-white rounded-t-lg shadow-sm`}>
+        <div className={`${bonkersColors ? bonkersColors.headerBg : 'bg-white dark:bg-gray-800'} ${sizeClasses.padding} text-black dark:text-white rounded-t-lg shadow-sm`}>
           <div className="flex items-center space-x-4">
             <div className={`w-12 h-12 bg-black dark:bg-white rounded-full flex items-center justify-center shadow-lg`}>
               <Heart className={`${sizeClasses.icon} text-white dark:text-black`} />
@@ -359,7 +359,7 @@ export function ChatInterface() {
               <div className={`w-10 h-10 bg-black dark:bg-white rounded-full flex items-center justify-center flex-shrink-0 shadow-md`}>
                 <Heart className={`${sizeClasses.icon} text-white dark:text-black`} />
               </div>
-              <div className={`bg-white dark:bg-gray-800 rounded-2xl rounded-tl-md ${sizeClasses.padding} shadow-lg ${getMessageBubbleWidth()}`}>
+              <div className={`${bonkersColors ? bonkersColors.messageBg : 'bg-white dark:bg-gray-800'} rounded-2xl rounded-tl-md ${sizeClasses.padding} shadow-lg ${getMessageBubbleWidth()}`}>
                 <p className={`text-gray-800 dark:text-gray-200 ${sizeClasses.text} leading-relaxed`}>
                   Welcome to Aran's all purpose home page. I'm not Aran. I'm just a silly little AI magician here to answer questions about Aran's products, services, designs, ideas, deep dark secrets, availability and contact information. You can ask me to list products and services currently on offer, request a meeting or to get in touch, or, if you know what you want to know about, just ask for that and I'll tell you what I have in my files that might be useful to you.
                 </p>
@@ -382,8 +382,8 @@ export function ChatInterface() {
               <div
                 className={`rounded-2xl ${sizeClasses.padding} shadow-lg ${getMessageBubbleWidth()} ${
                   msg.role === "user"
-                    ? "bg-black dark:bg-gray-700 text-white rounded-tr-md"
-                    : "bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-tl-md"
+                    ? `${bonkersColors ? bonkersColors.userMessageBg : 'bg-black dark:bg-gray-700'} text-white rounded-tr-md`
+                    : `${bonkersColors ? bonkersColors.messageBg : 'bg-white dark:bg-gray-800'} text-gray-800 dark:text-gray-200 rounded-tl-md`
                 }`}
               >
                 <p className={`${sizeClasses.text} leading-relaxed`}>{msg.content}</p>
@@ -467,7 +467,7 @@ export function ChatInterface() {
               <div className={`w-10 h-10 bg-black dark:bg-white rounded-full flex items-center justify-center flex-shrink-0 shadow-md`}>
                 <Heart className={`${sizeClasses.icon} text-white dark:text-black`} />
               </div>
-              <div className={`bg-white dark:bg-gray-800 rounded-2xl rounded-tl-md ${sizeClasses.padding} shadow-lg ${getMessageBubbleWidth()}`}>
+              <div className={`${bonkersColors ? bonkersColors.messageBg : 'bg-white dark:bg-gray-800'} rounded-2xl rounded-tl-md ${sizeClasses.padding} shadow-lg ${getMessageBubbleWidth()}`}>
                 <div className="flex space-x-1">
                   <div className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce"></div>
                   <div className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
@@ -481,7 +481,7 @@ export function ChatInterface() {
         </div>
 
         {/* Chat Input */}
-        <CardContent className={`${sizeClasses.padding} bg-white dark:bg-gray-800 rounded-b-lg shadow-sm`}>
+        <CardContent className={`${sizeClasses.padding} ${bonkersColors ? bonkersColors.inputBg : 'bg-white dark:bg-gray-800'} rounded-b-lg shadow-sm`}>
           <form onSubmit={handleSendMessage} className="flex space-x-3">
             <div className="flex-1 relative">
               <Input
@@ -489,7 +489,7 @@ export function ChatInterface() {
                 placeholder="Type your message here..."
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                className={`${sizeClasses.input} pr-12 rounded-xl bg-gray-50 dark:bg-gray-700 border-0 shadow-inner`}
+                className={`${sizeClasses.input} pr-12 rounded-xl ${bonkersColors ? bonkersColors.buttonBg : 'bg-gray-50 dark:bg-gray-700'} border-0 shadow-inner`}
                 style={{ fontSize: interfaceSize === 'extra-large' ? '1.25rem' : interfaceSize === 'large' ? '1.125rem' : '1rem' }}
               />
               <Button
@@ -504,7 +504,7 @@ export function ChatInterface() {
             <Button
               type="submit"
               disabled={!message.trim() || sendMessageMutation.isPending}
-              className={`${sizeClasses.button} bg-black hover:bg-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200`}
+              className={`${sizeClasses.button} ${bonkersColors ? bonkersColors.buttonBg : 'bg-black hover:bg-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600'} rounded-xl shadow-lg hover:shadow-xl transition-all duration-200`}
             >
               <Send className={sizeClasses.icon} />
             </Button>
@@ -518,7 +518,7 @@ export function ChatInterface() {
                   key={action.id}
                   variant="outline"
                   size="sm"
-                  className={`${sizeClasses.textSm} rounded-full border-0 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 shadow-sm hover:shadow-md transition-all duration-200 flex-shrink-0`}
+                  className={`${sizeClasses.textSm} rounded-full border-0 ${bonkersColors ? bonkersColors.buttonBg : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600'} shadow-sm hover:shadow-md transition-all duration-200 flex-shrink-0`}
                   onClick={() => handleQuickMessage(action.message)}
                 >
                   {action.label}
