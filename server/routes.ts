@@ -8,7 +8,6 @@ import path from "path";
 import { fileURLToPath } from 'url';
 import multer from "multer";
 import fs from "fs";
-import pdfParse from "pdf-parse";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -260,14 +259,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Title and type are required" });
       }
 
-      // Read and parse PDF
-      const pdfBuffer = fs.readFileSync(req.file.path);
-      const pdfData = await pdfParse(pdfBuffer);
-      
-      // Create document with extracted text
+      // For now, store PDF metadata without text extraction
+      // Text extraction can be added later with a proper PDF processing service
       const documentData = {
         title,
-        content: pdfData.text,
+        content: `PDF Document: ${title}\n\nFile uploaded: ${req.file.originalname}\nFile size: ${req.file.size} bytes\n\nNote: This is a PDF document. Text extraction is not yet implemented.`,
         type,
         fileType: 'pdf' as const,
         filePath: req.file.path,
@@ -279,8 +275,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json({
         ...document,
-        extractedPages: pdfData.numpages,
-        extractedText: pdfData.text.substring(0, 500) + (pdfData.text.length > 500 ? '...' : '')
+        fileName: req.file.originalname,
+        fileSize: req.file.size
       });
     } catch (error) {
       console.error("PDF upload error:", error);

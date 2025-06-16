@@ -74,6 +74,13 @@ export default function AdminDashboard() {
     priority: 5
   });
 
+  const [pdfUploadForm, setPdfUploadForm] = useState({
+    title: "",
+    type: "product" as const,
+    tags: "",
+    file: null as File | null
+  });
+
   // Fetch documents
   const { data: documents = [] } = useQuery<Document[]>({
     queryKey: ["/api/admin/documents"],
@@ -143,6 +150,32 @@ export default function AdminDashboard() {
     },
     onError: () => {
       toast({ title: "Error", description: "Failed to delete document", variant: "destructive" });
+    },
+  });
+
+  const uploadPdfMutation = useMutation({
+    mutationFn: async (formData: FormData) => {
+      const response = await fetch("/api/admin/documents/upload-pdf", {
+        method: "POST",
+        body: formData,
+        credentials: "include"
+      });
+      if (!response.ok) {
+        throw new Error("Failed to upload PDF");
+      }
+      return response.json();
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/documents"] });
+      setShowPdfUploadDialog(false);
+      setPdfUploadForm({ title: "", type: "product", tags: "", file: null });
+      toast({ 
+        title: "Success", 
+        description: `PDF uploaded successfully! Extracted ${data.extractedPages} pages of text.` 
+      });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to upload PDF", variant: "destructive" });
     },
   });
 
@@ -391,6 +424,22 @@ export default function AdminDashboard() {
     setEditingStandardResponse(null);
   };
 
+  const handlePdfUpload = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!pdfUploadForm.file || !pdfUploadForm.title) {
+      toast({ title: "Error", description: "Please select a PDF file and enter a title", variant: "destructive" });
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('pdf', pdfUploadForm.file);
+    formData.append('title', pdfUploadForm.title);
+    formData.append('type', pdfUploadForm.type);
+    formData.append('tags', pdfUploadForm.tags);
+
+    uploadPdfMutation.mutate(formData);
+  };
+
   const handleDocumentSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (editingDocument) {
@@ -575,13 +624,93 @@ export default function AdminDashboard() {
               <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
                 Knowledge Base Documents
               </h3>
-              <Dialog open={showDocumentDialog} onOpenChange={setShowDocumentDialog}>
-                <DialogTrigger asChild>
-                  <Button onClick={resetDocumentForm} className="bg-black hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-black">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Document
-                  </Button>
-                </DialogTrigger>
+              <div className="flex space-x-2">
+                <Dialog open={showPdfUploadDialog} onOpenChange={setShowPdfUploadDialog}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" className="border-gray-400 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700">
+                      <FileText className="w-4 h-4 mr-2" />
+                      Upload PDF
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-md bg-white dark:bg-gray-800 border border-gray-400 dark:border-gray-600">
+                    <DialogHeader>
+                      <DialogTitle className="text-gray-800 dark:text-gray-200">
+                        Upload PDF Document
+                      </DialogTitle>
+                    </DialogHeader>
+                    <form onSubmit={handlePdfUpload} className="space-y-4">
+                      <div>
+                        <Label htmlFor="pdf-title">Title</Label>
+                        <Input
+                          id="pdf-title"
+                          value={pdfUploadForm.title}
+                          onChange={(e) => setPdfUploadForm({ ...pdfUploadForm, title: e.target.value })}
+                          required
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="pdf-type">Type</Label>
+                        <Select
+                          value={pdfUploadForm.type}
+                          onValueChange={(value) => setPdfUploadForm({ ...pdfUploadForm, type: value as any })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="product">Product</SelectItem>
+                            <SelectItem value="instruction">Instruction</SelectItem>
+                            <SelectItem value="faq">FAQ</SelectItem>
+                            <SelectItem value="other">Other</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label htmlFor="pdf-tags">Tags (comma-separated)</Label>
+                        <Input
+                          id="pdf-tags"
+                          value={pdfUploadForm.tags}
+                          onChange={(e) => setPdfUploadForm({ ...pdfUploadForm, tags: e.target.value })}
+                          placeholder="product, service, manual"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="pdf-file">PDF File</Label>
+                        <Input
+                          id="pdf-file"
+                          type="file"
+                          accept=".pdf"
+                          onChange={(e) => setPdfUploadForm({ ...pdfUploadForm, file: e.target.files?.[0] || null })}
+                          required
+                        />
+                      </div>
+                      <div className="flex justify-end space-x-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setShowPdfUploadDialog(false)}
+                          className="border-gray-400 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          type="submit"
+                          disabled={uploadPdfMutation.isPending}
+                          className="bg-black hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-black"
+                        >
+                          {uploadPdfMutation.isPending ? "Uploading..." : "Upload"}
+                        </Button>
+                      </div>
+                    </form>
+                  </DialogContent>
+                </Dialog>
+                <Dialog open={showDocumentDialog} onOpenChange={setShowDocumentDialog}>
+                  <DialogTrigger asChild>
+                    <Button onClick={resetDocumentForm} className="bg-black hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-black">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Document
+                    </Button>
+                  </DialogTrigger>
                 <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto bg-white dark:bg-gray-800 border border-gray-400 dark:border-gray-600">
                   <DialogHeader>
                     <DialogTitle className="text-gray-800 dark:text-gray-200">
