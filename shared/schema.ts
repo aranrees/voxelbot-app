@@ -44,6 +44,7 @@ export const aiInstructions = pgTable("ai_instructions", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
   instruction: text("instruction").notNull(),
+  category: text("category").default("general").notNull(), // 'general' | 'tone' | 'behavior' | 'knowledge' | 'restrictions'
   priority: integer("priority").default(1).notNull(), // 1-10, higher priority instructions are more important
   isActive: boolean("is_active").default(true).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
