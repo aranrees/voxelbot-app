@@ -515,6 +515,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     next();
   };
 
+  // Change password endpoint
+  app.post("/api/admin/change-password", requireAuth, async (req, res) => {
+    try {
+      const { currentPassword, newPassword } = req.body;
+      const userId = req.user!.id;
+      
+      // Get current user
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      // Verify current password using the same method as auth.ts
+      const { scrypt, randomBytes, timingSafeEqual } = require("crypto");
+      const { promisify } = require("util");
+      const scryptAsync = promisify(scrypt);
+      
+      const [hashed, salt] = user.password.split(".");
+      const hashedBuf = Buffer.from(hashed, "hex");
+      const suppliedBuf = (await scryptAsync(currentPassword, salt, 64)) as Buffer;
+      
+      if (!timingSafeEqual(hashedBuf, suppliedBuf)) {
+        return res.status(400).json({ error: "Current password is incorrect" });
+      }
+      
+      // Hash new password
+      const newSalt = randomBytes(16).toString("hex");
+      const newHashedBuf = (await scryptAsync(newPassword, newSalt, 64)) as Buffer;
+      const newHashedPassword = `${newHashedBuf.toString("hex")}.${newSalt}`;
+      
+      // Update password
+      await storage.updateUserPassword(userId, newHashedPassword);
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error changing password:", error);
+      res.status(500).json({ error: "Failed to change password" });
+    }
+  });
+
   // Document management endpoints (admin only)
   app.get("/api/admin/documents", requireAuth, async (req, res) => {
     try {

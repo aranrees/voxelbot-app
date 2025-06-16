@@ -14,7 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Moon, Sun, Plus, Edit, Trash2, FileText, Brain, LogOut, MessageSquare, Zap, Heart, Upload, Download, Image, File, Calendar } from "lucide-react";
+import { Moon, Sun, Plus, Edit, Trash2, FileText, Brain, LogOut, MessageSquare, Zap, Heart, Upload, Download, Image, File, Calendar, Settings } from "lucide-react";
 import type { Document, AiInstruction, QuickAction, Availability, StandardResponse, InsertDocument, InsertAiInstruction, InsertQuickAction, InsertAvailability, InsertStandardResponse, FileAsset, InsertFileAsset } from "@shared/schema";
 
 export default function AdminDashboard() {
@@ -605,6 +605,118 @@ export default function AdminDashboard() {
                   <Moon className="h-4 w-4" />
                 )}
               </Button>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="border-gray-400 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    <Settings className="h-4 w-4" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="bg-white dark:bg-gray-800 border border-gray-400 dark:border-gray-600">
+                  <DialogHeader>
+                    <DialogTitle className="text-gray-800 dark:text-gray-200">Settings</DialogTitle>
+                  </DialogHeader>
+                  <form onSubmit={async (e) => {
+                    e.preventDefault();
+                    const formData = new FormData(e.currentTarget);
+                    const currentPassword = formData.get('currentPassword') as string;
+                    const newPassword = formData.get('newPassword') as string;
+                    const confirmPassword = formData.get('confirmPassword') as string;
+                    
+                    if (newPassword !== confirmPassword) {
+                      toast({
+                        title: "Password mismatch",
+                        description: "New passwords do not match",
+                        variant: "destructive",
+                      });
+                      return;
+                    }
+                    
+                    if (newPassword.length < 6) {
+                      toast({
+                        title: "Password too short",
+                        description: "Password must be at least 6 characters",
+                        variant: "destructive",
+                      });
+                      return;
+                    }
+                    
+                    try {
+                      const response = await fetch('/api/admin/change-password', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ currentPassword, newPassword })
+                      });
+                      
+                      const result = await response.json();
+                      
+                      if (response.ok) {
+                        toast({
+                          title: "Password changed",
+                          description: "Your password has been updated successfully",
+                        });
+                        e.currentTarget.reset();
+                      } else {
+                        toast({
+                          title: "Error",
+                          description: result.error || "Failed to change password",
+                          variant: "destructive",
+                        });
+                      }
+                    } catch (error) {
+                      toast({
+                        title: "Error",
+                        description: "Failed to change password",
+                        variant: "destructive",
+                      });
+                    }
+                  }} className="space-y-4">
+                    <div>
+                      <Label htmlFor="currentPassword">Current Password</Label>
+                      <Input
+                        id="currentPassword"
+                        name="currentPassword"
+                        type="password"
+                        required
+                        className="border-gray-400 dark:border-gray-600"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="newPassword">New Password</Label>
+                      <Input
+                        id="newPassword"
+                        name="newPassword"
+                        type="password"
+                        required
+                        minLength={6}
+                        className="border-gray-400 dark:border-gray-600"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                      <Input
+                        id="confirmPassword"
+                        name="confirmPassword"
+                        type="password"
+                        required
+                        minLength={6}
+                        className="border-gray-400 dark:border-gray-600"
+                      />
+                    </div>
+                    <div className="flex justify-end space-x-2">
+                      <Button
+                        type="submit"
+                        className="bg-black hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-black"
+                      >
+                        Change Password
+                      </Button>
+                    </div>
+                  </form>
+                </DialogContent>
+              </Dialog>
               <Button
                 onClick={() => logoutMutation.mutate()}
                 variant="outline"
