@@ -145,3 +145,30 @@ export type Availability = typeof availability.$inferSelect;
 export type InsertAvailability = z.infer<typeof insertAvailabilitySchema>;
 export type StandardResponse = typeof standardResponses.$inferSelect;
 export type InsertStandardResponse = z.infer<typeof insertStandardResponseSchema>;
+
+// File assets for client downloads
+export const fileAssets = pgTable("file_assets", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description"),
+  fileName: text("file_name").notNull(),
+  originalName: text("original_name").notNull(),
+  filePath: text("file_path").notNull(),
+  fileType: text("file_type").notNull(), // pdf, image, etc.
+  mimeType: text("mime_type").notNull(),
+  fileSize: integer("file_size").notNull(),
+  downloadCount: integer("download_count").default(0),
+  isPublic: boolean("is_public").default(true),
+  tags: text("tags").array().default([]),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertFileAssetSchema = createInsertSchema(fileAssets).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type FileAsset = typeof fileAssets.$inferSelect;
+export type InsertFileAsset = z.infer<typeof insertFileAssetSchema>;

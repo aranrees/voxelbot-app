@@ -1,6 +1,6 @@
-import { users, chatMessages, appointments, documents, aiInstructions, quickActions, availability, standardResponses, type User, type InsertUser, type ChatMessage, type InsertChatMessage, type Appointment, type InsertAppointment, type Document, type InsertDocument, type AiInstruction, type InsertAiInstruction, type QuickAction, type InsertQuickAction, type Availability, type InsertAvailability, type StandardResponse, type InsertStandardResponse } from "@shared/schema";
+import { users, chatMessages, appointments, documents, aiInstructions, quickActions, availability, standardResponses, fileAssets, type User, type InsertUser, type ChatMessage, type InsertChatMessage, type Appointment, type InsertAppointment, type Document, type InsertDocument, type AiInstruction, type InsertAiInstruction, type QuickAction, type InsertQuickAction, type Availability, type InsertAvailability, type StandardResponse, type InsertStandardResponse, type FileAsset, type InsertFileAsset } from "@shared/schema";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
 import { pool } from "./db";
@@ -60,6 +60,15 @@ export interface IStorage {
   createStandardResponse(response: InsertStandardResponse): Promise<StandardResponse>;
   updateStandardResponse(id: number, response: Partial<InsertStandardResponse>): Promise<StandardResponse | undefined>;
   deleteStandardResponse(id: number): Promise<boolean>;
+  
+  // File Assets
+  getFileAssets(): Promise<FileAsset[]>;
+  getPublicFileAssets(): Promise<FileAsset[]>;
+  getFileAsset(id: number): Promise<FileAsset | undefined>;
+  createFileAsset(asset: InsertFileAsset): Promise<FileAsset>;
+  updateFileAsset(id: number, asset: Partial<InsertFileAsset>): Promise<FileAsset | undefined>;
+  deleteFileAsset(id: number): Promise<boolean>;
+  incrementDownloadCount(id: number): Promise<void>;
   
   sessionStore: session.Store;
 }
@@ -367,6 +376,54 @@ export class DatabaseStorage implements IStorage {
   async deleteStandardResponse(id: number): Promise<boolean> {
     const result = await db.delete(standardResponses).where(eq(standardResponses.id, id));
     return (result.rowCount || 0) > 0;
+  }
+
+  // File Assets methods
+  async getFileAssets(): Promise<FileAsset[]> {
+    return await db.select().from(fileAssets).orderBy(fileAssets.createdAt);
+  }
+
+  async getPublicFileAssets(): Promise<FileAsset[]> {
+    return await db.select().from(fileAssets).where(eq(fileAssets.isPublic, true)).orderBy(fileAssets.createdAt);
+  }
+
+  async getFileAsset(id: number): Promise<FileAsset | undefined> {
+    const [asset] = await db.select().from(fileAssets).where(eq(fileAssets.id, id));
+    return asset || undefined;
+  }
+
+  async createFileAsset(insertAsset: InsertFileAsset): Promise<FileAsset> {
+    const [asset] = await db
+      .insert(fileAssets)
+      .values(insertAsset)
+      .returning();
+    return asset;
+  }
+
+  async updateFileAsset(id: number, updateData: Partial<InsertFileAsset>): Promise<FileAsset | undefined> {
+    const [asset] = await db
+      .update(fileAssets)
+      .set({ ...updateData, updatedAt: new Date() })
+      .where(eq(fileAssets.id, id))
+      .returning();
+    return asset || undefined;
+  }
+
+  async deleteFileAsset(id: number): Promise<boolean> {
+    try {
+      const result = await db.delete(fileAssets).where(eq(fileAssets.id, id));
+      return result.rowCount ? result.rowCount > 0 : false;
+    } catch (error) {
+      console.error('Error deleting file asset:', error);
+      return false;
+    }
+  }
+
+  async incrementDownloadCount(id: number): Promise<void> {
+    await db
+      .update(fileAssets)
+      .set({ downloadCount: sql`${fileAssets.downloadCount} + 1` })
+      .where(eq(fileAssets.id, id));
   }
 }
 
