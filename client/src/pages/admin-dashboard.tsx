@@ -1528,7 +1528,11 @@ export default function AdminDashboard() {
                   <form onSubmit={(e) => {
                     e.preventDefault();
                     const formData = {
-                      ...standardResponseForm,
+                      title: standardResponseForm.title,
+                      questionType: standardResponseForm.questionType,
+                      response: standardResponseForm.response,
+                      priority: standardResponseForm.priority,
+                      isActive: standardResponseForm.isActive,
                       keywords: standardResponseForm.keywords.split(',').map(k => k.trim()).filter(k => k.length > 0)
                     };
                     if (editingStandardResponse) {
