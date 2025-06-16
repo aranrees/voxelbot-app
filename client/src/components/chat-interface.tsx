@@ -161,8 +161,22 @@ export function ChatInterface() {
   useEffect(() => {
     const sessionId = `chat-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     setChatSessionId(sessionId);
-    updateActivity();
+    const now = new Date();
+    setLastActivity(now);
+    startInactivityTimer();
   }, []);
+
+  const startInactivityTimer = () => {
+    // Clear existing timer
+    if (inactivityTimerRef.current) {
+      clearTimeout(inactivityTimerRef.current);
+    }
+    
+    // Set new 10-minute inactivity timer
+    inactivityTimerRef.current = setTimeout(() => {
+      handleChatCompletion();
+    }, 10 * 60 * 1000); // 10 minutes
+  };
 
   // Activity tracking and inactivity detection
   const updateActivity = () => {

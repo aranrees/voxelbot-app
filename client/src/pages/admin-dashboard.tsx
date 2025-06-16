@@ -86,6 +86,11 @@ export default function AdminDashboard() {
     queryKey: ["/api/admin/ai-instructions"],
   });
 
+  // Fetch completed chats
+  const { data: completedChats = [] } = useQuery<any[]>({
+    queryKey: ["/api/admin/completed-chats"],
+  });
+
   // Document mutations
   const createDocumentMutation = useMutation({
     mutationFn: async (data: InsertDocument) => {
@@ -337,10 +342,11 @@ export default function AdminDashboard() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs defaultValue="documents" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6 bg-gray-100 dark:bg-gray-800 border border-gray-400 dark:border-gray-600">
+          <TabsList className="grid w-full grid-cols-7 bg-gray-100 dark:bg-gray-800 border border-gray-400 dark:border-gray-600">
             <TabsTrigger value="documents" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">Documents</TabsTrigger>
             <TabsTrigger value="files" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">Downloads</TabsTrigger>
             <TabsTrigger value="instructions" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">AI Instructions</TabsTrigger>
+            <TabsTrigger value="chats" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">Chats</TabsTrigger>
             <TabsTrigger value="quick-actions" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">Quick Actions</TabsTrigger>
             <TabsTrigger value="availability" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">Availability</TabsTrigger>
             <TabsTrigger value="standard-responses" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">Standard Responses</TabsTrigger>
@@ -843,6 +849,110 @@ export default function AdminDashboard() {
                     <Brain className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                     <p className="text-gray-600 dark:text-gray-400">
                       No AI instructions yet. Add instructions to guide the AI's behavior and responses.
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="chats" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                Completed Chat Sessions
+              </h3>
+            </div>
+
+            <div className="grid gap-6">
+              {completedChats.map((chat) => (
+                <Card key={chat.id} className="border-gray-400 dark:border-gray-600 bg-white dark:bg-gray-800">
+                  <CardHeader>
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <CardTitle className="text-lg font-medium text-gray-800 dark:text-gray-200">
+                          Chat Session {chat.sessionId.split('-').pop()}
+                        </CardTitle>
+                        <div className="flex items-center space-x-4 mt-2 text-sm text-gray-600 dark:text-gray-400">
+                          <span>{chat.messageCount} messages</span>
+                          <span>{Math.round(chat.durationMs / 1000 / 60)} minutes</span>
+                          <span>{new Date(chat.startTime).toLocaleDateString()} {new Date(chat.startTime).toLocaleTimeString()}</span>
+                          <span className={`px-2 py-1 rounded text-xs ${chat.isNotified ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                            {chat.isNotified ? 'Reviewed' : 'New'}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex space-x-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            const transcript = JSON.parse(chat.transcript);
+                            const formattedTranscript = transcript.map((msg: any) => 
+                              `[${new Date(msg.timestamp).toLocaleTimeString()}] ${msg.role.toUpperCase()}: ${msg.content}`
+                            ).join('\n\n');
+                            
+                            const blob = new Blob([formattedTranscript], { type: 'text/plain' });
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = `chat-transcript-${chat.sessionId}.txt`;
+                            a.click();
+                            URL.revokeObjectURL(url);
+                          }}
+                          className="border-gray-400 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        >
+                          <Download className="w-4 h-4" />
+                        </Button>
+                        {!chat.isNotified && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={async () => {
+                              try {
+                                await apiRequest("POST", `/api/admin/completed-chats/${chat.sessionId}/notify`);
+                                queryClient.invalidateQueries({ queryKey: ["/api/admin/completed-chats"] });
+                                toast({ title: "Success", description: "Chat marked as reviewed" });
+                              } catch (error) {
+                                toast({ title: "Error", description: "Failed to mark as reviewed", variant: "destructive" });
+                              }
+                            }}
+                            className="border-gray-400 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                          >
+                            Mark Reviewed
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 max-h-96 overflow-y-auto">
+                      <h4 className="font-medium text-gray-800 dark:text-gray-200 mb-3">Chat Transcript</h4>
+                      <div className="space-y-3">
+                        {JSON.parse(chat.transcript).map((msg: any, index: number) => (
+                          <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                            <div className={`max-w-xs lg:max-w-md px-3 py-2 rounded-lg ${
+                              msg.role === 'user' 
+                                ? 'bg-black text-white dark:bg-white dark:text-black' 
+                                : 'bg-white dark:bg-gray-600 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-500'
+                            }`}>
+                              <div className="text-xs opacity-70 mb-1">
+                                {msg.role === 'user' ? 'User' : 'Infomage'} • {new Date(msg.timestamp).toLocaleTimeString()}
+                              </div>
+                              <div className="text-sm whitespace-pre-wrap">{msg.content}</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+              {completedChats.length === 0 && (
+                <Card className="border-gray-400 dark:border-gray-600 bg-white dark:bg-gray-800">
+                  <CardContent className="text-center py-8">
+                    <MessageSquare className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-600 dark:text-gray-400">
+                      No completed chat sessions yet. Chat transcripts will appear here after 10 minutes of inactivity.
                     </p>
                   </CardContent>
                 </Card>

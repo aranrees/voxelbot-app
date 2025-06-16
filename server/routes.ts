@@ -12,6 +12,50 @@ import fs from "fs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+// Create notification files for completed chats
+async function createChatNotificationFiles(completedChat: any, messages: any[]) {
+  try {
+    const notificationsDir = path.join(process.cwd(), 'chat-notifications');
+    if (!fs.existsSync(notificationsDir)) {
+      fs.mkdirSync(notificationsDir, { recursive: true });
+    }
+
+    // Create detailed transcript file
+    const transcript = {
+      sessionId: completedChat.sessionId,
+      startTime: completedChat.startTime,
+      endTime: completedChat.endTime,
+      duration: `${Math.round(completedChat.durationMs / 1000 / 60)} minutes`,
+      messageCount: completedChat.messageCount,
+      messages: messages.map(msg => ({
+        timestamp: msg.timestamp,
+        role: msg.role,
+        content: msg.content
+      }))
+    };
+
+    const filename = `chat-${completedChat.sessionId}-${new Date().toISOString().split('T')[0]}.json`;
+    const filepath = path.join(notificationsDir, filename);
+    
+    fs.writeFileSync(filepath, JSON.stringify(transcript, null, 2));
+    
+    // Create simple notification summary
+    const summary = `New chat completed at ${new Date().toISOString()}
+Session: ${completedChat.sessionId}
+Messages: ${completedChat.messageCount}
+Duration: ${Math.round(completedChat.durationMs / 1000 / 60)} minutes
+File: ${filename}
+`;
+    
+    const summaryFile = path.join(notificationsDir, 'latest-chat.txt');
+    fs.writeFileSync(summaryFile, summary);
+    
+    console.log(`Chat notification created: ${filename}`);
+  } catch (error) {
+    console.error('Failed to create notification files:', error);
+  }
+}
+
 // Configure multer for file uploads
 const uploadsDir = path.join(__dirname, "../uploads");
 if (!fs.existsSync(uploadsDir)) {
@@ -158,7 +202,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // Create notification files for monitoring
-      await createChatNotificationFiles(completedChat, messages);
+      createChatNotificationFiles(completedChat, messages);
 
       res.json({ success: true, chatId: completedChat.id });
     } catch (error) {
