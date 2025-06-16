@@ -170,7 +170,7 @@ export default function AdminDashboard() {
       setPdfUploadForm({ title: "", type: "product", tags: "", file: null });
       toast({ 
         title: "Success", 
-        description: `PDF "${data.title}" uploaded successfully! File size: ${Math.round(data.fileSize / 1024)}KB` 
+        description: `PDF "${data.title}" uploaded successfully! ${data.pageCount} pages, ${Math.round(data.extractedTextLength / 1024)}KB text extracted.` 
       });
     },
     onError: () => {

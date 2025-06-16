@@ -265,11 +265,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let pageCount = 0;
       
       try {
-        const pdfjs = await import('pdfjs-dist');
+        const pdfjsLib = await import('pdfjs-dist');
         const pdfBuffer = fs.readFileSync(req.file.path);
         const typedArray = new Uint8Array(pdfBuffer);
         
-        const pdf = await pdfjs.getDocument({ data: typedArray }).promise;
+        const pdf = await pdfjsLib.getDocument({ data: typedArray }).promise;
         pageCount = pdf.numPages;
         
         const textPromises = [];
