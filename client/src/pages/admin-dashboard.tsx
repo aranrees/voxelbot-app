@@ -24,7 +24,6 @@ export default function AdminDashboard() {
   const queryClient = useQueryClient();
   
   const [showDocumentDialog, setShowDocumentDialog] = useState(false);
-  const [showPdfUploadDialog, setShowPdfUploadDialog] = useState(false);
   const [showFileUploadDialog, setShowFileUploadDialog] = useState(false);
   const [showInstructionDialog, setShowInstructionDialog] = useState(false);
   const [showQuickActionDialog, setShowQuickActionDialog] = useState(false);
@@ -35,50 +34,13 @@ export default function AdminDashboard() {
   const [editingQuickAction, setEditingQuickAction] = useState<QuickAction | null>(null);
   const [editingAvailability, setEditingAvailability] = useState<Availability | null>(null);
   const [editingStandardResponse, setEditingStandardResponse] = useState<StandardResponse | null>(null);
-  
-  const [documentForm, setDocumentForm] = useState<InsertDocument>({
+
+  const [documentForm, setDocumentForm] = useState({
     title: "",
     content: "",
-    type: "product",
-    tags: [],
-    isActive: true
-  });
-  
-  const [instructionForm, setInstructionForm] = useState<InsertAiInstruction>({
-    title: "",
-    instruction: "",
-    priority: 5,
-    isActive: true
-  });
-
-  const [quickActionForm, setQuickActionForm] = useState<InsertQuickAction>({
-    label: "",
-    message: "",
-    isActive: true
-  });
-
-  const [availabilityForm, setAvailabilityForm] = useState<InsertAvailability>({
-    date: "",
-    startTime: "09:00",
-    endTime: "17:00",
-    isAvailable: true,
-    note: ""
-  });
-
-  const [standardResponseForm, setStandardResponseForm] = useState<InsertStandardResponse>({
-    title: "",
-    questionType: "general",
-    response: "",
-    keywords: [],
-    isActive: true,
-    priority: 5
-  });
-
-  const [pdfUploadForm, setPdfUploadForm] = useState({
-    title: "",
     type: "product" as const,
-    tags: "",
-    file: null as File | null
+    tags: [] as string[],
+    isActive: true
   });
 
   const [fileUploadForm, setFileUploadForm] = useState({
@@ -92,26 +54,6 @@ export default function AdminDashboard() {
   // Fetch documents
   const { data: documents = [] } = useQuery<Document[]>({
     queryKey: ["/api/admin/documents"],
-  });
-
-  // Fetch AI instructions
-  const { data: aiInstructions = [] } = useQuery<AiInstruction[]>({
-    queryKey: ["/api/admin/ai-instructions"],
-  });
-
-  // Fetch quick actions
-  const { data: quickActions = [] } = useQuery<QuickAction[]>({
-    queryKey: ["/api/admin/quick-actions"],
-  });
-
-  // Fetch availability
-  const { data: availability = [] } = useQuery<Availability[]>({
-    queryKey: ["/api/admin/availability"],
-  });
-
-  // Fetch standard responses
-  const { data: standardResponses = [] } = useQuery<StandardResponse[]>({
-    queryKey: ["/api/admin/standard-responses"],
   });
 
   // Fetch file assets
@@ -166,32 +108,6 @@ export default function AdminDashboard() {
     },
   });
 
-  const uploadPdfMutation = useMutation({
-    mutationFn: async (formData: FormData) => {
-      const response = await fetch("/api/admin/documents/upload-pdf", {
-        method: "POST",
-        body: formData,
-        credentials: "include"
-      });
-      if (!response.ok) {
-        throw new Error("Failed to upload PDF");
-      }
-      return response.json();
-    },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/documents"] });
-      setShowPdfUploadDialog(false);
-      setPdfUploadForm({ title: "", type: "product", tags: "", file: null });
-      toast({ 
-        title: "Success", 
-        description: `PDF "${data.title}" uploaded successfully! ${data.pageCount} pages, ${Math.round(data.extractedTextLength / 1024)}KB text extracted.` 
-      });
-    },
-    onError: () => {
-      toast({ title: "Error", description: "Failed to upload PDF", variant: "destructive" });
-    },
-  });
-
   // File upload mutation
   const uploadFileMutation = useMutation({
     mutationFn: async (formData: FormData) => {
@@ -239,20 +155,16 @@ export default function AdminDashboard() {
     setEditingDocument(null);
   };
 
-  const handlePdfUpload = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!pdfUploadForm.file || !pdfUploadForm.title) {
-      toast({ title: "Error", description: "Please select a PDF file and enter a title", variant: "destructive" });
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append('pdf', pdfUploadForm.file);
-    formData.append('title', pdfUploadForm.title);
-    formData.append('type', pdfUploadForm.type);
-    formData.append('tags', pdfUploadForm.tags);
-
-    uploadPdfMutation.mutate(formData);
+  const editDocument = (document: Document) => {
+    setDocumentForm({
+      title: document.title,
+      content: document.content,
+      type: document.type,
+      tags: document.tags || [],
+      isActive: document.isActive
+    });
+    setEditingDocument(document);
+    setShowDocumentDialog(true);
   };
 
   const handleTagsChange = (value: string) => {
@@ -352,93 +264,93 @@ export default function AdminDashboard() {
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto bg-white dark:bg-gray-800 border border-gray-400 dark:border-gray-600">
-                    <DialogHeader>
-                      <DialogTitle className="text-gray-800 dark:text-gray-200">
-                        {editingDocument ? "Edit Document" : "Add New Document"}
-                      </DialogTitle>
-                    </DialogHeader>
-                    <form onSubmit={(e) => {
-                      e.preventDefault();
-                      if (editingDocument) {
-                        updateDocumentMutation.mutate({ id: editingDocument.id, data: documentForm });
-                      } else {
-                        createDocumentMutation.mutate(documentForm);
-                      }
-                    }} className="space-y-4">
-                      <div>
-                        <Label htmlFor="title">Title</Label>
-                        <Input
-                          id="title"
-                          value={documentForm.title}
-                          onChange={(e) => setDocumentForm({ ...documentForm, title: e.target.value })}
-                          required
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="type">Type</Label>
-                        <Select
-                          value={documentForm.type}
-                          onValueChange={(value) => setDocumentForm({ ...documentForm, type: value })}
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="product">Product</SelectItem>
-                            <SelectItem value="instruction">Instruction</SelectItem>
-                            <SelectItem value="faq">FAQ</SelectItem>
-                            <SelectItem value="other">Other</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <Label htmlFor="content">Content</Label>
-                        <Textarea
-                          id="content"
-                          value={documentForm.content}
-                          onChange={(e) => setDocumentForm({ ...documentForm, content: e.target.value })}
-                          rows={15}
-                          className="min-h-[400px]"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="tags">Tags (comma-separated)</Label>
-                        <Input
-                          id="tags"
-                          value={documentForm.tags?.join(', ') || ''}
-                          onChange={(e) => handleTagsChange(e.target.value)}
-                          placeholder="product, service, pricing"
-                        />
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Switch
-                          id="active"
-                          checked={documentForm.isActive}
-                          onCheckedChange={(checked) => setDocumentForm({ ...documentForm, isActive: checked })}
-                        />
-                        <Label htmlFor="active">Active</Label>
-                      </div>
-                      <div className="flex justify-end space-x-2">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() => setShowDocumentDialog(false)}
-                          className="border-gray-400 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
-                        >
-                          Cancel
-                        </Button>
-                        <Button
-                          type="submit"
-                          disabled={createDocumentMutation.isPending || updateDocumentMutation.isPending}
-                          className="bg-black hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-black"
-                        >
-                          {editingDocument ? "Update" : "Create"}
-                        </Button>
-                      </div>
-                    </form>
-                  </DialogContent>
-                </Dialog>
+                  <DialogHeader>
+                    <DialogTitle className="text-gray-800 dark:text-gray-200">
+                      {editingDocument ? "Edit Document" : "Add New Document"}
+                    </DialogTitle>
+                  </DialogHeader>
+                  <form onSubmit={(e) => {
+                    e.preventDefault();
+                    if (editingDocument) {
+                      updateDocumentMutation.mutate({ id: editingDocument.id, data: documentForm });
+                    } else {
+                      createDocumentMutation.mutate(documentForm);
+                    }
+                  }} className="space-y-4">
+                    <div>
+                      <Label htmlFor="title">Title</Label>
+                      <Input
+                        id="title"
+                        value={documentForm.title}
+                        onChange={(e) => setDocumentForm({ ...documentForm, title: e.target.value })}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="type">Type</Label>
+                      <Select
+                        value={documentForm.type}
+                        onValueChange={(value) => setDocumentForm({ ...documentForm, type: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="product">Product</SelectItem>
+                          <SelectItem value="instruction">Instruction</SelectItem>
+                          <SelectItem value="faq">FAQ</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="content">Content</Label>
+                      <Textarea
+                        id="content"
+                        value={documentForm.content}
+                        onChange={(e) => setDocumentForm({ ...documentForm, content: e.target.value })}
+                        rows={15}
+                        className="min-h-[400px]"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="tags">Tags (comma-separated)</Label>
+                      <Input
+                        id="tags"
+                        value={documentForm.tags?.join(', ') || ''}
+                        onChange={(e) => handleTagsChange(e.target.value)}
+                        placeholder="product, service, pricing"
+                      />
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        id="active"
+                        checked={documentForm.isActive}
+                        onCheckedChange={(checked) => setDocumentForm({ ...documentForm, isActive: checked })}
+                      />
+                      <Label htmlFor="active">Active</Label>
+                    </div>
+                    <div className="flex justify-end space-x-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setShowDocumentDialog(false)}
+                        className="border-gray-400 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        type="submit"
+                        disabled={createDocumentMutation.isPending || updateDocumentMutation.isPending}
+                        className="bg-black hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-black"
+                      >
+                        {editingDocument ? "Update" : "Create"}
+                      </Button>
+                    </div>
+                  </form>
+                </DialogContent>
+              </Dialog>
             </div>
 
             <div className="grid gap-6">
@@ -447,42 +359,31 @@ export default function AdminDashboard() {
                   <CardHeader>
                     <div className="flex justify-between items-start">
                       <div>
-                        <CardTitle className="flex items-center space-x-2 text-gray-800 dark:text-gray-200">
-                          <FileText className="w-5 h-5" />
-                          <span>{document.title}</span>
-                          {document.fileType === 'pdf' && (
-                            <Badge variant="outline" className="text-xs">PDF</Badge>
-                          )}
-                          <Badge variant={document.isActive ? "default" : "secondary"} className={document.isActive ? "bg-black text-white dark:bg-white dark:text-black" : ""}>
-                            {document.isActive ? "Active" : "Inactive"}
-                          </Badge>
+                        <CardTitle className="text-lg font-medium text-gray-800 dark:text-gray-200">
+                          {document.title}
                         </CardTitle>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 capitalize">
-                          {document.type}
-                        </p>
+                        <div className="flex items-center space-x-2 mt-1">
+                          <Badge variant="outline">{document.type}</Badge>
+                          {document.fileType === 'pdf' && (
+                            <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">PDF</Badge>
+                          )}
+                          <span className={`text-xs px-2 py-1 rounded ${document.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>
+                            {document.isActive ? 'Active' : 'Inactive'}
+                          </span>
+                        </div>
                       </div>
                       <div className="flex space-x-2">
                         <Button
-                          variant="outline"
                           size="sm"
-                          onClick={() => {
-                            setEditingDocument(document);
-                            setDocumentForm({
-                              title: document.title,
-                              content: document.content,
-                              type: document.type,
-                              tags: document.tags || [],
-                              isActive: document.isActive
-                            });
-                            setShowDocumentDialog(true);
-                          }}
+                          variant="outline"
+                          onClick={() => editDocument(document)}
                           className="border-gray-400 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
                         >
                           <Edit className="w-4 h-4" />
                         </Button>
                         <Button
-                          variant="outline"
                           size="sm"
+                          variant="outline"
                           onClick={() => deleteDocumentMutation.mutate(document.id)}
                           className="border-gray-400 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
                         >
