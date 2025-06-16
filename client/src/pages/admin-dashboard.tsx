@@ -46,13 +46,17 @@ export default function AdminDashboard() {
   });
 
   const [availabilityForm, setAvailabilityForm] = useState<{
+    type: "specific" | "recurring";
     date: string;
+    dayOfWeek: "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
     startTime: string;
     endTime: string;
     isAvailable: boolean;
     note: string;
   }>({
+    type: "specific",
     date: "",
+    dayOfWeek: "monday",
     startTime: "09:00",
     endTime: "17:00",
     isAvailable: true,
@@ -484,7 +488,9 @@ export default function AdminDashboard() {
 
   const resetAvailabilityForm = () => {
     setAvailabilityForm({
+      type: "specific",
       date: "",
+      dayOfWeek: "monday",
       startTime: "09:00",
       endTime: "17:00",
       isAvailable: true,
@@ -495,7 +501,9 @@ export default function AdminDashboard() {
 
   const editAvailability = (availability: Availability) => {
     setAvailabilityForm({
-      date: availability.date,
+      type: (availability.type as "specific" | "recurring") || "specific",
+      date: availability.date || "",
+      dayOfWeek: (availability.dayOfWeek as "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday") || "monday",
       startTime: availability.startTime,
       endTime: availability.endTime,
       isAvailable: availability.isAvailable,
@@ -1380,15 +1388,55 @@ export default function AdminDashboard() {
                     }
                   }} className="space-y-4">
                     <div>
-                      <Label htmlFor="availability-date">Date</Label>
-                      <Input
-                        id="availability-date"
-                        type="date"
-                        value={availabilityForm.date}
-                        onChange={(e) => setAvailabilityForm({ ...availabilityForm, date: e.target.value })}
-                        required
-                      />
+                      <Label htmlFor="availability-type">Schedule Type</Label>
+                      <Select
+                        value={availabilityForm.type}
+                        onValueChange={(value: "specific" | "recurring") => setAvailabilityForm({ ...availabilityForm, type: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="specific">Specific Date</SelectItem>
+                          <SelectItem value="recurring">Weekly Recurring</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
+                    
+                    {availabilityForm.type === "specific" ? (
+                      <div>
+                        <Label htmlFor="availability-date">Date</Label>
+                        <Input
+                          id="availability-date"
+                          type="date"
+                          value={availabilityForm.date}
+                          onChange={(e) => setAvailabilityForm({ ...availabilityForm, date: e.target.value })}
+                          required
+                        />
+                      </div>
+                    ) : (
+                      <div>
+                        <Label htmlFor="availability-day">Day of Week</Label>
+                        <Select
+                          value={availabilityForm.dayOfWeek}
+                          onValueChange={(value: "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday") => 
+                            setAvailabilityForm({ ...availabilityForm, dayOfWeek: value })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select day" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="monday">Monday</SelectItem>
+                            <SelectItem value="tuesday">Tuesday</SelectItem>
+                            <SelectItem value="wednesday">Wednesday</SelectItem>
+                            <SelectItem value="thursday">Thursday</SelectItem>
+                            <SelectItem value="friday">Friday</SelectItem>
+                            <SelectItem value="saturday">Saturday</SelectItem>
+                            <SelectItem value="sunday">Sunday</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
                     <div>
                       <Label htmlFor="availability-start">Start Time</Label>
                       <Input
@@ -1456,14 +1504,22 @@ export default function AdminDashboard() {
                     <div className="flex justify-between items-start">
                       <div>
                         <CardTitle className="text-sm font-medium text-gray-800 dark:text-gray-200">
-                          {new Date(slot.date).toLocaleDateString()}
+                          {slot.type === "recurring" 
+                            ? `Every ${slot.dayOfWeek?.charAt(0).toUpperCase()}${slot.dayOfWeek?.slice(1)}`
+                            : slot.date ? new Date(slot.date).toLocaleDateString() : "No date set"
+                          }
                         </CardTitle>
                         <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                           {slot.startTime} - {slot.endTime}
                         </p>
-                        <span className={`text-xs px-2 py-1 rounded mt-2 inline-block ${slot.isAvailable ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                          {slot.isAvailable ? 'Available' : 'Unavailable'}
-                        </span>
+                        <div className="flex gap-2 mt-2">
+                          <span className={`text-xs px-2 py-1 rounded ${slot.type === "recurring" ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-600'}`}>
+                            {slot.type === "recurring" ? 'Weekly' : 'One-time'}
+                          </span>
+                          <span className={`text-xs px-2 py-1 rounded ${slot.isAvailable ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                            {slot.isAvailable ? 'Available' : 'Unavailable'}
+                          </span>
+                        </div>
                       </div>
                       <div className="flex space-x-1">
                         <Button

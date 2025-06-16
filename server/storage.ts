@@ -76,6 +76,13 @@ export interface IStorage {
   createCompletedChat(chat: InsertCompletedChat): Promise<CompletedChat>;
   markChatAsNotified(sessionId: string): Promise<void>;
   
+  // Meeting Requests
+  getMeetingRequests(): Promise<MeetingRequest[]>;
+  getMeetingRequest(id: number): Promise<MeetingRequest | undefined>;
+  createMeetingRequest(request: InsertMeetingRequest): Promise<MeetingRequest>;
+  updateMeetingRequest(id: number, request: Partial<InsertMeetingRequest>): Promise<MeetingRequest | undefined>;
+  deleteMeetingRequest(id: number): Promise<boolean>;
+  
   sessionStore: session.Store;
 }
 
@@ -456,6 +463,37 @@ export class DatabaseStorage implements IStorage {
       .update(completedChats)
       .set({ isNotified: true })
       .where(eq(completedChats.sessionId, sessionId));
+  }
+
+  async getMeetingRequests(): Promise<MeetingRequest[]> {
+    return await db.select().from(meetingRequests).orderBy(desc(meetingRequests.createdAt));
+  }
+
+  async getMeetingRequest(id: number): Promise<MeetingRequest | undefined> {
+    const [request] = await db.select().from(meetingRequests).where(eq(meetingRequests.id, id));
+    return request || undefined;
+  }
+
+  async createMeetingRequest(insertRequest: InsertMeetingRequest): Promise<MeetingRequest> {
+    const [request] = await db
+      .insert(meetingRequests)
+      .values(insertRequest)
+      .returning();
+    return request;
+  }
+
+  async updateMeetingRequest(id: number, updateData: Partial<InsertMeetingRequest>): Promise<MeetingRequest | undefined> {
+    const [request] = await db
+      .update(meetingRequests)
+      .set(updateData)
+      .where(eq(meetingRequests.id, id))
+      .returning();
+    return request || undefined;
+  }
+
+  async deleteMeetingRequest(id: number): Promise<boolean> {
+    const result = await db.delete(meetingRequests).where(eq(meetingRequests.id, id));
+    return result.rowCount > 0;
   }
 }
 
