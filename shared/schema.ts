@@ -63,7 +63,9 @@ export const quickActions = pgTable("quick_actions", {
 
 export const availability = pgTable("availability", {
   id: serial("id").primaryKey(),
-  date: text("date").notNull(), // YYYY-MM-DD format
+  type: text("type").notNull().default("specific"), // "specific" | "recurring"
+  date: text("date"), // YYYY-MM-DD format for specific dates
+  dayOfWeek: text("day_of_week"), // "monday" | "tuesday" | etc. for recurring
   startTime: text("start_time").notNull(), // "09:00"
   endTime: text("end_time").notNull(), // "17:00"
   isAvailable: boolean("is_available").default(true).notNull(),
@@ -122,6 +124,9 @@ export const insertAvailabilitySchema = createInsertSchema(availability).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+}).extend({
+  type: z.enum(["specific", "recurring"]).default("specific"),
+  dayOfWeek: z.enum(["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]).optional(),
 });
 
 export const insertStandardResponseSchema = createInsertSchema(standardResponses).omit({
@@ -189,7 +194,34 @@ export const insertCompletedChatSchema = createInsertSchema(completedChats).omit
   createdAt: true,
 });
 
+export const meetingRequests = pgTable("meeting_requests", {
+  id: serial("id").primaryKey(),
+  sessionId: text("session_id").notNull(), // chat session that generated this request
+  requestorName: text("requestor_name"),
+  requestorEmail: text("requestor_email"),
+  requestorPhone: text("requestor_phone"),
+  meetingType: text("meeting_type").notNull(), // 'call' | 'video' | 'in-person' | 'consultation'
+  preferredDates: text("preferred_dates").array(), // ["2025-06-17", "2025-06-18"]
+  preferredTimes: text("preferred_times").array(), // ["14:00", "15:00"]
+  duration: integer("duration").default(30), // minutes
+  purpose: text("purpose"), // meeting purpose/agenda
+  status: text("status").default("requested").notNull(), // 'requested' | 'scheduled' | 'confirmed' | 'cancelled'
+  scheduledDate: text("scheduled_date"), // confirmed date
+  scheduledTime: text("scheduled_time"), // confirmed time
+  notes: text("notes"), // admin notes
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertMeetingRequestSchema = createInsertSchema(meetingRequests).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export type FileAsset = typeof fileAssets.$inferSelect;
 export type InsertFileAsset = z.infer<typeof insertFileAssetSchema>;
 export type CompletedChat = typeof completedChats.$inferSelect;
 export type InsertCompletedChat = z.infer<typeof insertCompletedChatSchema>;
+export type MeetingRequest = typeof meetingRequests.$inferSelect;
+export type InsertMeetingRequest = z.infer<typeof insertMeetingRequestSchema>;
