@@ -40,6 +40,9 @@ export function ChatInterface() {
   const [interfaceSize, setInterfaceSize] = useState<"normal" | "large" | "extra-large">("normal");
   const [chatWidth, setChatWidth] = useState<"narrow" | "normal" | "wide" | "extra-wide">("normal");
   const [themeMode, setThemeMode] = useState<"light" | "dark" | "bonkers">("light");
+  const [lastActivity, setLastActivity] = useState<Date>(new Date());
+  const [chatSessionId, setChatSessionId] = useState<string>("");
+  const inactivityTimerRef = useRef<NodeJS.Timeout | null>(null);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
@@ -82,6 +85,7 @@ export function ChatInterface() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/messages"] });
       setIsTyping(false);
+      updateActivity();
       
       // Check if the response contains an admin link
       if (data.adminLink) {
@@ -153,6 +157,59 @@ export function ChatInterface() {
     },
   });
 
+  // Initialize chat session
+  useEffect(() => {
+    const sessionId = `chat-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    setChatSessionId(sessionId);
+    updateActivity();
+  }, []);
+
+  // Activity tracking and inactivity detection
+  const updateActivity = () => {
+    const now = new Date();
+    setLastActivity(now);
+    
+    // Clear existing timer
+    if (inactivityTimerRef.current) {
+      clearTimeout(inactivityTimerRef.current);
+    }
+    
+    // Set new 10-minute inactivity timer
+    inactivityTimerRef.current = setTimeout(() => {
+      handleChatCompletion();
+    }, 10 * 60 * 1000); // 10 minutes
+  };
+
+  const handleChatCompletion = async () => {
+    if (!messages || messages.length === 0) return;
+    
+    // Send chat transcript
+    try {
+      await apiRequest("POST", "/api/chat/complete", {
+        sessionId: chatSessionId,
+        messages,
+        startTime: messages[0]?.timestamp,
+        endTime: lastActivity,
+        duration: lastActivity.getTime() - new Date(messages[0]?.timestamp).getTime()
+      });
+    } catch (error) {
+      console.error("Failed to log chat completion:", error);
+    }
+    
+    // Reset chat
+    await resetChatMutation.mutateAsync();
+    
+    // Generate new session ID
+    const newSessionId = `chat-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    setChatSessionId(newSessionId);
+    updateActivity();
+  };
+
+  // Track user interaction
+  const trackUserActivity = () => {
+    updateActivity();
+  };
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -161,15 +218,26 @@ export function ChatInterface() {
     scrollToBottom();
   }, [messages, isTyping]);
 
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (inactivityTimerRef.current) {
+        clearTimeout(inactivityTimerRef.current);
+      }
+    };
+  }, []);
+
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
     if (message.trim()) {
+      trackUserActivity();
       sendMessageMutation.mutate(message.trim());
       setMessage("");
     }
   };
 
   const handleQuickMessage = (quickMessage: string) => {
+    trackUserActivity();
     setMessage(quickMessage);
     sendMessageMutation.mutate(quickMessage);
     setMessage("");

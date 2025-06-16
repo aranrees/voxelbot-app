@@ -171,5 +171,25 @@ export const insertFileAssetSchema = createInsertSchema(fileAssets).omit({
   updatedAt: true,
 });
 
+export const completedChats = pgTable("completed_chats", {
+  id: serial("id").primaryKey(),
+  sessionId: text("session_id").notNull().unique(),
+  messageCount: integer("message_count").notNull(),
+  startTime: timestamp("start_time").notNull(),
+  endTime: timestamp("end_time").notNull(),
+  durationMs: integer("duration_ms").notNull(),
+  transcript: text("transcript").notNull(), // JSON string of messages
+  userEmail: text("user_email"), // if provided during chat
+  isNotified: boolean("is_notified").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertCompletedChatSchema = createInsertSchema(completedChats).omit({
+  id: true,
+  createdAt: true,
+});
+
 export type FileAsset = typeof fileAssets.$inferSelect;
 export type InsertFileAsset = z.infer<typeof insertFileAssetSchema>;
+export type CompletedChat = typeof completedChats.$inferSelect;
+export type InsertCompletedChat = z.infer<typeof insertCompletedChatSchema>;

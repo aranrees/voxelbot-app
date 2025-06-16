@@ -70,6 +70,12 @@ export interface IStorage {
   deleteFileAsset(id: number): Promise<boolean>;
   incrementDownloadCount(id: number): Promise<void>;
   
+  // Completed Chats
+  getCompletedChats(): Promise<CompletedChat[]>;
+  getUnnotifiedChats(): Promise<CompletedChat[]>;
+  createCompletedChat(chat: InsertCompletedChat): Promise<CompletedChat>;
+  markChatAsNotified(sessionId: string): Promise<void>;
+  
   sessionStore: session.Store;
 }
 
