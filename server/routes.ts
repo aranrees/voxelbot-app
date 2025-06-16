@@ -136,6 +136,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Chat completion endpoint
+  app.post("/api/chat/complete", async (req, res) => {
+    try {
+      const { sessionId, messages, startTime, endTime, duration } = req.body;
+      
+      if (!sessionId || !messages || !Array.isArray(messages)) {
+        return res.status(400).json({ error: "Invalid chat completion data" });
+      }
+
+      // Save completed chat to database
+      const completedChat = await storage.createCompletedChat({
+        sessionId,
+        messageCount: messages.length,
+        startTime: new Date(startTime),
+        endTime: new Date(endTime),
+        durationMs: duration,
+        transcript: JSON.stringify(messages),
+        userEmail: null,
+        isNotified: false
+      });
+
+      // Create notification files for monitoring
+      await createChatNotificationFiles(completedChat, messages);
+
+      res.json({ success: true, chatId: completedChat.id });
+    } catch (error) {
+      console.error("Error saving completed chat:", error);
+      res.status(500).json({ error: "Failed to save chat completion" });
+    }
+  });
+
+  // Get completed chats for admin review
+  app.get("/api/admin/completed-chats", async (req, res) => {
+    try {
+      const completedChats = await storage.getCompletedChats();
+      res.json(completedChats);
+    } catch (error) {
+      console.error("Error fetching completed chats:", error);
+      res.status(500).json({ error: "Failed to fetch completed chats" });
+    }
+  });
+
+  // Mark chat as reviewed/notified
+  app.post("/api/admin/completed-chats/:sessionId/notify", async (req, res) => {
+    try {
+      await storage.markChatAsNotified(req.params.sessionId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error marking chat as notified:", error);
+      res.status(500).json({ error: "Failed to mark chat as notified" });
+    }
+  });
+
   // Appointment endpoints
   app.get("/api/appointments", async (req, res) => {
     try {

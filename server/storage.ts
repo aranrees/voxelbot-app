@@ -1,6 +1,6 @@
-import { users, chatMessages, appointments, documents, aiInstructions, quickActions, availability, standardResponses, fileAssets, type User, type InsertUser, type ChatMessage, type InsertChatMessage, type Appointment, type InsertAppointment, type Document, type InsertDocument, type AiInstruction, type InsertAiInstruction, type QuickAction, type InsertQuickAction, type Availability, type InsertAvailability, type StandardResponse, type InsertStandardResponse, type FileAsset, type InsertFileAsset } from "@shared/schema";
+import { users, chatMessages, appointments, documents, aiInstructions, quickActions, availability, standardResponses, fileAssets, completedChats, type User, type InsertUser, type ChatMessage, type InsertChatMessage, type Appointment, type InsertAppointment, type Document, type InsertDocument, type AiInstruction, type InsertAiInstruction, type QuickAction, type InsertQuickAction, type Availability, type InsertAvailability, type StandardResponse, type InsertStandardResponse, type FileAsset, type InsertFileAsset, type CompletedChat, type InsertCompletedChat } from "@shared/schema";
 import { db } from "./db";
-import { eq, sql } from "drizzle-orm";
+import { eq, sql, desc } from "drizzle-orm";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
 import { pool } from "./db";
@@ -430,6 +430,32 @@ export class DatabaseStorage implements IStorage {
       .update(fileAssets)
       .set({ downloadCount: sql`${fileAssets.downloadCount} + 1` })
       .where(eq(fileAssets.id, id));
+  }
+
+  // Completed Chats
+  async getCompletedChats(): Promise<CompletedChat[]> {
+    const result = await db.select().from(completedChats).orderBy(desc(completedChats.createdAt));
+    return result;
+  }
+
+  async getUnnotifiedChats(): Promise<CompletedChat[]> {
+    const result = await db.select().from(completedChats).where(eq(completedChats.isNotified, false));
+    return result;
+  }
+
+  async createCompletedChat(insertChat: InsertCompletedChat): Promise<CompletedChat> {
+    const [chat] = await db
+      .insert(completedChats)
+      .values(insertChat)
+      .returning();
+    return chat;
+  }
+
+  async markChatAsNotified(sessionId: string): Promise<void> {
+    await db
+      .update(completedChats)
+      .set({ isNotified: true })
+      .where(eq(completedChats.sessionId, sessionId));
   }
 }
 
