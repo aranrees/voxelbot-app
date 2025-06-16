@@ -35,11 +35,17 @@ export default function AdminDashboard() {
   const [editingAvailability, setEditingAvailability] = useState<Availability | null>(null);
   const [editingStandardResponse, setEditingStandardResponse] = useState<StandardResponse | null>(null);
 
-  const [documentForm, setDocumentForm] = useState({
+  const [documentForm, setDocumentForm] = useState<{
+    title: string;
+    content: string;
+    type: "product" | "instruction" | "faq" | "other";
+    tags: string[];
+    isActive: boolean;
+  }>({
     title: "",
     content: "",
-    type: "product" as const,
-    tags: [] as string[],
+    type: "product",
+    tags: [],
     isActive: true
   });
 
@@ -51,11 +57,17 @@ export default function AdminDashboard() {
     file: null as File | null
   });
 
-  const [instructionForm, setInstructionForm] = useState({
+  const [instructionForm, setInstructionForm] = useState<{
+    title: string;
+    instruction: string;
+    priority: number;
+    category: "general" | "tone" | "behavior" | "knowledge" | "restrictions";
+    isActive: boolean;
+  }>({
     title: "",
     instruction: "",
     priority: 1,
-    category: "general" as const,
+    category: "general",
     isActive: true
   });
 
@@ -230,7 +242,7 @@ export default function AdminDashboard() {
     setDocumentForm({
       title: document.title,
       content: document.content,
-      type: document.type,
+      type: document.type as "product" | "instruction" | "faq" | "other",
       tags: document.tags || [],
       isActive: document.isActive
     });
@@ -243,7 +255,7 @@ export default function AdminDashboard() {
       title: instruction.title,
       instruction: instruction.instruction,
       priority: instruction.priority,
-      category: instruction.category,
+      category: (instruction.category || "general") as "general" | "tone" | "behavior" | "knowledge" | "restrictions",
       isActive: instruction.isActive
     });
     setEditingInstruction(instruction);
@@ -373,7 +385,7 @@ export default function AdminDashboard() {
                       <Label htmlFor="type">Type</Label>
                       <Select
                         value={documentForm.type}
-                        onValueChange={(value) => setDocumentForm({ ...documentForm, type: value })}
+                        onValueChange={(value: "product" | "instruction" | "faq" | "other") => setDocumentForm({ ...documentForm, type: value })}
                       >
                         <SelectTrigger>
                           <SelectValue />
@@ -711,7 +723,7 @@ export default function AdminDashboard() {
                       <Label htmlFor="instruction-category">Category</Label>
                       <Select
                         value={instructionForm.category}
-                        onValueChange={(value) => setInstructionForm({ ...instructionForm, category: value })}
+                        onValueChange={(value) => setInstructionForm({ ...instructionForm, category: value as "general" | "tone" | "behavior" | "knowledge" | "restrictions" })}
                       >
                         <SelectTrigger>
                           <SelectValue />
