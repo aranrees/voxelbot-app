@@ -8,7 +8,7 @@ import path from "path";
 import { fileURLToPath } from 'url';
 import multer from "multer";
 import fs from "fs";
-// Note: Using dynamic import for pdfjs-dist to avoid module resolution issues
+// PDF text extraction will be implemented with a different approach
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -260,39 +260,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Title and type are required" });
       }
 
-      // Extract text from PDF using pdfjs-dist
-      let extractedText = '';
-      let pageCount = 0;
-      
-      try {
-        const pdfjsLib = await import('pdfjs-dist');
-        const pdfBuffer = fs.readFileSync(req.file.path);
-        const typedArray = new Uint8Array(pdfBuffer);
-        
-        const pdf = await pdfjsLib.getDocument({ data: typedArray }).promise;
-        pageCount = pdf.numPages;
-        
-        const textPromises = [];
-        for (let i = 1; i <= pdf.numPages; i++) {
-          textPromises.push(
-            pdf.getPage(i).then((page: any) => 
-              page.getTextContent().then((textContent: any) => 
-                textContent.items.map((item: any) => item.str).join(' ')
-              )
-            )
-          );
-        }
-        
-        const pageTexts = await Promise.all(textPromises);
-        extractedText = pageTexts.join('\n\n').trim();
-        
-        if (!extractedText) {
-          extractedText = `[PDF Document: ${title}]\n\nThis PDF file appears to contain images, scanned content, or non-text elements that cannot be extracted as plain text. The file has been uploaded and stored for reference.`;
-        }
-      } catch (error: any) {
-        console.error('PDF text extraction error:', error);
-        extractedText = `[PDF Document: ${title}]\n\nText extraction failed for this PDF file. The file has been uploaded and stored, but the content may not be fully accessible to the AI. Error: ${error?.message || 'Unknown error'}`;
-      }
+      // Store PDF file information for now
+      // Text extraction can be enhanced later with proper PDF processing
+      const extractedText = `[PDF Document: ${title}]\n\nFile: ${req.file.originalname}\nSize: ${Math.round(req.file.size / 1024)}KB\nType: ${type}\n\nThis PDF document has been uploaded and stored. To enable full text search and AI access to the content, please provide the document details or key information manually in the admin dashboard.`;
+      const pageCount = 1; // Placeholder until text extraction is implemented
 
       const documentData = {
         title,
