@@ -24,6 +24,7 @@ export default function AdminDashboard() {
   const queryClient = useQueryClient();
   
   const [showDocumentDialog, setShowDocumentDialog] = useState(false);
+  const [showPdfUploadDialog, setShowPdfUploadDialog] = useState(false);
   const [showInstructionDialog, setShowInstructionDialog] = useState(false);
   const [showQuickActionDialog, setShowQuickActionDialog] = useState(false);
   const [showAvailabilityDialog, setShowAvailabilityDialog] = useState(false);

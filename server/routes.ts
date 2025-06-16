@@ -6,8 +6,31 @@ import { getChatResponse } from "./lib/openai";
 import { setupAuth } from "./auth";
 import path from "path";
 import { fileURLToPath } from 'url';
+import multer from "multer";
+import fs from "fs";
+import pdfParse from "pdf-parse";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// Configure multer for file uploads
+const uploadsDir = path.join(__dirname, "../uploads");
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+const upload = multer({
+  dest: uploadsDir,
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype === 'application/pdf') {
+      cb(null, true);
+    } else {
+      cb(new Error('Only PDF files are allowed'));
+    }
+  }
+});
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -221,6 +244,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ message: "Document deleted successfully" });
     } catch (error) {
       res.status(500).json({ message: "Failed to delete document" });
+    }
+  });
+
+  // PDF upload endpoint
+  app.post("/api/admin/documents/upload-pdf", requireAuth, upload.single('pdf'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No PDF file uploaded" });
+      }
+
+      const { title, type, tags } = req.body;
+      
+      if (!title || !type) {
+        return res.status(400).json({ message: "Title and type are required" });
+      }
+
+      // Read and parse PDF
+      const pdfBuffer = fs.readFileSync(req.file.path);
+      const pdfData = await pdfParse(pdfBuffer);
+      
+      // Create document with extracted text
+      const documentData = {
+        title,
+        content: pdfData.text,
+        type,
+        fileType: 'pdf' as const,
+        filePath: req.file.path,
+        tags: tags ? tags.split(',').map((tag: string) => tag.trim()) : [],
+        isActive: true
+      };
+
+      const document = await storage.createDocument(documentData);
+      
+      res.json({
+        ...document,
+        extractedPages: pdfData.numpages,
+        extractedText: pdfData.text.substring(0, 500) + (pdfData.text.length > 500 ? '...' : '')
+      });
+    } catch (error) {
+      console.error("PDF upload error:", error);
+      // Clean up uploaded file if processing failed
+      if (req.file && fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
+      res.status(500).json({ message: "Failed to process PDF upload" });
     }
   });
 
