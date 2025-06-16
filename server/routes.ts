@@ -104,12 +104,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         content: msg.content
       }));
       
-      // Get documents and AI instructions for enhanced context
+      // Get documents, AI instructions, and file assets for enhanced context
       const documents = await storage.getDocuments();
       const aiInstructions = await storage.getActiveAiInstructions();
+      const fileAssets = await storage.getPublicFileAssets();
       
-      // Get AI response with enhanced context
-      const aiResponse = await getChatResponse(validatedData.content, conversationHistory, documents, aiInstructions);
+      // Get AI response with enhanced context including downloadable files
+      const aiResponse = await getChatResponse(validatedData.content, conversationHistory, documents, aiInstructions, fileAssets);
       
       // Save AI response
       const aiMessage = await storage.createChatMessage({
