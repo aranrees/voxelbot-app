@@ -1,4 +1,4 @@
-import { users, chatMessages, appointments, documents, aiInstructions, quickActions, availability, standardResponses, fileAssets, completedChats, type User, type InsertUser, type ChatMessage, type InsertChatMessage, type Appointment, type InsertAppointment, type Document, type InsertDocument, type AiInstruction, type InsertAiInstruction, type QuickAction, type InsertQuickAction, type Availability, type InsertAvailability, type StandardResponse, type InsertStandardResponse, type FileAsset, type InsertFileAsset, type CompletedChat, type InsertCompletedChat } from "@shared/schema";
+import { users, chatMessages, appointments, documents, aiInstructions, quickActions, availability, standardResponses, fileAssets, completedChats, meetingRequests, type User, type InsertUser, type ChatMessage, type InsertChatMessage, type Appointment, type InsertAppointment, type Document, type InsertDocument, type AiInstruction, type InsertAiInstruction, type QuickAction, type InsertQuickAction, type Availability, type InsertAvailability, type StandardResponse, type InsertStandardResponse, type FileAsset, type InsertFileAsset, type CompletedChat, type InsertCompletedChat, type MeetingRequest, type InsertMeetingRequest } from "@shared/schema";
 import { db } from "./db";
 import { eq, sql, desc } from "drizzle-orm";
 import session from "express-session";
@@ -493,7 +493,7 @@ export class DatabaseStorage implements IStorage {
 
   async deleteMeetingRequest(id: number): Promise<boolean> {
     const result = await db.delete(meetingRequests).where(eq(meetingRequests.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount || 0) > 0;
   }
 }
 

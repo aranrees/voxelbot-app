@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertChatMessageSchema, insertAppointmentSchema, insertDocumentSchema, insertAiInstructionSchema, insertQuickActionSchema, insertAvailabilitySchema, insertStandardResponseSchema } from "@shared/schema";
+import { insertChatMessageSchema, insertAppointmentSchema, insertDocumentSchema, insertAiInstructionSchema, insertQuickActionSchema, insertAvailabilitySchema, insertStandardResponseSchema, insertMeetingRequestSchema } from "@shared/schema";
 import { getChatResponse } from "./lib/openai";
 import { setupAuth } from "./auth";
 import path from "path";
@@ -395,6 +395,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting standard response:", error);
       res.status(500).json({ error: "Failed to delete standard response" });
+    }
+  });
+
+  // Meeting Requests endpoints
+  app.get("/api/admin/meeting-requests", async (req, res) => {
+    try {
+      const requests = await storage.getMeetingRequests();
+      res.json(requests);
+    } catch (error) {
+      console.error("Error fetching meeting requests:", error);
+      res.status(500).json({ error: "Failed to fetch meeting requests" });
+    }
+  });
+
+  app.post("/api/admin/meeting-requests", async (req, res) => {
+    try {
+      const validatedData = insertMeetingRequestSchema.parse(req.body);
+      const request = await storage.createMeetingRequest(validatedData);
+      res.json(request);
+    } catch (error) {
+      console.error("Error creating meeting request:", error);
+      res.status(400).json({ error: "Failed to create meeting request" });
+    }
+  });
+
+  app.put("/api/admin/meeting-requests/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validatedData = insertMeetingRequestSchema.partial().parse(req.body);
+      const request = await storage.updateMeetingRequest(id, validatedData);
+      if (!request) {
+        return res.status(404).json({ error: "Meeting request not found" });
+      }
+      res.json(request);
+    } catch (error) {
+      console.error("Error updating meeting request:", error);
+      res.status(400).json({ error: "Failed to update meeting request" });
+    }
+  });
+
+  app.delete("/api/admin/meeting-requests/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteMeetingRequest(id);
+      if (!deleted) {
+        return res.status(404).json({ error: "Meeting request not found" });
+      }
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting meeting request:", error);
+      res.status(500).json({ error: "Failed to delete meeting request" });
+    }
+  });
+
+  // Public endpoint for creating meeting requests from chat
+  app.post("/api/meeting-request", async (req, res) => {
+    try {
+      const validatedData = insertMeetingRequestSchema.parse(req.body);
+      const request = await storage.createMeetingRequest(validatedData);
+      res.json(request);
+    } catch (error) {
+      console.error("Error creating meeting request:", error);
+      res.status(400).json({ error: "Failed to create meeting request" });
     }
   });
 
