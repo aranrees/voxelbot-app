@@ -247,6 +247,127 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // File asset routes - public download access
+  app.get("/api/files", async (req, res) => {
+    try {
+      const files = await storage.getPublicFileAssets();
+      res.json(files);
+    } catch (error) {
+      console.error("Error fetching public files:", error);
+      res.status(500).json({ message: "Failed to fetch files" });
+    }
+  });
+
+  app.get("/api/files/:id/download", async (req, res) => {
+    try {
+      const fileId = parseInt(req.params.id);
+      const file = await storage.getFileAsset(fileId);
+      
+      if (!file || (!file.isPublic && !req.isAuthenticated())) {
+        return res.status(404).json({ message: "File not found" });
+      }
+
+      // Increment download count
+      await storage.incrementDownloadCount(fileId);
+
+      // Set appropriate headers
+      res.setHeader('Content-Type', file.mimeType);
+      res.setHeader('Content-Disposition', `attachment; filename="${file.originalName}"`);
+      
+      // Send file
+      const filePath = path.join(__dirname, '..', file.filePath);
+      res.sendFile(filePath);
+    } catch (error) {
+      console.error("Error downloading file:", error);
+      res.status(500).json({ message: "Failed to download file" });
+    }
+  });
+
+  // Admin file management routes
+  app.get("/api/admin/files", requireAuth, async (req, res) => {
+    try {
+      const files = await storage.getFileAssets();
+      res.json(files);
+    } catch (error) {
+      console.error("Error fetching files:", error);
+      res.status(500).json({ message: "Failed to fetch files" });
+    }
+  });
+
+  app.post("/api/admin/files/upload", requireAuth, upload.single('file'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      const { title, description, tags, isPublic } = req.body;
+
+      if (!title) {
+        return res.status(400).json({ message: "Title is required" });
+      }
+
+      // Determine file type
+      let fileType = 'other';
+      if (req.file.mimetype.startsWith('image/')) {
+        fileType = 'image';
+      } else if (req.file.mimetype === 'application/pdf') {
+        fileType = 'pdf';
+      }
+
+      const fileData = {
+        title,
+        description: description || null,
+        fileName: req.file.filename,
+        originalName: req.file.originalname,
+        filePath: req.file.path,
+        fileType,
+        mimeType: req.file.mimetype,
+        fileSize: req.file.size,
+        downloadCount: 0,
+        isPublic: isPublic === 'true' || isPublic === true,
+        tags: tags ? tags.split(',').map((tag: string) => tag.trim()) : [],
+      };
+
+      const file = await storage.createFileAsset(fileData);
+      res.json(file);
+    } catch (error) {
+      console.error("File upload error:", error);
+      // Clean up uploaded file if processing failed
+      if (req.file && fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
+      res.status(500).json({ message: "Failed to upload file" });
+    }
+  });
+
+  app.delete("/api/admin/files/:id", requireAuth, async (req, res) => {
+    try {
+      const fileId = parseInt(req.params.id);
+      const file = await storage.getFileAsset(fileId);
+      
+      if (!file) {
+        return res.status(404).json({ message: "File not found" });
+      }
+
+      // Delete file from filesystem
+      if (fs.existsSync(file.filePath)) {
+        fs.unlinkSync(file.filePath);
+      }
+
+      // Delete from database
+      const deleted = await storage.deleteFileAsset(fileId);
+      
+      if (deleted) {
+        res.json({ message: "File deleted successfully" });
+      } else {
+        res.status(500).json({ message: "Failed to delete file from database" });
+      }
+    } catch (error) {
+      console.error("Error deleting file:", error);
+      res.status(500).json({ message: "Failed to delete file" });
+    }
+  });
+
   // PDF upload endpoint
   app.post("/api/admin/documents/upload-pdf", requireAuth, upload.single('pdf'), async (req, res) => {
     try {

@@ -14,8 +14,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Moon, Sun, Plus, Edit, Trash2, FileText, Brain, LogOut, MessageSquare, Zap, Heart } from "lucide-react";
-import type { Document, AiInstruction, QuickAction, Availability, StandardResponse, InsertDocument, InsertAiInstruction, InsertQuickAction, InsertAvailability, InsertStandardResponse } from "@shared/schema";
+import { Moon, Sun, Plus, Edit, Trash2, FileText, Brain, LogOut, MessageSquare, Zap, Heart, Upload, Download, Image, File } from "lucide-react";
+import type { Document, AiInstruction, QuickAction, Availability, StandardResponse, InsertDocument, InsertAiInstruction, InsertQuickAction, InsertAvailability, InsertStandardResponse, FileAsset, InsertFileAsset } from "@shared/schema";
 
 export default function AdminDashboard() {
   const { user, logoutMutation } = useAuth();
@@ -25,6 +25,7 @@ export default function AdminDashboard() {
   
   const [showDocumentDialog, setShowDocumentDialog] = useState(false);
   const [showPdfUploadDialog, setShowPdfUploadDialog] = useState(false);
+  const [showFileUploadDialog, setShowFileUploadDialog] = useState(false);
   const [showInstructionDialog, setShowInstructionDialog] = useState(false);
   const [showQuickActionDialog, setShowQuickActionDialog] = useState(false);
   const [showAvailabilityDialog, setShowAvailabilityDialog] = useState(false);
@@ -80,6 +81,14 @@ export default function AdminDashboard() {
     file: null as File | null
   });
 
+  const [fileUploadForm, setFileUploadForm] = useState({
+    title: "",
+    description: "",
+    tags: "",
+    isPublic: true,
+    file: null as File | null
+  });
+
   // Fetch documents
   const { data: documents = [] } = useQuery<Document[]>({
     queryKey: ["/api/admin/documents"],
@@ -103,6 +112,11 @@ export default function AdminDashboard() {
   // Fetch standard responses
   const { data: standardResponses = [] } = useQuery<StandardResponse[]>({
     queryKey: ["/api/admin/standard-responses"],
+  });
+
+  // Fetch file assets
+  const { data: fileAssets = [] } = useQuery<FileAsset[]>({
+    queryKey: ["/api/admin/files"],
   });
 
   // Document mutations
