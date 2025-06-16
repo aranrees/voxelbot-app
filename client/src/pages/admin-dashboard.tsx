@@ -1519,7 +1519,13 @@ export default function AdminDashboard() {
                       <div>
                         <CardTitle className="text-sm font-medium text-gray-800 dark:text-gray-200">
                           {slot.type === "recurring" 
-                            ? `Every ${slot.dayOfWeek?.charAt(0).toUpperCase()}${slot.dayOfWeek?.slice(1)}`
+                            ? slot.daysOfWeek && slot.daysOfWeek.length > 0
+                              ? slot.daysOfWeek.length === 1 
+                                ? `Every ${slot.daysOfWeek[0].charAt(0).toUpperCase()}${slot.daysOfWeek[0].slice(1)}`
+                                : `Every ${slot.daysOfWeek.map(d => d.charAt(0).toUpperCase() + d.slice(1)).join(', ')}`
+                              : slot.dayOfWeek 
+                                ? `Every ${slot.dayOfWeek.charAt(0).toUpperCase()}${slot.dayOfWeek.slice(1)}`
+                                : "Weekly Recurring"
                             : slot.date ? new Date(slot.date).toLocaleDateString() : "No date set"
                           }
                         </CardTitle>
