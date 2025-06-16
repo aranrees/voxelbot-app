@@ -8,6 +8,7 @@ import path from "path";
 import { fileURLToPath } from 'url';
 import multer from "multer";
 import fs from "fs";
+// Note: Using dynamic import for pdfjs-dist to avoid module resolution issues
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -259,11 +260,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Title and type are required" });
       }
 
-      // For now, store PDF metadata without text extraction
-      // Text extraction can be added later with a proper PDF processing service
+      // Extract text from PDF using pdfjs-dist
+      let extractedText = '';
+      let pageCount = 0;
+      
+      try {
+        const pdfjs = await import('pdfjs-dist');
+        const pdfBuffer = fs.readFileSync(req.file.path);
+        const typedArray = new Uint8Array(pdfBuffer);
+        
+        const pdf = await pdfjs.getDocument({ data: typedArray }).promise;
+        pageCount = pdf.numPages;
+        
+        const textPromises = [];
+        for (let i = 1; i <= pdf.numPages; i++) {
+          textPromises.push(
+            pdf.getPage(i).then((page: any) => 
+              page.getTextContent().then((textContent: any) => 
+                textContent.items.map((item: any) => item.str).join(' ')
+              )
+            )
+          );
+        }
+        
+        const pageTexts = await Promise.all(textPromises);
+        extractedText = pageTexts.join('\n\n').trim();
+        
+        if (!extractedText) {
+          extractedText = `[PDF Document: ${title}]\n\nThis PDF file appears to contain images, scanned content, or non-text elements that cannot be extracted as plain text. The file has been uploaded and stored for reference.`;
+        }
+      } catch (error: any) {
+        console.error('PDF text extraction error:', error);
+        extractedText = `[PDF Document: ${title}]\n\nText extraction failed for this PDF file. The file has been uploaded and stored, but the content may not be fully accessible to the AI. Error: ${error?.message || 'Unknown error'}`;
+      }
+
       const documentData = {
         title,
-        content: `PDF Document: ${title}\n\nFile uploaded: ${req.file.originalname}\nFile size: ${req.file.size} bytes\n\nNote: This is a PDF document. Text extraction is not yet implemented.`,
+        content: extractedText,
         type,
         fileType: 'pdf' as const,
         filePath: req.file.path,
@@ -276,7 +309,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({
         ...document,
         fileName: req.file.originalname,
-        fileSize: req.file.size
+        fileSize: req.file.size,
+        pageCount,
+        extractedTextLength: extractedText.length,
+        extractionSuccessful: !extractedText.includes('extraction failed')
       });
     } catch (error) {
       console.error("PDF upload error:", error);
