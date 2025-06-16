@@ -182,16 +182,7 @@ export function ChatInterface() {
   const updateActivity = () => {
     const now = new Date();
     setLastActivity(now);
-    
-    // Clear existing timer
-    if (inactivityTimerRef.current) {
-      clearTimeout(inactivityTimerRef.current);
-    }
-    
-    // Set new 10-minute inactivity timer
-    inactivityTimerRef.current = setTimeout(() => {
-      handleChatCompletion();
-    }, 10 * 60 * 1000); // 10 minutes
+    startInactivityTimer();
   };
 
   const handleChatCompletion = async () => {

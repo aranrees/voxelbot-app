@@ -202,7 +202,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // Create notification files for monitoring
-      createChatNotificationFiles(completedChat, messages);
+      await import("./lib/chat-notifications.js").then(module => 
+        module.createChatNotificationFiles(completedChat, messages)
+      );
 
       res.json({ success: true, chatId: completedChat.id });
     } catch (error) {
