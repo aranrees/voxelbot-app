@@ -235,6 +235,169 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Quick Actions endpoints
+  app.get("/api/admin/quick-actions", async (req, res) => {
+    try {
+      const quickActions = await storage.getQuickActions();
+      res.json(quickActions);
+    } catch (error) {
+      console.error("Error fetching quick actions:", error);
+      res.status(500).json({ error: "Failed to fetch quick actions" });
+    }
+  });
+
+  app.post("/api/admin/quick-actions", async (req, res) => {
+    try {
+      const validatedData = insertQuickActionSchema.parse(req.body);
+      const quickAction = await storage.createQuickAction(validatedData);
+      res.json(quickAction);
+    } catch (error) {
+      console.error("Error creating quick action:", error);
+      res.status(400).json({ error: "Failed to create quick action" });
+    }
+  });
+
+  app.put("/api/admin/quick-actions/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validatedData = insertQuickActionSchema.partial().parse(req.body);
+      const quickAction = await storage.updateQuickAction(id, validatedData);
+      if (!quickAction) {
+        return res.status(404).json({ error: "Quick action not found" });
+      }
+      res.json(quickAction);
+    } catch (error) {
+      console.error("Error updating quick action:", error);
+      res.status(400).json({ error: "Failed to update quick action" });
+    }
+  });
+
+  app.delete("/api/admin/quick-actions/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteQuickAction(id);
+      if (!deleted) {
+        return res.status(404).json({ error: "Quick action not found" });
+      }
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting quick action:", error);
+      res.status(500).json({ error: "Failed to delete quick action" });
+    }
+  });
+
+  // Availability endpoints
+  app.get("/api/admin/availability", async (req, res) => {
+    try {
+      const availability = await storage.getAvailability();
+      res.json(availability);
+    } catch (error) {
+      console.error("Error fetching availability:", error);
+      res.status(500).json({ error: "Failed to fetch availability" });
+    }
+  });
+
+  app.post("/api/admin/availability", async (req, res) => {
+    try {
+      const validatedData = insertAvailabilitySchema.parse(req.body);
+      const availability = await storage.createAvailability(validatedData);
+      res.json(availability);
+    } catch (error) {
+      console.error("Error creating availability:", error);
+      res.status(400).json({ error: "Failed to create availability" });
+    }
+  });
+
+  app.put("/api/admin/availability/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validatedData = insertAvailabilitySchema.partial().parse(req.body);
+      const availability = await storage.updateAvailability(id, validatedData);
+      if (!availability) {
+        return res.status(404).json({ error: "Availability not found" });
+      }
+      res.json(availability);
+    } catch (error) {
+      console.error("Error updating availability:", error);
+      res.status(400).json({ error: "Failed to update availability" });
+    }
+  });
+
+  app.delete("/api/admin/availability/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteAvailability(id);
+      if (!deleted) {
+        return res.status(404).json({ error: "Availability not found" });
+      }
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting availability:", error);
+      res.status(500).json({ error: "Failed to delete availability" });
+    }
+  });
+
+  // Standard Responses endpoints
+  app.get("/api/admin/standard-responses", async (req, res) => {
+    try {
+      const standardResponses = await storage.getStandardResponses();
+      res.json(standardResponses);
+    } catch (error) {
+      console.error("Error fetching standard responses:", error);
+      res.status(500).json({ error: "Failed to fetch standard responses" });
+    }
+  });
+
+  app.post("/api/admin/standard-responses", async (req, res) => {
+    try {
+      const data = req.body;
+      // Convert keywords string to array
+      if (data.keywords && typeof data.keywords === 'string') {
+        data.keywords = data.keywords.split(',').map(k => k.trim()).filter(k => k.length > 0);
+      }
+      const validatedData = insertStandardResponseSchema.parse(data);
+      const standardResponse = await storage.createStandardResponse(validatedData);
+      res.json(standardResponse);
+    } catch (error) {
+      console.error("Error creating standard response:", error);
+      res.status(400).json({ error: "Failed to create standard response" });
+    }
+  });
+
+  app.put("/api/admin/standard-responses/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const data = req.body;
+      // Convert keywords string to array
+      if (data.keywords && typeof data.keywords === 'string') {
+        data.keywords = data.keywords.split(',').map(k => k.trim()).filter(k => k.length > 0);
+      }
+      const validatedData = insertStandardResponseSchema.partial().parse(data);
+      const standardResponse = await storage.updateStandardResponse(id, validatedData);
+      if (!standardResponse) {
+        return res.status(404).json({ error: "Standard response not found" });
+      }
+      res.json(standardResponse);
+    } catch (error) {
+      console.error("Error updating standard response:", error);
+      res.status(400).json({ error: "Failed to update standard response" });
+    }
+  });
+
+  app.delete("/api/admin/standard-responses/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteStandardResponse(id);
+      if (!deleted) {
+        return res.status(404).json({ error: "Standard response not found" });
+      }
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting standard response:", error);
+      res.status(500).json({ error: "Failed to delete standard response" });
+    }
+  });
+
   // Appointment endpoints
   app.get("/api/appointments", async (req, res) => {
     try {

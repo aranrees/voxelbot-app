@@ -35,6 +35,46 @@ export default function AdminDashboard() {
   const [editingAvailability, setEditingAvailability] = useState<Availability | null>(null);
   const [editingStandardResponse, setEditingStandardResponse] = useState<StandardResponse | null>(null);
 
+  const [quickActionForm, setQuickActionForm] = useState<{
+    label: string;
+    message: string;
+    isActive: boolean;
+  }>({
+    label: "",
+    message: "",
+    isActive: true
+  });
+
+  const [availabilityForm, setAvailabilityForm] = useState<{
+    date: string;
+    startTime: string;
+    endTime: string;
+    isAvailable: boolean;
+    note: string;
+  }>({
+    date: "",
+    startTime: "09:00",
+    endTime: "17:00",
+    isAvailable: true,
+    note: ""
+  });
+
+  const [standardResponseForm, setStandardResponseForm] = useState<{
+    title: string;
+    questionType: string;
+    response: string;
+    keywords: string;
+    priority: number;
+    isActive: boolean;
+  }>({
+    title: "",
+    questionType: "general",
+    response: "",
+    keywords: "",
+    priority: 1,
+    isActive: true
+  });
+
   const [documentForm, setDocumentForm] = useState<{
     title: string;
     content: string;
@@ -89,6 +129,21 @@ export default function AdminDashboard() {
   // Fetch completed chats
   const { data: completedChats = [] } = useQuery<any[]>({
     queryKey: ["/api/admin/completed-chats"],
+  });
+
+  // Fetch quick actions
+  const { data: quickActions = [] } = useQuery<QuickAction[]>({
+    queryKey: ["/api/admin/quick-actions"],
+  });
+
+  // Fetch availability
+  const { data: availability = [] } = useQuery<Availability[]>({
+    queryKey: ["/api/admin/availability"],
+  });
+
+  // Fetch standard responses
+  const { data: standardResponses = [] } = useQuery<StandardResponse[]>({
+    queryKey: ["/api/admin/standard-responses"],
   });
 
   // Document mutations
@@ -220,6 +275,147 @@ export default function AdminDashboard() {
     },
   });
 
+  // Quick Action mutations
+  const createQuickActionMutation = useMutation({
+    mutationFn: async (data: InsertQuickAction) => {
+      const response = await apiRequest("POST", "/api/admin/quick-actions", data);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/quick-actions"] });
+      setShowQuickActionDialog(false);
+      resetQuickActionForm();
+      toast({ title: "Success", description: "Quick Action created successfully!" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to create quick action", variant: "destructive" });
+    },
+  });
+
+  const updateQuickActionMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: Partial<InsertQuickAction> }) => {
+      const response = await apiRequest("PUT", `/api/admin/quick-actions/${id}`, data);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/quick-actions"] });
+      setShowQuickActionDialog(false);
+      resetQuickActionForm();
+      toast({ title: "Success", description: "Quick Action updated successfully!" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to update quick action", variant: "destructive" });
+    },
+  });
+
+  const deleteQuickActionMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await apiRequest("DELETE", `/api/admin/quick-actions/${id}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/quick-actions"] });
+      toast({ title: "Success", description: "Quick Action deleted successfully!" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to delete quick action", variant: "destructive" });
+    },
+  });
+
+  // Availability mutations
+  const createAvailabilityMutation = useMutation({
+    mutationFn: async (data: InsertAvailability) => {
+      const response = await apiRequest("POST", "/api/admin/availability", data);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/availability"] });
+      setShowAvailabilityDialog(false);
+      resetAvailabilityForm();
+      toast({ title: "Success", description: "Availability created successfully!" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to create availability", variant: "destructive" });
+    },
+  });
+
+  const updateAvailabilityMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: Partial<InsertAvailability> }) => {
+      const response = await apiRequest("PUT", `/api/admin/availability/${id}`, data);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/availability"] });
+      setShowAvailabilityDialog(false);
+      resetAvailabilityForm();
+      toast({ title: "Success", description: "Availability updated successfully!" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to update availability", variant: "destructive" });
+    },
+  });
+
+  const deleteAvailabilityMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await apiRequest("DELETE", `/api/admin/availability/${id}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/availability"] });
+      toast({ title: "Success", description: "Availability deleted successfully!" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to delete availability", variant: "destructive" });
+    },
+  });
+
+  // Standard Response mutations
+  const createStandardResponseMutation = useMutation({
+    mutationFn: async (data: InsertStandardResponse) => {
+      const response = await apiRequest("POST", "/api/admin/standard-responses", data);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/standard-responses"] });
+      setShowStandardResponseDialog(false);
+      resetStandardResponseForm();
+      toast({ title: "Success", description: "Standard Response created successfully!" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to create standard response", variant: "destructive" });
+    },
+  });
+
+  const updateStandardResponseMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: Partial<InsertStandardResponse> }) => {
+      const response = await apiRequest("PUT", `/api/admin/standard-responses/${id}`, data);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/standard-responses"] });
+      setShowStandardResponseDialog(false);
+      resetStandardResponseForm();
+      toast({ title: "Success", description: "Standard Response updated successfully!" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to update standard response", variant: "destructive" });
+    },
+  });
+
+  const deleteStandardResponseMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await apiRequest("DELETE", `/api/admin/standard-responses/${id}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/standard-responses"] });
+      toast({ title: "Success", description: "Standard Response deleted successfully!" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to delete standard response", variant: "destructive" });
+    },
+  });
+
   // Helper functions
   const resetDocumentForm = () => {
     setDocumentForm({
@@ -265,6 +461,73 @@ export default function AdminDashboard() {
     });
     setEditingInstruction(instruction);
     setShowInstructionDialog(true);
+  };
+
+  const resetQuickActionForm = () => {
+    setQuickActionForm({
+      label: "",
+      message: "",
+      isActive: true
+    });
+    setEditingQuickAction(null);
+  };
+
+  const editQuickAction = (action: QuickAction) => {
+    setQuickActionForm({
+      label: action.label,
+      message: action.message,
+      isActive: action.isActive
+    });
+    setEditingQuickAction(action);
+    setShowQuickActionDialog(true);
+  };
+
+  const resetAvailabilityForm = () => {
+    setAvailabilityForm({
+      date: "",
+      startTime: "09:00",
+      endTime: "17:00",
+      isAvailable: true,
+      note: ""
+    });
+    setEditingAvailability(null);
+  };
+
+  const editAvailability = (availability: Availability) => {
+    setAvailabilityForm({
+      date: availability.date,
+      startTime: availability.startTime,
+      endTime: availability.endTime,
+      isAvailable: availability.isAvailable,
+      note: availability.note || ""
+    });
+    setEditingAvailability(availability);
+    setShowAvailabilityDialog(true);
+  };
+
+  const resetStandardResponseForm = () => {
+    setStandardResponseForm({
+      title: "",
+      questionType: "general",
+      response: "",
+      keywords: "",
+      priority: 1,
+      isActive: true
+    });
+    setEditingStandardResponse(null);
+  };
+
+  const editStandardResponse = (response: StandardResponse) => {
+    setStandardResponseForm({
+      title: response.title,
+      questionType: response.questionType,
+      response: response.response,
+      keywords: response.keywords?.join(', ') || "",
+      priority: response.priority,
+      isActive: response.isActive
+    });
+    setEditingStandardResponse(response);
+    setShowStandardResponseDialog(true);
   };
 
   const handleTagsChange = (value: string) => {
@@ -961,10 +1224,132 @@ export default function AdminDashboard() {
           </TabsContent>
 
           <TabsContent value="quick-actions" className="space-y-6">
-            <div className="text-center py-8">
-              <p className="text-gray-600 dark:text-gray-400">
-                Quick Actions functionality will be available in the next update.
-              </p>
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                Quick Action Buttons
+              </h3>
+              <Dialog open={showQuickActionDialog} onOpenChange={setShowQuickActionDialog}>
+                <DialogTrigger asChild>
+                  <Button onClick={resetQuickActionForm} className="bg-black hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-black">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Quick Action
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-md bg-white dark:bg-gray-800 border border-gray-400 dark:border-gray-600">
+                  <DialogHeader>
+                    <DialogTitle className="text-gray-800 dark:text-gray-200">
+                      {editingQuickAction ? "Edit Quick Action" : "Add New Quick Action"}
+                    </DialogTitle>
+                  </DialogHeader>
+                  <form onSubmit={(e) => {
+                    e.preventDefault();
+                    if (editingQuickAction) {
+                      updateQuickActionMutation.mutate({ id: editingQuickAction.id, data: quickActionForm });
+                    } else {
+                      createQuickActionMutation.mutate(quickActionForm);
+                    }
+                  }} className="space-y-4">
+                    <div>
+                      <Label htmlFor="action-label">Button Label</Label>
+                      <Input
+                        id="action-label"
+                        value={quickActionForm.label}
+                        onChange={(e) => setQuickActionForm({ ...quickActionForm, label: e.target.value })}
+                        placeholder="Schedule Meeting"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="action-message">Message to Send</Label>
+                      <Textarea
+                        id="action-message"
+                        value={quickActionForm.message}
+                        onChange={(e) => setQuickActionForm({ ...quickActionForm, message: e.target.value })}
+                        rows={3}
+                        placeholder="I'd like to schedule a meeting..."
+                        required
+                      />
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        id="action-active"
+                        checked={quickActionForm.isActive}
+                        onCheckedChange={(checked) => setQuickActionForm({ ...quickActionForm, isActive: checked })}
+                      />
+                      <Label htmlFor="action-active">Active</Label>
+                    </div>
+                    <div className="flex justify-end space-x-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setShowQuickActionDialog(false)}
+                        className="border-gray-400 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        type="submit"
+                        disabled={createQuickActionMutation.isPending || updateQuickActionMutation.isPending}
+                        className="bg-black hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-black"
+                      >
+                        {editingQuickAction ? "Update" : "Create"}
+                      </Button>
+                    </div>
+                  </form>
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {quickActions.map((action) => (
+                <Card key={action.id} className="border-gray-400 dark:border-gray-600 bg-white dark:bg-gray-800">
+                  <CardHeader className="pb-3">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <CardTitle className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                          {action.label}
+                        </CardTitle>
+                        <span className={`text-xs px-2 py-1 rounded mt-2 inline-block ${action.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>
+                          {action.isActive ? 'Active' : 'Inactive'}
+                        </span>
+                      </div>
+                      <div className="flex space-x-1">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => editQuickAction(action)}
+                          className="border-gray-400 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => deleteQuickActionMutation.mutate(action.id)}
+                          className="border-gray-400 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-700 dark:text-gray-300 text-sm">
+                      {action.message}
+                    </p>
+                  </CardContent>
+                </Card>
+              ))}
+              {quickActions.length === 0 && (
+                <Card className="border-gray-400 dark:border-gray-600 bg-white dark:bg-gray-800 col-span-full">
+                  <CardContent className="text-center py-8">
+                    <Zap className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-600 dark:text-gray-400">
+                      No quick actions yet. Add buttons to help users quickly send common messages.
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           </TabsContent>
 
