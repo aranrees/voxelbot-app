@@ -66,6 +66,7 @@ export const availability = pgTable("availability", {
   type: text("type").notNull().default("specific"), // "specific" | "recurring"
   date: text("date"), // YYYY-MM-DD format for specific dates
   dayOfWeek: text("day_of_week"), // "monday" | "tuesday" | etc. for recurring
+  daysOfWeek: text("days_of_week").array(), // ["monday", "tuesday"] for multi-day recurring
   startTime: text("start_time").notNull(), // "09:00"
   endTime: text("end_time").notNull(), // "17:00"
   isAvailable: boolean("is_available").default(true).notNull(),

@@ -49,6 +49,7 @@ export default function AdminDashboard() {
     type: "specific" | "recurring";
     date: string;
     dayOfWeek: "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
+    daysOfWeek: string[];
     startTime: string;
     endTime: string;
     isAvailable: boolean;
@@ -57,6 +58,7 @@ export default function AdminDashboard() {
     type: "specific",
     date: "",
     dayOfWeek: "monday",
+    daysOfWeek: [],
     startTime: "09:00",
     endTime: "17:00",
     isAvailable: true,
@@ -491,6 +493,7 @@ export default function AdminDashboard() {
       type: "specific",
       date: "",
       dayOfWeek: "monday",
+      daysOfWeek: [],
       startTime: "09:00",
       endTime: "17:00",
       isAvailable: true,
@@ -504,6 +507,7 @@ export default function AdminDashboard() {
       type: (availability.type as "specific" | "recurring") || "specific",
       date: availability.date || "",
       dayOfWeek: (availability.dayOfWeek as "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday") || "monday",
+      daysOfWeek: availability.daysOfWeek || [],
       startTime: availability.startTime,
       endTime: availability.endTime,
       isAvailable: availability.isAvailable,
@@ -1416,25 +1420,35 @@ export default function AdminDashboard() {
                       </div>
                     ) : (
                       <div>
-                        <Label htmlFor="availability-day">Day of Week</Label>
-                        <Select
-                          value={availabilityForm.dayOfWeek}
-                          onValueChange={(value: "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday") => 
-                            setAvailabilityForm({ ...availabilityForm, dayOfWeek: value })}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select day" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="monday">Monday</SelectItem>
-                            <SelectItem value="tuesday">Tuesday</SelectItem>
-                            <SelectItem value="wednesday">Wednesday</SelectItem>
-                            <SelectItem value="thursday">Thursday</SelectItem>
-                            <SelectItem value="friday">Friday</SelectItem>
-                            <SelectItem value="saturday">Saturday</SelectItem>
-                            <SelectItem value="sunday">Sunday</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <Label htmlFor="availability-days">Days of Week</Label>
+                        <div className="grid grid-cols-2 gap-2 mt-2">
+                          {["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"].map((day) => (
+                            <div key={day} className="flex items-center space-x-2">
+                              <input
+                                type="checkbox"
+                                id={`day-${day}`}
+                                checked={availabilityForm.daysOfWeek.includes(day)}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setAvailabilityForm({
+                                      ...availabilityForm,
+                                      daysOfWeek: [...availabilityForm.daysOfWeek, day]
+                                    });
+                                  } else {
+                                    setAvailabilityForm({
+                                      ...availabilityForm,
+                                      daysOfWeek: availabilityForm.daysOfWeek.filter(d => d !== day)
+                                    });
+                                  }
+                                }}
+                                className="rounded border-gray-300"
+                              />
+                              <Label htmlFor={`day-${day}`} className="text-sm capitalize">
+                                {day}
+                              </Label>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     )}
                     <div>
