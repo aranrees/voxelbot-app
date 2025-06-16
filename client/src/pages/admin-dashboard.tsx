@@ -711,7 +711,7 @@ export default function AdminDashboard() {
                       Add Document
                     </Button>
                   </DialogTrigger>
-                <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto bg-white dark:bg-gray-800 border border-gray-400 dark:border-gray-600">
+                  <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto bg-white dark:bg-gray-800 border border-gray-400 dark:border-gray-600">
                   <DialogHeader>
                     <DialogTitle className="text-gray-800 dark:text-gray-200">
                       {editingDocument ? "Edit Document" : "Add New Document"}
@@ -791,6 +791,7 @@ export default function AdminDashboard() {
                   </form>
                 </DialogContent>
               </Dialog>
+              </div>
             </div>
 
             <div className="grid gap-6">
