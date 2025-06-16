@@ -152,6 +152,11 @@ export default function AdminDashboard() {
     queryKey: ["/api/admin/standard-responses"],
   });
 
+  // Fetch meeting requests
+  const { data: meetingRequests = [] } = useQuery<any[]>({
+    queryKey: ["/api/admin/meeting-requests"],
+  });
+
   // Document mutations
   const createDocumentMutation = useMutation({
     mutationFn: async (data: InsertDocument) => {
@@ -617,7 +622,7 @@ export default function AdminDashboard() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs defaultValue="documents" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-7 bg-gray-100 dark:bg-gray-800 border border-gray-400 dark:border-gray-600">
+          <TabsList className="grid w-full grid-cols-8 bg-gray-100 dark:bg-gray-800 border border-gray-400 dark:border-gray-600">
             <TabsTrigger value="documents" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">Documents</TabsTrigger>
             <TabsTrigger value="files" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">Downloads</TabsTrigger>
             <TabsTrigger value="instructions" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">AI Instructions</TabsTrigger>
@@ -625,6 +630,7 @@ export default function AdminDashboard() {
             <TabsTrigger value="quick-actions" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">Quick Actions</TabsTrigger>
             <TabsTrigger value="availability" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">Availability</TabsTrigger>
             <TabsTrigger value="standard-responses" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">Standard Responses</TabsTrigger>
+            <TabsTrigger value="meeting-requests" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">Meeting Requests</TabsTrigger>
           </TabsList>
 
           <TabsContent value="documents" className="space-y-6">
@@ -1778,6 +1784,96 @@ export default function AdminDashboard() {
                     <MessageSquare className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                     <p className="text-gray-600 dark:text-gray-400">
                       No standard responses yet. Add pre-written responses for common questions.
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="meeting-requests" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                Meeting Requests
+              </h3>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {meetingRequests.map((request: any) => (
+                <Card key={request.id} className="border-gray-400 dark:border-gray-600 bg-white dark:bg-gray-800">
+                  <CardHeader className="pb-3">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <CardTitle className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                          {request.requestType === 'phone' ? 'Phone Call' : 
+                           request.requestType === 'video' ? 'Video Call' : 
+                           request.requestType === 'in_person' ? 'In-Person Meeting' : 
+                           'Meeting Request'}
+                        </CardTitle>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                          {new Date(request.createdAt).toLocaleDateString()} at {new Date(request.createdAt).toLocaleTimeString()}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <span className={`px-2 py-1 rounded text-xs ${
+                          request.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                          request.status === 'confirmed' ? 'bg-green-100 text-green-800' :
+                          request.status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          {request.status}
+                        </span>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    {request.contactInfo && (
+                      <div className="space-y-1 text-sm text-gray-700 dark:text-gray-300">
+                        {request.contactInfo.email && (
+                          <p><strong>Email:</strong> {request.contactInfo.email}</p>
+                        )}
+                        {request.contactInfo.phone && (
+                          <p><strong>Phone:</strong> {request.contactInfo.phone}</p>
+                        )}
+                        {request.contactInfo.name && (
+                          <p><strong>Name:</strong> {request.contactInfo.name}</p>
+                        )}
+                      </div>
+                    )}
+                    {request.preferredTimes && request.preferredTimes.length > 0 && (
+                      <div className="mt-2">
+                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Preferred Times:</p>
+                        <ul className="text-sm text-gray-600 dark:text-gray-400 list-disc list-inside">
+                          {request.preferredTimes.slice(0, 2).map((time: string, index: number) => (
+                            <li key={index}>{time}</li>
+                          ))}
+                          {request.preferredTimes.length > 2 && (
+                            <li>+{request.preferredTimes.length - 2} more</li>
+                          )}
+                        </ul>
+                      </div>
+                    )}
+                    {request.topic && (
+                      <div className="mt-2">
+                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Topic:</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">{request.topic}</p>
+                      </div>
+                    )}
+                    {request.sessionId && (
+                      <div className="mt-2">
+                        <p className="text-xs text-gray-500 dark:text-gray-500">
+                          Session: {request.sessionId.substring(0, 8)}...
+                        </p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+              {meetingRequests.length === 0 && (
+                <Card className="border-gray-400 dark:border-gray-600 bg-white dark:bg-gray-800 col-span-full">
+                  <CardContent className="text-center py-8">
+                    <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-600 dark:text-gray-400">
+                      No meeting requests yet. Requests will appear here when users schedule meetings through the chat.
                     </p>
                   </CardContent>
                 </Card>
