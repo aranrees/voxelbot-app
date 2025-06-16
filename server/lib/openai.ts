@@ -5,7 +5,7 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY_ENV_VAR || "your-openai-api-key"
 });
 
-export async function getChatResponse(message: string, conversationHistory: Array<{role: string, content: string}> = [], documents: any[] = [], aiInstructions: any[] = []): Promise<string> {
+export async function getChatResponse(message: string, conversationHistory: Array<{role: string, content: string}> = [], documents: any[] = [], aiInstructions: any[] = [], fileAssets: any[] = []): Promise<string> {
   try {
     // Build enhanced system prompt with admin-defined content
     let systemPrompt = `You are a helpful AI assistant for a business. You can help customers with:
@@ -47,6 +47,26 @@ export async function getChatResponse(message: string, conversationHistory: Arra
             systemPrompt += `Tags: ${doc.tags.join(', ')}\n`;
           }
         });
+    }
+
+    // Add downloadable files information
+    if (fileAssets && fileAssets.length > 0) {
+      systemPrompt += "\n\nAvailable Downloads for Clients:\n";
+      fileAssets
+        .filter(file => file.isPublic)
+        .forEach(file => {
+          systemPrompt += `\n**${file.title}** (${file.fileType.toUpperCase()}):\n`;
+          if (file.description) {
+            systemPrompt += `Description: ${file.description}\n`;
+          }
+          systemPrompt += `Download link: ${process.env.REPLIT_DEV_DOMAIN || 'http://localhost:5000'}/api/files/${file.id}/download\n`;
+          systemPrompt += `File size: ${Math.round(file.fileSize / 1024)}KB\n`;
+          if (file.tags && file.tags.length > 0) {
+            systemPrompt += `Tags: ${file.tags.join(', ')}\n`;
+          }
+          systemPrompt += "\n";
+        });
+      systemPrompt += "When relevant, you can share these download links with clients. Always provide the full download URL when mentioning files.";
     }
 
     const messages = [

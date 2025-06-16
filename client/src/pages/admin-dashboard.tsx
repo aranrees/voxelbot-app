@@ -192,6 +192,41 @@ export default function AdminDashboard() {
     },
   });
 
+  // File upload mutation
+  const uploadFileMutation = useMutation({
+    mutationFn: async (formData: FormData) => {
+      const response = await apiRequest("POST", "/api/admin/files/upload", formData);
+      return response.json();
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/files"] });
+      setShowFileUploadDialog(false);
+      setFileUploadForm({ title: "", description: "", tags: "", isPublic: true, file: null });
+      toast({ 
+        title: "Success", 
+        description: `File "${data.title}" uploaded successfully! Available for client download.` 
+      });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to upload file", variant: "destructive" });
+    },
+  });
+
+  // Delete file mutation
+  const deleteFileMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await apiRequest("DELETE", `/api/admin/files/${id}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/files"] });
+      toast({ title: "Success", description: "File deleted successfully!" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to delete file", variant: "destructive" });
+    },
+  });
+
   // Helper functions
   const resetDocumentForm = () => {
     setDocumentForm({
@@ -223,6 +258,23 @@ export default function AdminDashboard() {
   const handleTagsChange = (value: string) => {
     const tags = value.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
     setDocumentForm({ ...documentForm, tags });
+  };
+
+  const handleFileUpload = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!fileUploadForm.file || !fileUploadForm.title) {
+      toast({ title: "Error", description: "Please select a file and enter a title", variant: "destructive" });
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', fileUploadForm.file);
+    formData.append('title', fileUploadForm.title);
+    formData.append('description', fileUploadForm.description);
+    formData.append('tags', fileUploadForm.tags);
+    formData.append('isPublic', fileUploadForm.isPublic.toString());
+
+    uploadFileMutation.mutate(formData);
   };
 
   return (
@@ -278,8 +330,9 @@ export default function AdminDashboard() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs defaultValue="documents" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 bg-gray-100 dark:bg-gray-800 border border-gray-400 dark:border-gray-600">
+          <TabsList className="grid w-full grid-cols-6 bg-gray-100 dark:bg-gray-800 border border-gray-400 dark:border-gray-600">
             <TabsTrigger value="documents" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">Documents</TabsTrigger>
+            <TabsTrigger value="files" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">Downloads</TabsTrigger>
             <TabsTrigger value="instructions" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">AI Instructions</TabsTrigger>
             <TabsTrigger value="quick-actions" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">Quick Actions</TabsTrigger>
             <TabsTrigger value="availability" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">Availability</TabsTrigger>
@@ -547,7 +600,174 @@ export default function AdminDashboard() {
             </div>
           </TabsContent>
 
-          {/* Additional tab content would go here */}
+          {/* File Downloads Tab */}
+          <TabsContent value="files" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                Client Download Files
+              </h3>
+              <Dialog open={showFileUploadDialog} onOpenChange={setShowFileUploadDialog}>
+                <DialogTrigger asChild>
+                  <Button className="bg-black hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-black">
+                    <Upload className="w-4 h-4 mr-2" />
+                    Upload File
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-md bg-white dark:bg-gray-800 border border-gray-400 dark:border-gray-600">
+                  <DialogHeader>
+                    <DialogTitle className="text-gray-800 dark:text-gray-200">
+                      Upload File for Client Downloads
+                    </DialogTitle>
+                  </DialogHeader>
+                  <form onSubmit={handleFileUpload} className="space-y-4">
+                    <div>
+                      <Label htmlFor="file-title">Title</Label>
+                      <Input
+                        id="file-title"
+                        value={fileUploadForm.title}
+                        onChange={(e) => setFileUploadForm({ ...fileUploadForm, title: e.target.value })}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="file-description">Description</Label>
+                      <Textarea
+                        id="file-description"
+                        value={fileUploadForm.description}
+                        onChange={(e) => setFileUploadForm({ ...fileUploadForm, description: e.target.value })}
+                        rows={3}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="file-tags">Tags (comma-separated)</Label>
+                      <Input
+                        id="file-tags"
+                        value={fileUploadForm.tags}
+                        onChange={(e) => setFileUploadForm({ ...fileUploadForm, tags: e.target.value })}
+                        placeholder="manual, guide, brochure"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="file">File (PDF, Images)</Label>
+                      <Input
+                        id="file"
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png,.gif,.doc,.docx"
+                        onChange={(e) => setFileUploadForm({ ...fileUploadForm, file: e.target.files?.[0] || null })}
+                        required
+                      />
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        id="is-public"
+                        checked={fileUploadForm.isPublic}
+                        onCheckedChange={(checked) => setFileUploadForm({ ...fileUploadForm, isPublic: checked })}
+                      />
+                      <Label htmlFor="is-public">Public download (visible to clients)</Label>
+                    </div>
+                    <div className="flex justify-end space-x-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setShowFileUploadDialog(false)}
+                        className="border-gray-400 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        type="submit"
+                        disabled={uploadFileMutation.isPending}
+                        className="bg-black hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-black"
+                      >
+                        {uploadFileMutation.isPending ? "Uploading..." : "Upload"}
+                      </Button>
+                    </div>
+                  </form>
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {fileAssets.map((file) => (
+                <Card key={file.id} className="border-gray-400 dark:border-gray-600 bg-white dark:bg-gray-800">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+                          {file.fileType === 'image' ? (
+                            <Image className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                          ) : file.fileType === 'pdf' ? (
+                            <FileText className="w-5 h-5 text-red-600" />
+                          ) : (
+                            <File className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                          )}
+                        </div>
+                        <div>
+                          <CardTitle className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                            {file.title}
+                          </CardTitle>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                            {Math.round(file.fileSize / 1024)}KB • {file.downloadCount} downloads
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex space-x-1">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => window.open(`/api/files/${file.id}/download`, '_blank')}
+                          className="border-gray-400 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        >
+                          <Download className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => deleteFileMutation.mutate(file.id)}
+                          className="border-gray-400 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    {file.description && (
+                      <p className="text-gray-700 dark:text-gray-300 mb-3 text-sm">
+                        {file.description}
+                      </p>
+                    )}
+                    <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mb-3">
+                      <span>{file.originalName}</span>
+                      <span className={file.isPublic ? "text-green-600" : "text-yellow-600"}>
+                        {file.isPublic ? "Public" : "Private"}
+                      </span>
+                    </div>
+                    {file.tags && file.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {file.tags.map((tag, index) => (
+                          <Badge key={index} variant="outline" className="text-xs">
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+              {fileAssets.length === 0 && (
+                <Card className="border-gray-400 dark:border-gray-600 bg-white dark:bg-gray-800 col-span-full">
+                  <CardContent className="text-center py-8">
+                    <Download className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-600 dark:text-gray-400">
+                      No files uploaded yet. Add files for clients to download.
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </TabsContent>
+
           <TabsContent value="instructions" className="space-y-6">
             <div className="text-center py-8">
               <p className="text-gray-600 dark:text-gray-400">
