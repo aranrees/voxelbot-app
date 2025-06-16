@@ -353,7 +353,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const data = req.body;
       // Convert keywords string to array
       if (data.keywords && typeof data.keywords === 'string') {
-        data.keywords = data.keywords.split(',').map(k => k.trim()).filter(k => k.length > 0);
+        data.keywords = data.keywords.split(',').map((k: string) => k.trim()).filter((k: string) => k.length > 0);
       }
       const validatedData = insertStandardResponseSchema.parse(data);
       const standardResponse = await storage.createStandardResponse(validatedData);
@@ -370,7 +370,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const data = req.body;
       // Convert keywords string to array
       if (data.keywords && typeof data.keywords === 'string') {
-        data.keywords = data.keywords.split(',').map(k => k.trim()).filter(k => k.length > 0);
+        data.keywords = data.keywords.split(',').map((k: string) => k.trim()).filter((k: string) => k.length > 0);
       }
       const validatedData = insertStandardResponseSchema.partial().parse(data);
       const standardResponse = await storage.updateStandardResponse(id, validatedData);
