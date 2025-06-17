@@ -2166,44 +2166,7 @@ export default function AdminDashboard() {
         </Tabs>
       </div>
 
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={deleteConfirmDialog.isOpen} onOpenChange={(open) => 
-        setDeleteConfirmDialog({ ...deleteConfirmDialog, isOpen: open })
-      }>
-        <DialogContent className="bg-white dark:bg-gray-800 border border-gray-400 dark:border-gray-600">
-          <DialogHeader>
-            <DialogTitle className="text-gray-800 dark:text-gray-200">
-              Confirm Document Deletion
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <p className="text-gray-700 dark:text-gray-300">
-              Are you sure you want to delete "{deleteConfirmDialog.documentTitle}"? 
-              This document will be archived and can be restored later if needed.
-            </p>
-            <div className="flex justify-end space-x-2">
-              <Button
-                variant="outline"
-                onClick={() => setDeleteConfirmDialog({ isOpen: false, documentId: null, documentTitle: "" })}
-                className="border-gray-400 dark:border-gray-600"
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={() => {
-                  if (deleteConfirmDialog.documentId) {
-                    deleteDocumentMutation.mutate(deleteConfirmDialog.documentId);
-                  }
-                }}
-                disabled={deleteDocumentMutation.isPending}
-              >
-                {deleteDocumentMutation.isPending ? "Deleting..." : "Delete & Archive"}
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+
     </div>
   );
 }
