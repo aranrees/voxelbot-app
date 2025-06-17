@@ -97,6 +97,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Welcome message endpoint
+  app.get("/api/welcome-message", async (req, res) => {
+    try {
+      const welcomeMessage = await storage.getWelcomeMessage();
+      res.json({ message: welcomeMessage });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch welcome message" });
+    }
+  });
+
   // Chat endpoints
   app.get("/api/messages", async (req, res) => {
     try {

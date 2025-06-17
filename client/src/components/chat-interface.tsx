@@ -70,6 +70,11 @@ export function ChatInterface() {
     queryKey: ["/api/quick-actions"],
   });
 
+  // Fetch welcome message
+  const { data: welcomeData } = useQuery<{ message: string }>({
+    queryKey: ["/api/welcome-message"],
+  });
+
   // Send message mutation
   const sendMessageMutation = useMutation({
     mutationFn: async (content: string) => {
@@ -434,7 +439,7 @@ export function ChatInterface() {
               </div>
               <div className={`${bonkersColors ? bonkersColors.messageBg : 'bg-white dark:bg-gray-800'} rounded-2xl rounded-tl-md ${sizeClasses.padding} shadow-lg ${getMessageBubbleWidth()}`}>
                 <p className={`text-gray-800 dark:text-gray-200 ${sizeClasses.text} leading-relaxed`}>
-                  Welcome to Aran's all purpose home page. I'm not Aran. I'm just a silly little AI magician here to answer questions about Aran's products, services, designs, ideas, deep dark secrets, availability and contact information. You can ask me to list products and services currently on offer, request a meeting or to get in touch, or, if you know what you want to know about, just ask for that and I'll tell you what I have in my files that might be useful to you.
+                  {welcomeData?.message || "Welcome to Aran's all purpose home page. I'm not Aran. I'm just a silly little AI magician here to answer questions about Aran's products, services, designs, ideas, deep dark secrets, availability and contact information. You can ask me to list products and services currently on offer, request a meeting or to get in touch, or, if you know what you want to know about, just ask for that and I'll tell you what I have in my files that might be useful to you."}
                 </p>
                 <span className={`${sizeClasses.textXs} text-gray-500 dark:text-gray-400 mt-2 block`}>Just now</span>
               </div>
