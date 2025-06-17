@@ -95,6 +95,8 @@ export function ChatInterface() {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/messages"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/smart-suggestions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/quick-actions"] });
       setIsTyping(false);
       updateActivity();
       

@@ -268,7 +268,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const fileAssets = await storage.getPublicFileAssets();
       
       // Get AI response with enhanced context including downloadable files
-      const aiResponse = await getChatResponse(validatedData.content, conversationHistory, documents, aiInstructions, fileAssets);
+      const aiResponse = await getChatResponse(validatedData.content, conversationHistory, documents, aiInstructions, fileAssets, sessionId);
       
       // Save AI response with session ID
       const aiMessage = await storage.createChatMessage({
@@ -276,6 +276,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
         role: "assistant",
         sessionId: sessionId
       });
+
+      // Trigger adaptive actions analysis after sufficient conversation
+      if (conversationHistory.length >= 4) { // After 2 user messages and 2 AI responses
+        try {
+          const { analyzeConversationForAdaptiveActions, applyAdaptiveRecommendations } = await import("./lib/adaptive-actions");
+          
+          // Get updated conversation history including the new messages
+          const updatedMessages = await storage.getChatMessagesBySession(sessionId, 20);
+          const conversationData = updatedMessages.map(msg => ({
+            role: msg.role,
+            content: msg.content,
+            timestamp: new Date(msg.timestamp)
+          }));
+          
+          // Analyze and apply recommendations automatically
+          const recommendations = await analyzeConversationForAdaptiveActions(conversationData, sessionId);
+          
+          if (recommendations.length > 0) {
+            const result = await applyAdaptiveRecommendations(recommendations);
+            console.log(`Applied ${result.applied} adaptive quick action recommendations for session ${sessionId}`);
+          }
+        } catch (adaptiveError) {
+          console.error("Adaptive actions error (non-blocking):", adaptiveError);
+          // Don't let adaptive action errors break the chat
+        }
+      }
       
       res.json({ userMessage, aiMessage });
     } catch (error) {

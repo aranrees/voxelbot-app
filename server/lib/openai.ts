@@ -39,7 +39,7 @@ function parseInstructionPriorities(text: string, basePriority: number = 5): Arr
   return sections;
 }
 
-export async function getChatResponse(message: string, conversationHistory: Array<{role: string, content: string}> = [], documents: any[] = [], aiInstructions: any[] = [], fileAssets: any[] = []): Promise<string> {
+export async function getChatResponse(message: string, conversationHistory: Array<{role: string, content: string}> = [], documents: any[] = [], aiInstructions: any[] = [], fileAssets: any[] = [], sessionId?: string): Promise<string> {
   try {
     // Build enhanced system prompt with admin-defined content
     let systemPrompt = `You are a helpful AI assistant for a business. You can help customers with:
@@ -113,6 +113,10 @@ export async function getChatResponse(message: string, conversationHistory: Arra
         });
       systemPrompt += "When relevant, you can share these download links with clients. Always provide the full download URL when mentioning files.";
     }
+
+    // Add adaptive quick actions management instructions
+    const { generateAdaptiveActionInstructions } = await import("./adaptive-actions");
+    systemPrompt += "\n\n" + generateAdaptiveActionInstructions();
 
     const messages = [
       { role: "system", content: systemPrompt },
