@@ -529,9 +529,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "User not found" });
       }
       
-      // Verify current password using the same method as auth.ts
+      // Verify current password
       const scryptAsync = promisify(scrypt);
-      
       const [hashed, salt] = user.password.split(".");
       const hashedBuf = Buffer.from(hashed, "hex");
       const suppliedBuf = (await scryptAsync(currentPassword, salt, 64)) as Buffer;
