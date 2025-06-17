@@ -427,6 +427,14 @@ export function ChatInterface() {
                 <span className={`${sizeClasses.textXs} text-gray-600 dark:text-gray-300`}>Online</span>
               </div>
               <Button
+                variant="outline"
+                size="sm"
+                onClick={() => window.open('/admin', '_blank')}
+                className={`text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 ${sizeClasses.textXs}`}
+              >
+                Login
+              </Button>
+              <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setShowResetConfirm(true)}

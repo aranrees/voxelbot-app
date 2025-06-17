@@ -210,44 +210,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const validatedData = insertChatMessageSchema.parse(req.body);
       
-      // Check for secret phrase first - normalize and check multiple variations
-      const normalizedContent = validatedData.content?.toLowerCase()
-        .replace(/[.,!?;:]/g, '')
-        .replace(/\s+/g, ' ')
-        .trim();
-      
-      // Define all accepted secret phrase patterns
-      const secretPatterns = [
-        /honey\s+i\s*'?\s*m\s+home/i,
-        /honey\s+i\s+am\s+home/i,
-        /honey\s+im\s+home/i,
-        /hey\s+honey\s+i\s*'?\s*m\s+home/i,
-        /hi\s+honey\s+i\s*'?\s*m\s+home/i,
-        /honey\s+i\s*'?\s*m\s+back/i,
-        /honey\s+i\s+am\s+back/i
-      ];
-      
-      const isSecretPhrase = secretPatterns.some(pattern => pattern.test(normalizedContent));
-      
       // Get or create session ID
       if (!(req.session as any).chatSessionId) {
         (req.session as any).chatSessionId = randomBytes(16).toString('hex');
       }
       const sessionId = (req.session as any).chatSessionId;
-
-      if (isSecretPhrase) {
-        const userMessage = await storage.createChatMessage({
-          ...validatedData,
-          sessionId: sessionId
-        });
-        const aiMessage = await storage.createChatMessage({
-          content: "Welcome home! Here's your admin access: [Admin Dashboard](/admin)",
-          role: "assistant",
-          sessionId: sessionId
-        });
-        res.json({ userMessage, aiMessage, adminLink: "/admin" });
-        return;
-      }
       
       const userMessage = await storage.createChatMessage({
         ...validatedData,
