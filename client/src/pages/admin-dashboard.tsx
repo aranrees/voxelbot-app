@@ -997,7 +997,7 @@ export default function AdminDashboard() {
                         </p>
                         {archived.tags && archived.tags.length > 0 && (
                           <div className="flex flex-wrap gap-2">
-                            {archived.tags.map((tag, index) => (
+                            {archived.tags.map((tag: string, index: number) => (
                               <Badge key={index} variant="outline">
                                 {tag}
                               </Badge>

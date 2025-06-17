@@ -744,9 +744,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!success) {
         return res.status(404).json({ message: "Document not found" });
       }
-      res.json({ message: "Document deleted successfully" });
+      res.json({ message: "Document archived and deleted successfully" });
     } catch (error) {
       res.status(500).json({ message: "Failed to delete document" });
+    }
+  });
+
+  // Archived documents endpoints
+  app.get("/api/admin/documents/archived", requireAuth, async (req, res) => {
+    try {
+      const archivedDocs = await storage.getArchivedDocuments();
+      res.json(archivedDocs);
+    } catch (error) {
+      console.error("Error fetching archived documents:", error);
+      res.status(500).json({ message: "Failed to fetch archived documents" });
+    }
+  });
+
+  app.post("/api/admin/documents/archived/:id/restore", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid archived document ID" });
+      }
+
+      const restored = await storage.restoreArchivedDocument(id);
+      if (restored) {
+        res.json({ message: "Document restored successfully", document: restored });
+      } else {
+        res.status(404).json({ message: "Archived document not found" });
+      }
+    } catch (error) {
+      console.error("Error restoring document:", error);
+      res.status(500).json({ message: "Failed to restore document" });
     }
   });
 
