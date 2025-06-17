@@ -251,7 +251,7 @@ export class DatabaseStorage implements IStorage {
     const results = await db
       .select()
       .from(archivedDocuments)
-      .orderBy(desc(archivedDocuments.archivedAt));
+      .orderBy(sql`${archivedDocuments.archivedAt} DESC`);
     return results;
   }
 
