@@ -213,19 +213,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check for secret phrase first - normalize and check multiple variations
       const normalizedContent = validatedData.content?.toLowerCase()
         .replace(/[.,!?;:]/g, '')
-        .replace(/'/g, '')
         .replace(/\s+/g, ' ')
         .trim();
       
       // Define all accepted secret phrase patterns
       const secretPatterns = [
-        /honey\s+i\s*m\s+home/,
-        /honey\s+i\s+am\s+home/,
-        /honey\s+im\s+home/,
-        /hey\s+honey\s+i\s*m\s+home/,
-        /hi\s+honey\s+i\s*m\s+home/,
-        /honey\s+i\s*m\s+back/,
-        /honey\s+i\s+am\s+back/
+        /honey\s+i\s*'?\s*m\s+home/i,
+        /honey\s+i\s+am\s+home/i,
+        /honey\s+im\s+home/i,
+        /hey\s+honey\s+i\s*'?\s*m\s+home/i,
+        /hi\s+honey\s+i\s*'?\s*m\s+home/i,
+        /honey\s+i\s*'?\s*m\s+back/i,
+        /honey\s+i\s+am\s+back/i
       ];
       
       const isSecretPhrase = secretPatterns.some(pattern => pattern.test(normalizedContent));
