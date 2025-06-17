@@ -595,7 +595,31 @@ export function ChatInterface() {
             </Button>
           </form>
           
-          {/* Quick Actions */}
+          {/* Smart Context-Aware Suggestions */}
+          {smartSuggestions.length > 0 && (
+            <div className={`mt-4`}>
+              <div className={`${sizeClasses.textXs} text-gray-500 dark:text-gray-400 mb-2 flex items-center gap-1`}>
+                <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
+                Smart suggestions based on your conversation
+              </div>
+              <div className={`flex flex-wrap items-center gap-2`}>
+                {smartSuggestions.map((suggestion) => (
+                  <Button
+                    key={`smart-${suggestion.id}`}
+                    variant="outline"
+                    size="sm"
+                    className={`${sizeClasses.textSm} rounded-full border border-blue-200 dark:border-blue-800 ${bonkersColors ? bonkersColors.buttonBg : 'bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40'} shadow-sm hover:shadow-md transition-all duration-200 flex-shrink-0 text-blue-700 dark:text-blue-300`}
+                    onClick={() => handleQuickMessage(suggestion.message)}
+                    title={`Relevance: ${suggestion.relevanceScore}% - ${suggestion.reason}`}
+                  >
+                    ✨ {suggestion.label}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* General Quick Actions */}
           {quickActions.length > 0 && (
             <div className={`flex flex-wrap items-center gap-2 mt-4`}>
               {quickActions.map((action) => (

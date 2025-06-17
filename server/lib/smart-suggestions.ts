@@ -132,9 +132,16 @@ export async function getSmartSuggestions(
       reason = `Matches ${context.category} context`;
     }
     
-    // Keyword matching
+    // Keyword matching - check against recent user messages
     if (action.contextKeywords && action.contextKeywords.length > 0) {
+      const recentUserContent = messages
+        .filter(m => m.role === 'user')
+        .slice(-3)
+        .map(m => m.content.toLowerCase())
+        .join(' ');
+      
       const matchingKeywords = action.contextKeywords.filter(keyword => 
+        recentUserContent.includes(keyword.toLowerCase()) ||
         context.entities.some(entity => 
           entity.includes(keyword.toLowerCase()) || keyword.toLowerCase().includes(entity)
         )
