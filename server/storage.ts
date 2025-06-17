@@ -248,11 +248,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getArchivedDocuments(): Promise<ArchivedDocument[]> {
-    const results = await db
-      .select()
-      .from(archivedDocuments)
-      .orderBy(sql`${archivedDocuments.archivedAt} DESC`);
-    return results;
+    try {
+      console.log("Starting getArchivedDocuments query...");
+      const results = await db
+        .select()
+        .from(archivedDocuments);
+      console.log("Query completed, found", results.length, "archived documents");
+      // Sort by archived date in JavaScript instead of SQL
+      return results.sort((a, b) => new Date(b.archivedAt).getTime() - new Date(a.archivedAt).getTime());
+    } catch (error) {
+      console.error("Error in getArchivedDocuments:", error);
+      throw error;
+    }
   }
 
   async getArchivedDocument(id: number): Promise<ArchivedDocument | undefined> {

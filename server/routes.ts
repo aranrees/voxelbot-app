@@ -726,7 +726,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(archivedDocs);
     } catch (error) {
       console.error("Error fetching archived documents:", error);
-      res.status(500).json({ message: "Failed to fetch archived documents", error: error.message });
+      res.status(500).json({ message: "Failed to fetch archived documents", error: error instanceof Error ? error.message : String(error) });
     }
   });
 
