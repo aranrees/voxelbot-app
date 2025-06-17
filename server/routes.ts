@@ -102,7 +102,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Get or create session ID
       if (!req.session.chatSessionId) {
-        req.session.chatSessionId = crypto.randomUUID();
+        req.session.chatSessionId = randomBytes(16).toString('hex');
       }
       const sessionId = req.session.chatSessionId;
       
