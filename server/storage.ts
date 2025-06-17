@@ -1,6 +1,6 @@
 import { users, chatMessages, appointments, documents, aiInstructions, quickActions, availability, standardResponses, fileAssets, completedChats, meetingRequests, type User, type InsertUser, type ChatMessage, type InsertChatMessage, type Appointment, type InsertAppointment, type Document, type InsertDocument, type AiInstruction, type InsertAiInstruction, type QuickAction, type InsertQuickAction, type Availability, type InsertAvailability, type StandardResponse, type InsertStandardResponse, type FileAsset, type InsertFileAsset, type CompletedChat, type InsertCompletedChat, type MeetingRequest, type InsertMeetingRequest } from "@shared/schema";
 import { db } from "./db";
-import { eq, sql, desc } from "drizzle-orm";
+import { eq, sql, desc, and } from "drizzle-orm";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
 import { pool } from "./db";
@@ -36,6 +36,7 @@ export interface IStorage {
   // AI Instructions
   getAiInstructions(): Promise<AiInstruction[]>;
   getActiveAiInstructions(): Promise<AiInstruction[]>;
+  getWelcomeMessage(): Promise<string>;
   getAiInstruction(id: number): Promise<AiInstruction | undefined>;
   createAiInstruction(instruction: InsertAiInstruction): Promise<AiInstruction>;
   updateAiInstruction(id: number, instruction: Partial<InsertAiInstruction>): Promise<AiInstruction | undefined>;
@@ -247,6 +248,22 @@ export class DatabaseStorage implements IStorage {
       .where(eq(aiInstructions.isActive, true))
       .orderBy(aiInstructions.priority);
     return results;
+  }
+
+  async getWelcomeMessage(): Promise<string> {
+    const results = await db
+      .select()
+      .from(aiInstructions)
+      .where(sql`${aiInstructions.isActive} = true AND ${aiInstructions.category} = 'welcome'`)
+      .orderBy(desc(aiInstructions.priority))
+      .limit(1);
+    
+    if (results.length > 0) {
+      return results[0].instruction;
+    }
+    
+    // Default welcome message if none is configured
+    return "Welcome to Aran's all purpose home page. I'm not Aran. I'm just a silly little AI magician here to answer questions about Aran's products, services, designs, ideas, deep dark secrets, availability and contact information. You can ask me to list products and services currently on offer, request a meeting or to get in touch, or, if you know what you want to know about, just ask for that and I'll tell you what I have in my files that might be useful to you.";
   }
 
   async getAiInstruction(id: number): Promise<AiInstruction | undefined> {
