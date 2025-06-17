@@ -262,8 +262,8 @@ export class DatabaseStorage implements IStorage {
       return results[0].instruction;
     }
     
-    // Default welcome message if none is configured
-    return "Welcome to Aran's all purpose home page. I'm not Aran. I'm just a silly little AI magician here to answer questions about Aran's products, services, designs, ideas, deep dark secrets, availability and contact information. You can ask me to list products and services currently on offer, request a meeting or to get in touch, or, if you know what you want to know about, just ask for that and I'll tell you what I have in my files that might be useful to you.";
+    // Return empty string if no welcome message is configured
+    return "";
   }
 
   async getAiInstruction(id: number): Promise<AiInstruction | undefined> {
