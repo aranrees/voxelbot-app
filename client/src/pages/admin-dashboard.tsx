@@ -123,9 +123,22 @@ export default function AdminDashboard() {
     isActive: true
   });
 
+  const [deleteConfirmDialog, setDeleteConfirmDialog] = useState<{
+    isOpen: boolean;
+    documentId: number | null;
+    documentTitle: string;
+  }>({ isOpen: false, documentId: null, documentTitle: "" });
+  const [showArchivedDocuments, setShowArchivedDocuments] = useState(false);
+
   // Fetch documents
   const { data: documents = [] } = useQuery<Document[]>({
     queryKey: ["/api/admin/documents"],
+  });
+
+  // Fetch archived documents
+  const { data: archivedDocuments = [] } = useQuery<any[]>({
+    queryKey: ["/api/admin/documents/archived"],
+    enabled: showArchivedDocuments,
   });
 
   // Fetch file assets
@@ -203,10 +216,27 @@ export default function AdminDashboard() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/documents"] });
-      toast({ title: "Success", description: "Document deleted successfully!" });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/documents/archived"] });
+      setDeleteConfirmDialog({ isOpen: false, documentId: null, documentTitle: "" });
+      toast({ title: "Success", description: "Document archived and deleted successfully!" });
     },
     onError: () => {
       toast({ title: "Error", description: "Failed to delete document", variant: "destructive" });
+    },
+  });
+
+  const restoreDocumentMutation = useMutation({
+    mutationFn: async (archivedId: number) => {
+      const response = await apiRequest("POST", `/api/admin/documents/archived/${archivedId}/restore`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/documents"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/documents/archived"] });
+      toast({ title: "Success", description: "Document restored successfully!" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to restore document", variant: "destructive" });
     },
   });
 
@@ -879,7 +909,11 @@ export default function AdminDashboard() {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => deleteDocumentMutation.mutate(document.id)}
+                          onClick={() => setDeleteConfirmDialog({
+                            isOpen: true,
+                            documentId: document.id,
+                            documentTitle: document.title
+                          })}
                           className="border-gray-400 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
                         >
                           <Trash2 className="w-4 h-4" />

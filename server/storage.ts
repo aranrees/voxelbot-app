@@ -233,10 +233,101 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteDocument(id: number): Promise<boolean> {
-    const result = await db
-      .delete(documents)
-      .where(eq(documents.id, id));
-    return (result.rowCount || 0) > 0;
+    try {
+      // Archive the document before deleting
+      const archived = await this.archiveDocument(id, 'system', 'deleted');
+      if (archived) {
+        const result = await db.delete(documents).where(eq(documents.id, id));
+        return (result.rowCount || 0) > 0;
+      }
+      return false;
+    } catch (error) {
+      console.error('Delete document error:', error);
+      return false;
+    }
+  }
+
+  async getArchivedDocuments(): Promise<ArchivedDocument[]> {
+    const results = await db
+      .select()
+      .from(archivedDocuments)
+      .orderBy(desc(archivedDocuments.archivedAt));
+    return results;
+  }
+
+  async getArchivedDocument(id: number): Promise<ArchivedDocument | undefined> {
+    const [archived] = await db
+      .select()
+      .from(archivedDocuments)
+      .where(eq(archivedDocuments.id, id));
+    return archived || undefined;
+  }
+
+  async archiveDocument(id: number, archivedBy: string = 'system', reason: string = 'deleted'): Promise<boolean> {
+    try {
+      // Get the original document
+      const [original] = await db
+        .select()
+        .from(documents)
+        .where(eq(documents.id, id));
+      
+      if (!original) {
+        return false;
+      }
+
+      // Archive the document
+      await db.insert(archivedDocuments).values({
+        originalId: original.id,
+        title: original.title,
+        content: original.content,
+        type: original.type,
+        fileType: original.fileType,
+        filePath: original.filePath,
+        tags: original.tags,
+        originalCreatedAt: original.createdAt,
+        originalUpdatedAt: original.updatedAt,
+        archivedBy,
+        reason
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Archive document error:', error);
+      return false;
+    }
+  }
+
+  async restoreArchivedDocument(archivedId: number): Promise<Document | undefined> {
+    try {
+      // Get the archived document
+      const [archived] = await db
+        .select()
+        .from(archivedDocuments)
+        .where(eq(archivedDocuments.id, archivedId));
+      
+      if (!archived) {
+        return undefined;
+      }
+
+      // Restore the document
+      const [restored] = await db.insert(documents).values({
+        title: archived.title,
+        content: archived.content,
+        type: archived.type,
+        fileType: archived.fileType,
+        filePath: archived.filePath,
+        tags: archived.tags,
+        isActive: true
+      }).returning();
+
+      // Remove from archive
+      await db.delete(archivedDocuments).where(eq(archivedDocuments.id, archivedId));
+
+      return restored;
+    } catch (error) {
+      console.error('Restore document error:', error);
+      return undefined;
+    }
   }
 
   async getAiInstructions(): Promise<AiInstruction[]> {
