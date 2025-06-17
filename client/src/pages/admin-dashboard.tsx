@@ -123,23 +123,17 @@ export default function AdminDashboard() {
     isActive: true
   });
 
-  const [deleteConfirmDialog, setDeleteConfirmDialog] = useState<{
-    isOpen: boolean;
-    documentId: number | null;
-    documentTitle: string;
-  }>({ isOpen: false, documentId: null, documentTitle: "" });
+
   const [showArchivedDocuments, setShowArchivedDocuments] = useState(false);
 
   // Fetch documents
-  const { data: documents = [] } = useQuery<Document[]>({
+  const { data: allDocuments = [] } = useQuery<Document[]>({
     queryKey: ["/api/admin/documents"],
   });
 
-  // Fetch archived documents
-  const { data: archivedDocuments = [] } = useQuery<any[]>({
-    queryKey: ["/api/admin/documents/archived"],
-    enabled: showArchivedDocuments,
-  });
+  // Separate active and archived documents
+  const documents = allDocuments.filter(doc => doc.isActive);
+  const archivedDocuments = allDocuments.filter(doc => !doc.isActive);
 
   // Fetch file assets
   const { data: fileAssets = [] } = useQuery<FileAsset[]>({
@@ -209,19 +203,17 @@ export default function AdminDashboard() {
     },
   });
 
-  const deleteDocumentMutation = useMutation({
+  const toggleDocumentArchiveMutation = useMutation({
     mutationFn: async (id: number) => {
-      const response = await apiRequest("DELETE", `/api/admin/documents/${id}`);
+      const response = await apiRequest("PATCH", `/api/admin/documents/${id}/toggle-archive`);
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/documents"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/documents/archived"] });
-      setDeleteConfirmDialog({ isOpen: false, documentId: null, documentTitle: "" });
-      toast({ title: "Success", description: "Document archived and deleted successfully!" });
+      toast({ title: "Success", description: data.message });
     },
     onError: () => {
-      toast({ title: "Error", description: "Failed to delete document", variant: "destructive" });
+      toast({ title: "Error", description: "Failed to toggle document archive", variant: "destructive" });
     },
   });
 
@@ -921,11 +913,8 @@ export default function AdminDashboard() {
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => setDeleteConfirmDialog({
-                                isOpen: true,
-                                documentId: document.id,
-                                documentTitle: document.title
-                              })}
+                              onClick={() => toggleDocumentArchiveMutation.mutate(document.id)}
+                              disabled={toggleDocumentArchiveMutation.isPending}
                               className="border-gray-400 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
                             >
                               <Trash2 className="w-4 h-4" />
@@ -973,18 +962,18 @@ export default function AdminDashboard() {
                             </CardTitle>
                             <div className="flex items-center space-x-2 mt-1">
                               <Badge variant="outline">{archived.type}</Badge>
-                              <span className="text-xs text-gray-500">
-                                Archived: {new Date(archived.archivedAt).toLocaleDateString()}
-                              </span>
+                              <Badge variant="secondary" className="text-xs">
+                                Archived
+                              </Badge>
                             </div>
                           </div>
                           <div className="flex space-x-2">
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => restoreDocumentMutation.mutate(archived.id)}
+                              onClick={() => toggleDocumentArchiveMutation.mutate(archived.id)}
                               className="border-gray-400 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
-                              disabled={restoreDocumentMutation.isPending}
+                              disabled={toggleDocumentArchiveMutation.isPending}
                             >
                               <RotateCcw className="w-4 h-4" />
                             </Button>
