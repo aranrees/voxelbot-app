@@ -58,6 +58,9 @@ export const quickActions = pgTable("quick_actions", {
   message: text("message").notNull(),
   order: integer("order").default(1).notNull(),
   isActive: boolean("is_active").default(true).notNull(),
+  contextKeywords: text("context_keywords").array(), // Keywords that trigger this suggestion
+  contextType: text("context_type").default("general").notNull(), // 'general' | 'question' | 'request' | 'problem' | 'pricing' | 'scheduling'
+  suggestionWeight: integer("suggestion_weight").default(1).notNull(), // Higher weight = more likely to be suggested
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

@@ -75,6 +75,13 @@ export function ChatInterface() {
     queryKey: ["/api/welcome-message"],
   });
 
+  // Fetch smart suggestions based on conversation context
+  const { data: smartSuggestions = [] } = useQuery<Array<QuickAction & {relevanceScore: number, reason: string}>>({
+    queryKey: ["/api/smart-suggestions"],
+    refetchInterval: 5000, // Refresh every 5 seconds during active conversation
+    enabled: messages.length > 0, // Only fetch if there are messages
+  });
+
   // Send message mutation
   const sendMessageMutation = useMutation({
     mutationFn: async (content: string) => {

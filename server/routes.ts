@@ -107,6 +107,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Smart suggestions endpoint
+  app.get("/api/smart-suggestions", async (req, res) => {
+    try {
+      // Get or create session ID
+      if (!(req.session as any).chatSessionId) {
+        (req.session as any).chatSessionId = randomBytes(16).toString('hex');
+      }
+      const sessionId = (req.session as any).chatSessionId;
+      
+      // Get recent conversation history for context
+      const messages = await storage.getChatMessagesBySession(sessionId, 10);
+      const conversationHistory = messages.map(msg => ({
+        role: msg.role,
+        content: msg.content
+      }));
+      
+      // Get smart suggestions based on conversation context
+      const { getSmartSuggestions } = await import("./lib/smart-suggestions");
+      const suggestions = await getSmartSuggestions(conversationHistory, 3);
+      
+      res.json(suggestions);
+    } catch (error) {
+      console.error("Smart suggestions error:", error);
+      res.status(500).json({ message: "Failed to get smart suggestions" });
+    }
+  });
+
   // Chat endpoints
   app.get("/api/messages", async (req, res) => {
     try {
