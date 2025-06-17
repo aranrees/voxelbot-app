@@ -645,31 +645,20 @@ export default function AdminDashboard() {
                     }
                     
                     try {
-                      const response = await fetch('/api/admin/change-password', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ currentPassword, newPassword })
+                      const response = await apiRequest('POST', '/api/admin/change-password', {
+                        currentPassword,
+                        newPassword
                       });
                       
-                      const result = await response.json();
-                      
-                      if (response.ok) {
-                        toast({
-                          title: "Password changed",
-                          description: "Your password has been updated successfully",
-                        });
-                        e.currentTarget.reset();
-                      } else {
-                        toast({
-                          title: "Error",
-                          description: result.error || "Failed to change password",
-                          variant: "destructive",
-                        });
-                      }
-                    } catch (error) {
+                      toast({
+                        title: "Password changed",
+                        description: "Your password has been updated successfully",
+                      });
+                      e.currentTarget.reset();
+                    } catch (error: any) {
                       toast({
                         title: "Error",
-                        description: "Failed to change password",
+                        description: error.message || "Failed to change password",
                         variant: "destructive",
                       });
                     }
