@@ -101,10 +101,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/messages", async (req, res) => {
     try {
       // Get or create session ID
-      if (!req.session.chatSessionId) {
-        req.session.chatSessionId = randomBytes(16).toString('hex');
+      if (!(req.session as any).chatSessionId) {
+        (req.session as any).chatSessionId = randomBytes(16).toString('hex');
       }
-      const sessionId = req.session.chatSessionId;
+      const sessionId = (req.session as any).chatSessionId;
       
       const messages = await storage.getChatMessagesBySession(sessionId, 50);
       res.json(messages);
@@ -137,20 +137,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const isSecretPhrase = secretPatterns.some(pattern => pattern.test(normalizedContent));
       
+      // Get or create session ID
+      if (!(req.session as any).chatSessionId) {
+        (req.session as any).chatSessionId = randomBytes(16).toString('hex');
+      }
+      const sessionId = (req.session as any).chatSessionId;
+
       if (isSecretPhrase) {
-        const userMessage = await storage.createChatMessage(validatedData);
+        const userMessage = await storage.createChatMessage({
+          ...validatedData,
+          sessionId: sessionId
+        });
         const aiMessage = await storage.createChatMessage({
           content: "Welcome home! Here's your admin access: [Admin Dashboard](/admin)",
-          role: "assistant"
+          role: "assistant",
+          sessionId: sessionId
         });
         res.json({ userMessage, aiMessage, adminLink: "/admin" });
         return;
       }
       
-      const userMessage = await storage.createChatMessage(validatedData);
+      const userMessage = await storage.createChatMessage({
+        ...validatedData,
+        sessionId: sessionId
+      });
       
-      // Get conversation history for context
-      const history = await storage.getChatMessages(20);
+      // Get conversation history for context (session-specific)
+      const history = await storage.getChatMessagesBySession(sessionId, 20);
       const conversationHistory = history.map(msg => ({
         role: msg.role,
         content: msg.content
@@ -164,10 +177,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get AI response with enhanced context including downloadable files
       const aiResponse = await getChatResponse(validatedData.content, conversationHistory, documents, aiInstructions, fileAssets);
       
-      // Save AI response
+      // Save AI response with session ID
       const aiMessage = await storage.createChatMessage({
         content: aiResponse,
-        role: "assistant"
+        role: "assistant",
+        sessionId: sessionId
       });
       
       res.json({ userMessage, aiMessage });

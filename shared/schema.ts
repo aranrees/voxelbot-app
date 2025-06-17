@@ -96,6 +96,8 @@ export const insertUserSchema = createInsertSchema(users).pick({
 export const insertChatMessageSchema = createInsertSchema(chatMessages).omit({
   id: true,
   timestamp: true,
+}).extend({
+  sessionId: z.string().optional(),
 });
 
 export const insertAppointmentSchema = createInsertSchema(appointments).omit({
