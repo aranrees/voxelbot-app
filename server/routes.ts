@@ -720,12 +720,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Archived documents endpoints
   app.get("/api/admin/documents/archived", requireAuth, async (req, res) => {
     try {
-      console.log("Fetching archived documents...");
+      console.log("=== Fetching archived documents API called ===");
       const archivedDocs = await storage.getArchivedDocuments();
-      console.log("Archived documents retrieved:", archivedDocs.length, "documents");
+      console.log("=== Archived documents retrieved:", archivedDocs.length, "documents ===");
+      console.log("=== First archived doc:", archivedDocs[0] ? JSON.stringify(archivedDocs[0], null, 2) : "none" , "===");
       res.json(archivedDocs);
     } catch (error) {
-      console.error("Error fetching archived documents:", error);
+      console.error("=== ERROR in archived documents API ===", error);
+      console.error("=== ERROR STACK ===", error instanceof Error ? error.stack : "No stack");
       res.status(500).json({ message: "Failed to fetch archived documents", error: error instanceof Error ? error.message : String(error) });
     }
   });
