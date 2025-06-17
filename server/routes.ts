@@ -692,32 +692,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/admin/documents/:id", requireAuth, async (req, res) => {
-    try {
-      const validatedData = insertDocumentSchema.partial().parse(req.body);
-      const document = await storage.updateDocument(parseInt(req.params.id), validatedData);
-      if (!document) {
-        return res.status(404).json({ message: "Document not found" });
-      }
-      res.json(document);
-    } catch (error) {
-      res.status(400).json({ message: "Failed to update document" });
-    }
-  });
-
-  app.delete("/api/admin/documents/:id", requireAuth, async (req, res) => {
-    try {
-      const success = await storage.deleteDocument(parseInt(req.params.id));
-      if (!success) {
-        return res.status(404).json({ message: "Document not found" });
-      }
-      res.json({ message: "Document archived and deleted successfully" });
-    } catch (error) {
-      res.status(500).json({ message: "Failed to delete document" });
-    }
-  });
-
-  // Archived documents endpoints
+  // Archived documents endpoints - MUST come before parameterized routes
   app.get("/api/admin/documents/archived", requireAuth, async (req, res) => {
     try {
       console.log("=== Fetching archived documents API called ===");
@@ -748,6 +723,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error restoring document:", error);
       res.status(500).json({ message: "Failed to restore document" });
+    }
+  });
+
+  app.put("/api/admin/documents/:id", requireAuth, async (req, res) => {
+    try {
+      const validatedData = insertDocumentSchema.partial().parse(req.body);
+      const document = await storage.updateDocument(parseInt(req.params.id), validatedData);
+      if (!document) {
+        return res.status(404).json({ message: "Document not found" });
+      }
+      res.json(document);
+    } catch (error) {
+      res.status(400).json({ message: "Failed to update document" });
+    }
+  });
+
+  app.delete("/api/admin/documents/:id", requireAuth, async (req, res) => {
+    try {
+      const success = await storage.deleteDocument(parseInt(req.params.id));
+      if (!success) {
+        return res.status(404).json({ message: "Document not found" });
+      }
+      res.json({ message: "Document archived and deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete document" });
     }
   });
 
