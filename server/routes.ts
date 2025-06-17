@@ -100,7 +100,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Chat endpoints
   app.get("/api/messages", async (req, res) => {
     try {
-      const messages = await storage.getChatMessages(50);
+      // Get or create session ID
+      if (!req.session.chatSessionId) {
+        req.session.chatSessionId = crypto.randomUUID();
+      }
+      const sessionId = req.session.chatSessionId;
+      
+      const messages = await storage.getChatMessagesBySession(sessionId, 50);
       res.json(messages);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch messages" });

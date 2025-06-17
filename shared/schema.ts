@@ -12,6 +12,7 @@ export const chatMessages = pgTable("chat_messages", {
   id: serial("id").primaryKey(),
   content: text("content").notNull(),
   role: text("role").notNull(), // 'user' | 'assistant'
+  sessionId: text("session_id").notNull().default("global"),
   timestamp: timestamp("timestamp").defaultNow().notNull(),
 });
 

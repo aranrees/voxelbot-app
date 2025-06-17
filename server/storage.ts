@@ -15,8 +15,10 @@ export interface IStorage {
   
   // Chat messages
   getChatMessages(limit?: number): Promise<ChatMessage[]>;
+  getChatMessagesBySession(sessionId: string, limit?: number): Promise<ChatMessage[]>;
   createChatMessage(message: InsertChatMessage): Promise<ChatMessage>;
   resetChatMessages(): Promise<void>;
+  resetChatMessagesBySession(sessionId: string): Promise<void>;
   
   // Appointments
   getAppointments(): Promise<Appointment[]>;
@@ -131,6 +133,16 @@ export class DatabaseStorage implements IStorage {
     return messages;
   }
 
+  async getChatMessagesBySession(sessionId: string, limit: number = 50): Promise<ChatMessage[]> {
+    const messages = await db
+      .select()
+      .from(chatMessages)
+      .where(eq(chatMessages.sessionId, sessionId))
+      .orderBy(chatMessages.timestamp)
+      .limit(limit);
+    return messages;
+  }
+
   async createChatMessage(insertMessage: InsertChatMessage): Promise<ChatMessage> {
     const [message] = await db
       .insert(chatMessages)
@@ -141,6 +153,10 @@ export class DatabaseStorage implements IStorage {
 
   async resetChatMessages(): Promise<void> {
     await db.delete(chatMessages);
+  }
+
+  async resetChatMessagesBySession(sessionId: string): Promise<void> {
+    await db.delete(chatMessages).where(eq(chatMessages.sessionId, sessionId));
   }
 
   async getAppointments(): Promise<Appointment[]> {
