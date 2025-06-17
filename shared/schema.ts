@@ -41,6 +41,22 @@ export const documents = pgTable("documents", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+export const archivedDocuments = pgTable("archived_documents", {
+  id: serial("id").primaryKey(),
+  originalId: integer("original_id").notNull(), // ID from the original documents table
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  type: text("type").notNull(),
+  fileType: text("file_type").default("text").notNull(),
+  filePath: text("file_path"),
+  tags: text("tags").array(),
+  originalCreatedAt: timestamp("original_created_at").notNull(),
+  originalUpdatedAt: timestamp("original_updated_at").notNull(),
+  archivedAt: timestamp("archived_at").defaultNow().notNull(),
+  archivedBy: text("archived_by"), // username or system identifier
+  reason: text("reason").default("deleted").notNull(), // reason for archiving
+});
+
 export const aiInstructions = pgTable("ai_instructions", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
@@ -115,6 +131,11 @@ export const insertDocumentSchema = createInsertSchema(documents).omit({
   updatedAt: true,
 });
 
+export const insertArchivedDocumentSchema = createInsertSchema(archivedDocuments).omit({
+  id: true,
+  archivedAt: true,
+});
+
 export const insertAiInstructionSchema = createInsertSchema(aiInstructions).omit({
   id: true,
   createdAt: true,
@@ -150,6 +171,8 @@ export type Appointment = typeof appointments.$inferSelect;
 export type InsertAppointment = z.infer<typeof insertAppointmentSchema>;
 export type Document = typeof documents.$inferSelect;
 export type InsertDocument = z.infer<typeof insertDocumentSchema>;
+export type ArchivedDocument = typeof archivedDocuments.$inferSelect;
+export type InsertArchivedDocument = z.infer<typeof insertArchivedDocumentSchema>;
 export type AiInstruction = typeof aiInstructions.$inferSelect;
 export type InsertAiInstruction = z.infer<typeof insertAiInstructionSchema>;
 export type QuickAction = typeof quickActions.$inferSelect;

@@ -1,4 +1,4 @@
-import { users, chatMessages, appointments, documents, aiInstructions, quickActions, availability, standardResponses, fileAssets, completedChats, meetingRequests, type User, type InsertUser, type ChatMessage, type InsertChatMessage, type Appointment, type InsertAppointment, type Document, type InsertDocument, type AiInstruction, type InsertAiInstruction, type QuickAction, type InsertQuickAction, type Availability, type InsertAvailability, type StandardResponse, type InsertStandardResponse, type FileAsset, type InsertFileAsset, type CompletedChat, type InsertCompletedChat, type MeetingRequest, type InsertMeetingRequest } from "@shared/schema";
+import { users, chatMessages, appointments, documents, archivedDocuments, aiInstructions, quickActions, availability, standardResponses, fileAssets, completedChats, meetingRequests, type User, type InsertUser, type ChatMessage, type InsertChatMessage, type Appointment, type InsertAppointment, type Document, type InsertDocument, type ArchivedDocument, type InsertArchivedDocument, type AiInstruction, type InsertAiInstruction, type QuickAction, type InsertQuickAction, type Availability, type InsertAvailability, type StandardResponse, type InsertStandardResponse, type FileAsset, type InsertFileAsset, type CompletedChat, type InsertCompletedChat, type MeetingRequest, type InsertMeetingRequest } from "@shared/schema";
 import { db } from "./db";
 import { eq, sql, desc, and } from "drizzle-orm";
 import session from "express-session";
@@ -32,6 +32,12 @@ export interface IStorage {
   createDocument(document: InsertDocument): Promise<Document>;
   updateDocument(id: number, document: Partial<InsertDocument>): Promise<Document | undefined>;
   deleteDocument(id: number): Promise<boolean>;
+  
+  // Archived Documents
+  getArchivedDocuments(): Promise<ArchivedDocument[]>;
+  getArchivedDocument(id: number): Promise<ArchivedDocument | undefined>;
+  archiveDocument(id: number, archivedBy?: string, reason?: string): Promise<boolean>;
+  restoreArchivedDocument(archivedId: number): Promise<Document | undefined>;
   
   // AI Instructions
   getAiInstructions(): Promise<AiInstruction[]>;
