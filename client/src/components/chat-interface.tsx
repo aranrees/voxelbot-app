@@ -78,7 +78,6 @@ export function ChatInterface() {
   // Fetch smart suggestions based on conversation context
   const { data: smartSuggestions = [] } = useQuery<Array<QuickAction & {relevanceScore: number, reason: string}>>({
     queryKey: ["/api/smart-suggestions"],
-    refetchInterval: 5000, // Refresh every 5 seconds during active conversation
     enabled: messages.length > 0, // Only fetch if there are messages
   });
 
@@ -595,46 +594,53 @@ export function ChatInterface() {
             </Button>
           </form>
           
-          {/* Smart Context-Aware Suggestions */}
-          {smartSuggestions.length > 0 && (
-            <div className={`mt-4`}>
-              <div className={`${sizeClasses.textXs} text-gray-500 dark:text-gray-400 mb-2 flex items-center gap-1`}>
-                <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
-                Smart suggestions based on your conversation
+          {/* Quick Actions - Smart suggestions first, then general actions, limited to 3 total */}
+          {(() => {
+            // Combine smart suggestions and general actions, prioritizing smart suggestions
+            const smartActions = smartSuggestions.map(suggestion => ({
+              ...suggestion,
+              isSmartSuggestion: true
+            }));
+            
+            const generalActions = quickActions.filter(action => 
+              !smartSuggestions.some(smart => smart.id === action.id)
+            ).map(action => ({
+              ...action,
+              isSmartSuggestion: false
+            }));
+            
+            // Take up to 3 actions total, prioritizing smart suggestions
+            const displayActions = [...smartActions, ...generalActions].slice(0, 3);
+            
+            return displayActions.length > 0 ? (
+              <div className={`mt-4`}>
+                {smartActions.length > 0 && (
+                  <div className={`${sizeClasses.textXs} text-gray-500 dark:text-gray-400 mb-2 flex items-center gap-1`}>
+                    <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
+                    Suggestions based on your conversation
+                  </div>
+                )}
+                <div className={`flex flex-wrap items-center gap-2`}>
+                  {displayActions.map((action) => (
+                    <Button
+                      key={action.isSmartSuggestion ? `smart-${action.id}` : action.id}
+                      variant="outline"
+                      size="sm"
+                      className={`${sizeClasses.textSm} rounded-full ${
+                        action.isSmartSuggestion 
+                          ? `border border-blue-200 dark:border-blue-800 ${bonkersColors ? bonkersColors.buttonBg : 'bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40'} text-blue-700 dark:text-blue-300`
+                          : `border-0 ${bonkersColors ? bonkersColors.buttonBg : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600'}`
+                      } shadow-sm hover:shadow-md transition-all duration-200 flex-shrink-0`}
+                      onClick={() => handleQuickMessage(action.message)}
+                      title={action.isSmartSuggestion && 'relevanceScore' in action ? `Relevance: ${(action as any).relevanceScore}% - ${(action as any).reason}` : undefined}
+                    >
+                      {action.isSmartSuggestion ? '✨ ' : ''}{action.label}
+                    </Button>
+                  ))}
+                </div>
               </div>
-              <div className={`flex flex-wrap items-center gap-2`}>
-                {smartSuggestions.map((suggestion) => (
-                  <Button
-                    key={`smart-${suggestion.id}`}
-                    variant="outline"
-                    size="sm"
-                    className={`${sizeClasses.textSm} rounded-full border border-blue-200 dark:border-blue-800 ${bonkersColors ? bonkersColors.buttonBg : 'bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40'} shadow-sm hover:shadow-md transition-all duration-200 flex-shrink-0 text-blue-700 dark:text-blue-300`}
-                    onClick={() => handleQuickMessage(suggestion.message)}
-                    title={`Relevance: ${suggestion.relevanceScore}% - ${suggestion.reason}`}
-                  >
-                    ✨ {suggestion.label}
-                  </Button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* General Quick Actions */}
-          {quickActions.length > 0 && (
-            <div className={`flex flex-wrap items-center gap-2 mt-4`}>
-              {quickActions.map((action) => (
-                <Button
-                  key={action.id}
-                  variant="outline"
-                  size="sm"
-                  className={`${sizeClasses.textSm} rounded-full border-0 ${bonkersColors ? bonkersColors.buttonBg : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600'} shadow-sm hover:shadow-md transition-all duration-200 flex-shrink-0`}
-                  onClick={() => handleQuickMessage(action.message)}
-                >
-                  {action.label}
-                </Button>
-              ))}
-            </div>
-          )}
+            ) : null;
+          })()}
         </CardContent>
       </Card>
 

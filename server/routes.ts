@@ -134,6 +134,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Adaptive actions endpoint for AI-driven quick action management
+  app.post("/api/adaptive-actions/analyze", async (req, res) => {
+    try {
+      // Get or create session ID
+      if (!(req.session as any).chatSessionId) {
+        (req.session as any).chatSessionId = randomBytes(16).toString('hex');
+      }
+      const sessionId = (req.session as any).chatSessionId;
+      
+      // Get conversation history with timestamps
+      const messages = await storage.getChatMessagesBySession(sessionId, 20);
+      const conversationData = messages.map(msg => ({
+        role: msg.role,
+        content: msg.content,
+        timestamp: new Date(msg.timestamp)
+      }));
+      
+      // Analyze conversation for adaptive action recommendations
+      const { analyzeConversationForAdaptiveActions } = await import("./lib/adaptive-actions");
+      const recommendations = await analyzeConversationForAdaptiveActions(conversationData, sessionId);
+      
+      res.json({
+        recommendations,
+        conversationLength: messages.length,
+        sessionId
+      });
+    } catch (error) {
+      console.error("Adaptive actions analysis error:", error);
+      res.status(500).json({ message: "Failed to analyze conversation" });
+    }
+  });
+
+  // Apply adaptive action recommendations
+  app.post("/api/adaptive-actions/apply", async (req, res) => {
+    try {
+      const { recommendations } = req.body;
+      
+      if (!recommendations || !Array.isArray(recommendations)) {
+        return res.status(400).json({ message: "Invalid recommendations data" });
+      }
+      
+      const { applyAdaptiveRecommendations } = await import("./lib/adaptive-actions");
+      const result = await applyAdaptiveRecommendations(recommendations);
+      
+      res.json({
+        success: true,
+        applied: result.applied,
+        skipped: result.skipped,
+        message: `Applied ${result.applied} recommendations, skipped ${result.skipped}`
+      });
+    } catch (error) {
+      console.error("Apply adaptive actions error:", error);
+      res.status(500).json({ message: "Failed to apply recommendations" });
+    }
+  });
+
   // Chat endpoints
   app.get("/api/messages", async (req, res) => {
     try {
