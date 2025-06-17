@@ -692,35 +692,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Archived documents endpoints - MUST come before parameterized routes
-  app.get("/api/admin/documents/archived", requireAuth, async (req, res) => {
-    try {
-      const archivedDocs = await storage.getArchivedDocuments();
-      res.json(archivedDocs);
-    } catch (error) {
-      console.error("Error fetching archived documents:", error);
-      res.status(500).json({ message: "Failed to fetch archived documents" });
-    }
-  });
 
-  app.post("/api/admin/documents/archived/:id/restore", requireAuth, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      if (isNaN(id)) {
-        return res.status(400).json({ message: "Invalid archived document ID" });
-      }
-
-      const restored = await storage.restoreArchivedDocument(id);
-      if (restored) {
-        res.json({ message: "Document restored successfully", document: restored });
-      } else {
-        res.status(404).json({ message: "Archived document not found" });
-      }
-    } catch (error) {
-      console.error("Error restoring document:", error);
-      res.status(500).json({ message: "Failed to restore document" });
-    }
-  });
 
   app.put("/api/admin/documents/:id", requireAuth, async (req, res) => {
     try {
@@ -735,15 +707,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/admin/documents/:id", requireAuth, async (req, res) => {
+  app.patch("/api/admin/documents/:id/toggle-archive", requireAuth, async (req, res) => {
     try {
-      const success = await storage.deleteDocument(parseInt(req.params.id));
-      if (!success) {
+      const document = await storage.toggleDocumentArchive(parseInt(req.params.id));
+      if (!document) {
         return res.status(404).json({ message: "Document not found" });
       }
-      res.json({ message: "Document archived and deleted successfully" });
+      res.json({ 
+        message: document.isActive ? "Document restored successfully" : "Document archived successfully",
+        document 
+      });
     } catch (error) {
-      res.status(500).json({ message: "Failed to delete document" });
+      res.status(500).json({ message: "Failed to toggle document archive" });
     }
   });
 

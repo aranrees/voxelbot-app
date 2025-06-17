@@ -31,13 +31,9 @@ export interface IStorage {
   getDocument(id: number): Promise<Document | undefined>;
   createDocument(document: InsertDocument): Promise<Document>;
   updateDocument(id: number, document: Partial<InsertDocument>): Promise<Document | undefined>;
-  deleteDocument(id: number): Promise<boolean>;
+  toggleDocumentArchive(id: number): Promise<Document | undefined>;
   
-  // Archived Documents
-  getArchivedDocuments(): Promise<ArchivedDocument[]>;
-  getArchivedDocument(id: number): Promise<ArchivedDocument | undefined>;
-  archiveDocument(id: number, archivedBy?: string, reason?: string): Promise<boolean>;
-  restoreArchivedDocument(archivedId: number): Promise<Document | undefined>;
+
   
   // AI Instructions
   getAiInstructions(): Promise<AiInstruction[]>;
@@ -232,104 +228,36 @@ export class DatabaseStorage implements IStorage {
     return updated || undefined;
   }
 
-  async deleteDocument(id: number): Promise<boolean> {
+  async toggleDocumentArchive(id: number): Promise<Document | undefined> {
     try {
-      // Archive the document before deleting
-      const archived = await this.archiveDocument(id, 'system', 'deleted');
-      if (archived) {
-        const result = await db.delete(documents).where(eq(documents.id, id));
-        return (result.rowCount || 0) > 0;
-      }
-      return false;
-    } catch (error) {
-      console.error('Delete document error:', error);
-      return false;
-    }
-  }
-
-  async getArchivedDocuments(): Promise<ArchivedDocument[]> {
-    const results = await db
-      .select()
-      .from(archivedDocuments);
-    
-    // Sort by archived date in JavaScript
-    return results.sort((a, b) => new Date(b.archivedAt).getTime() - new Date(a.archivedAt).getTime());
-  }
-
-  async getArchivedDocument(id: number): Promise<ArchivedDocument | undefined> {
-    const [archived] = await db
-      .select()
-      .from(archivedDocuments)
-      .where(eq(archivedDocuments.id, id));
-    return archived || undefined;
-  }
-
-  async archiveDocument(id: number, archivedBy: string = 'system', reason: string = 'deleted'): Promise<boolean> {
-    try {
-      // Get the original document
-      const [original] = await db
+      // Get current document
+      const [current] = await db
         .select()
         .from(documents)
         .where(eq(documents.id, id));
       
-      if (!original) {
-        return false;
-      }
-
-      // Archive the document
-      await db.insert(archivedDocuments).values({
-        originalId: original.id,
-        title: original.title,
-        content: original.content,
-        type: original.type,
-        fileType: original.fileType,
-        filePath: original.filePath,
-        tags: original.tags,
-        originalCreatedAt: original.createdAt,
-        originalUpdatedAt: original.updatedAt,
-        archivedBy,
-        reason
-      });
-
-      return true;
-    } catch (error) {
-      console.error('Archive document error:', error);
-      return false;
-    }
-  }
-
-  async restoreArchivedDocument(archivedId: number): Promise<Document | undefined> {
-    try {
-      // Get the archived document
-      const [archived] = await db
-        .select()
-        .from(archivedDocuments)
-        .where(eq(archivedDocuments.id, archivedId));
-      
-      if (!archived) {
+      if (!current) {
         return undefined;
       }
 
-      // Restore the document
-      const [restored] = await db.insert(documents).values({
-        title: archived.title,
-        content: archived.content,
-        type: archived.type,
-        fileType: archived.fileType,
-        filePath: archived.filePath,
-        tags: archived.tags,
-        isActive: true
-      }).returning();
-
-      // Remove from archive
-      await db.delete(archivedDocuments).where(eq(archivedDocuments.id, archivedId));
-
-      return restored;
+      // Toggle the isActive status
+      const [updated] = await db
+        .update(documents)
+        .set({ 
+          isActive: !current.isActive,
+          updatedAt: new Date()
+        })
+        .where(eq(documents.id, id))
+        .returning();
+      
+      return updated;
     } catch (error) {
-      console.error('Restore document error:', error);
+      console.error('Toggle document archive error:', error);
       return undefined;
     }
   }
+
+
 
   async getAiInstructions(): Promise<AiInstruction[]> {
     const results = await db
