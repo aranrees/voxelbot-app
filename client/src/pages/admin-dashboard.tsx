@@ -38,10 +38,16 @@ export default function AdminDashboard() {
   const [quickActionForm, setQuickActionForm] = useState<{
     label: string;
     message: string;
+    contextKeywords?: string[];
+    contextType?: string;
+    suggestionWeight?: number;
     isActive: boolean;
   }>({
     label: "",
     message: "",
+    contextKeywords: [],
+    contextType: "general",
+    suggestionWeight: 5,
     isActive: true
   });
 
@@ -478,6 +484,9 @@ export default function AdminDashboard() {
     setQuickActionForm({
       label: "",
       message: "",
+      contextKeywords: [],
+      contextType: "general",
+      suggestionWeight: 5,
       isActive: true
     });
     setEditingQuickAction(null);
@@ -487,6 +496,9 @@ export default function AdminDashboard() {
     setQuickActionForm({
       label: action.label,
       message: action.message,
+      contextKeywords: action.contextKeywords || [],
+      contextType: action.contextType || "general",
+      suggestionWeight: action.suggestionWeight || 5,
       isActive: action.isActive
     });
     setEditingQuickAction(action);
@@ -1389,6 +1401,50 @@ export default function AdminDashboard() {
                         required
                       />
                     </div>
+                    <div>
+                      <Label htmlFor="context-keywords">Context Keywords (comma-separated)</Label>
+                      <Input
+                        id="context-keywords"
+                        value={quickActionForm.contextKeywords?.join(', ') || ''}
+                        onChange={(e) => setQuickActionForm({ 
+                          ...quickActionForm, 
+                          contextKeywords: e.target.value.split(',').map(k => k.trim()).filter(k => k) 
+                        })}
+                        placeholder="meeting, appointment, schedule, calendar"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">Keywords that trigger this suggestion</p>
+                    </div>
+                    <div>
+                      <Label htmlFor="context-type">Context Type</Label>
+                      <Select 
+                        value={quickActionForm.contextType || 'general'} 
+                        onValueChange={(value) => setQuickActionForm({ ...quickActionForm, contextType: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select context type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="general">General</SelectItem>
+                          <SelectItem value="question">Question</SelectItem>
+                          <SelectItem value="request">Request</SelectItem>
+                          <SelectItem value="problem">Problem</SelectItem>
+                          <SelectItem value="pricing">Pricing</SelectItem>
+                          <SelectItem value="scheduling">Scheduling</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="suggestion-weight">Suggestion Weight (1-10)</Label>
+                      <Input
+                        id="suggestion-weight"
+                        type="number"
+                        min="1"
+                        max="10"
+                        value={quickActionForm.suggestionWeight || 5}
+                        onChange={(e) => setQuickActionForm({ ...quickActionForm, suggestionWeight: parseInt(e.target.value) || 5 })}
+                      />
+                      <p className="text-xs text-gray-500 mt-1">Higher weights appear more often in suggestions</p>
+                    </div>
                     <div className="flex items-center space-x-2">
                       <Switch
                         id="action-active"
@@ -1453,9 +1509,39 @@ export default function AdminDashboard() {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-gray-700 dark:text-gray-300 text-sm">
+                    <p className="text-gray-700 dark:text-gray-300 text-sm mb-3">
                       {action.message}
                     </p>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-xs">
+                        <span className="font-medium text-gray-600 dark:text-gray-400">Context:</span>
+                        <span className={`px-2 py-1 rounded text-xs ${
+                          action.contextType === 'scheduling' ? 'bg-blue-100 text-blue-800' :
+                          action.contextType === 'pricing' ? 'bg-green-100 text-green-800' :
+                          action.contextType === 'problem' ? 'bg-red-100 text-red-800' :
+                          action.contextType === 'question' ? 'bg-purple-100 text-purple-800' :
+                          action.contextType === 'request' ? 'bg-orange-100 text-orange-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          {action.contextType || 'general'}
+                        </span>
+                        <span className="font-medium text-gray-600 dark:text-gray-400 ml-2">Weight:</span>
+                        <span className="text-gray-700 dark:text-gray-300">{action.suggestionWeight || 5}/10</span>
+                      </div>
+                      {action.contextKeywords && action.contextKeywords.length > 0 && (
+                        <div className="flex flex-wrap gap-1">
+                          <span className="text-xs text-gray-600 dark:text-gray-400 mr-1">Keywords:</span>
+                          {action.contextKeywords.slice(0, 3).map((keyword, index) => (
+                            <span key={index} className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 px-2 py-1 rounded">
+                              {keyword}
+                            </span>
+                          ))}
+                          {action.contextKeywords.length > 3 && (
+                            <span className="text-xs text-gray-500 dark:text-gray-400">+{action.contextKeywords.length - 3} more</span>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </CardContent>
                 </Card>
               ))}
