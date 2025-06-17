@@ -14,7 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Moon, Sun, Plus, Edit, Trash2, FileText, Brain, LogOut, MessageSquare, Zap, Heart, Upload, Download, Image, File, Calendar, Settings } from "lucide-react";
+import { Moon, Sun, Plus, Edit, Trash2, FileText, Brain, LogOut, MessageSquare, Zap, Heart, Upload, Download, Image, File, Calendar, Settings, RotateCcw } from "lucide-react";
 import type { Document, AiInstruction, QuickAction, Availability, StandardResponse, InsertDocument, InsertAiInstruction, InsertQuickAction, InsertAvailability, InsertStandardResponse, FileAsset, InsertFileAsset } from "@shared/schema";
 
 export default function AdminDashboard() {
@@ -778,9 +778,19 @@ export default function AdminDashboard() {
 
           <TabsContent value="documents" className="space-y-6">
             <div className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-                Knowledge Base Documents
-              </h3>
+              <div className="flex items-center space-x-4">
+                <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                  Knowledge Base Documents
+                </h3>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowArchivedDocuments(!showArchivedDocuments)}
+                  className="border-gray-400 dark:border-gray-600"
+                >
+                  {showArchivedDocuments ? "Show Active" : "Show Archived"}
+                </Button>
+              </div>
               <Dialog open={showDocumentDialog} onOpenChange={setShowDocumentDialog}>
                 <DialogTrigger asChild>
                   <Button onClick={resetDocumentForm} className="bg-black hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-black">
@@ -879,73 +889,135 @@ export default function AdminDashboard() {
             </div>
 
             <div className="grid gap-6">
-              {documents.map((document) => (
-                <Card key={document.id} className="border-gray-400 dark:border-gray-600 bg-white dark:bg-gray-800">
-                  <CardHeader>
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <CardTitle className="text-lg font-medium text-gray-800 dark:text-gray-200">
-                          {document.title}
-                        </CardTitle>
-                        <div className="flex items-center space-x-2 mt-1">
-                          <Badge variant="outline">{document.type}</Badge>
-                          {document.fileType === 'pdf' && (
-                            <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">PDF</Badge>
-                          )}
-                          <span className={`text-xs px-2 py-1 rounded ${document.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>
-                            {document.isActive ? 'Active' : 'Inactive'}
-                          </span>
+              {!showArchivedDocuments ? (
+                <>
+                  {documents.map((document) => (
+                    <Card key={document.id} className="border-gray-400 dark:border-gray-600 bg-white dark:bg-gray-800">
+                      <CardHeader>
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <CardTitle className="text-lg font-medium text-gray-800 dark:text-gray-200">
+                              {document.title}
+                            </CardTitle>
+                            <div className="flex items-center space-x-2 mt-1">
+                              <Badge variant="outline">{document.type}</Badge>
+                              {document.fileType === 'pdf' && (
+                                <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">PDF</Badge>
+                              )}
+                              <span className={`text-xs px-2 py-1 rounded ${document.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>
+                                {document.isActive ? 'Active' : 'Inactive'}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex space-x-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => editDocument(document)}
+                              className="border-gray-400 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setDeleteConfirmDialog({
+                                isOpen: true,
+                                documentId: document.id,
+                                documentTitle: document.title
+                              })}
+                              className="border-gray-400 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
                         </div>
-                      </div>
-                      <div className="flex space-x-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => editDocument(document)}
-                          className="border-gray-400 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => setDeleteConfirmDialog({
-                            isOpen: true,
-                            documentId: document.id,
-                            documentTitle: document.title
-                          })}
-                          className="border-gray-400 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-gray-700 dark:text-gray-300 mb-3 line-clamp-3">
-                      {document.content}
-                    </p>
-                    {document.tags && document.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-2">
-                        {document.tags.map((tag, index) => (
-                          <Badge key={index} variant="outline">
-                            {tag}
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
-              {documents.length === 0 && (
-                <Card className="border-gray-400 dark:border-gray-600 bg-white dark:bg-gray-800">
-                  <CardContent className="text-center py-8">
-                    <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600 dark:text-gray-400">
-                      No documents yet. Add your first document to enhance the AI's knowledge base.
-                    </p>
-                  </CardContent>
-                </Card>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-gray-700 dark:text-gray-300 mb-3 line-clamp-3">
+                          {document.content}
+                        </p>
+                        {document.tags && document.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-2">
+                            {document.tags.map((tag, index) => (
+                              <Badge key={index} variant="outline">
+                                {tag}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+                  {documents.length === 0 && (
+                    <Card className="border-gray-400 dark:border-gray-600 bg-white dark:bg-gray-800">
+                      <CardContent className="text-center py-8">
+                        <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                        <p className="text-gray-600 dark:text-gray-400">
+                          No documents yet. Add your first document to enhance the AI's knowledge base.
+                        </p>
+                      </CardContent>
+                    </Card>
+                  )}
+                </>
+              ) : (
+                <>
+                  {archivedDocuments.map((archived) => (
+                    <Card key={archived.id} className="border-gray-400 dark:border-gray-600 bg-gray-50 dark:bg-gray-700">
+                      <CardHeader>
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <CardTitle className="text-lg font-medium text-gray-800 dark:text-gray-200 flex items-center space-x-2">
+                              <span>{archived.title}</span>
+                              <Badge variant="secondary">Archived</Badge>
+                            </CardTitle>
+                            <div className="flex items-center space-x-2 mt-1">
+                              <Badge variant="outline">{archived.type}</Badge>
+                              <span className="text-xs text-gray-500">
+                                Archived: {new Date(archived.archivedAt).toLocaleDateString()}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex space-x-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => restoreDocumentMutation.mutate(archived.id)}
+                              className="border-gray-400 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                              disabled={restoreDocumentMutation.isPending}
+                            >
+                              <RotateCcw className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-gray-600 dark:text-gray-400 mb-3 line-clamp-3">
+                          {archived.content}
+                        </p>
+                        {archived.tags && archived.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-2">
+                            {archived.tags.map((tag, index) => (
+                              <Badge key={index} variant="outline">
+                                {tag}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+                  {archivedDocuments.length === 0 && (
+                    <Card className="border-gray-400 dark:border-gray-600 bg-white dark:bg-gray-800">
+                      <CardContent className="text-center py-8">
+                        <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                        <p className="text-gray-600 dark:text-gray-400">
+                          No archived documents. Deleted documents will appear here and can be restored.
+                        </p>
+                      </CardContent>
+                    </Card>
+                  )}
+                </>
               )}
             </div>
           </TabsContent>
@@ -2104,6 +2176,45 @@ export default function AdminDashboard() {
 
         </Tabs>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteConfirmDialog.isOpen} onOpenChange={(open) => 
+        setDeleteConfirmDialog({ ...deleteConfirmDialog, isOpen: open })
+      }>
+        <DialogContent className="bg-white dark:bg-gray-800 border border-gray-400 dark:border-gray-600">
+          <DialogHeader>
+            <DialogTitle className="text-gray-800 dark:text-gray-200">
+              Confirm Document Deletion
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-gray-700 dark:text-gray-300">
+              Are you sure you want to delete "{deleteConfirmDialog.documentTitle}"? 
+              This document will be archived and can be restored later if needed.
+            </p>
+            <div className="flex justify-end space-x-2">
+              <Button
+                variant="outline"
+                onClick={() => setDeleteConfirmDialog({ isOpen: false, documentId: null, documentTitle: "" })}
+                className="border-gray-400 dark:border-gray-600"
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  if (deleteConfirmDialog.documentId) {
+                    deleteDocumentMutation.mutate(deleteConfirmDialog.documentId);
+                  }
+                }}
+                disabled={deleteDocumentMutation.isPending}
+              >
+                {deleteDocumentMutation.isPending ? "Deleting..." : "Delete & Archive"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
