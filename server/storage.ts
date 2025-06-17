@@ -249,15 +249,25 @@ export class DatabaseStorage implements IStorage {
 
   async getArchivedDocuments(): Promise<ArchivedDocument[]> {
     try {
-      console.log("Starting getArchivedDocuments query...");
+      console.log("=== STORAGE: Starting getArchivedDocuments query ===");
+      
+      // First try a raw SQL query to test connection
+      const rawResults = await db.execute(sql`SELECT * FROM archived_documents`);
+      console.log("=== STORAGE: Raw SQL results count:", rawResults.rows.length, "===");
+      
+      // Now try the Drizzle query
       const results = await db
         .select()
         .from(archivedDocuments);
-      console.log("Query completed, found", results.length, "archived documents");
+      console.log("=== STORAGE: Drizzle query completed, found", results.length, "archived documents ===");
+      
       // Sort by archived date in JavaScript instead of SQL
-      return results.sort((a, b) => new Date(b.archivedAt).getTime() - new Date(a.archivedAt).getTime());
+      const sorted = results.sort((a, b) => new Date(b.archivedAt).getTime() - new Date(a.archivedAt).getTime());
+      console.log("=== STORAGE: Returning sorted results ===");
+      return sorted;
     } catch (error) {
-      console.error("Error in getArchivedDocuments:", error);
+      console.error("=== STORAGE ERROR in getArchivedDocuments ===", error);
+      console.error("=== STORAGE ERROR STACK ===", error instanceof Error ? error.stack : "No stack");
       throw error;
     }
   }
