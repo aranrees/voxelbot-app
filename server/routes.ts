@@ -8,6 +8,8 @@ import path from "path";
 import { fileURLToPath } from 'url';
 import multer from "multer";
 import fs from "fs";
+import { scrypt, randomBytes, timingSafeEqual } from "crypto";
+import { promisify } from "util";
 // PDF text extraction will be implemented with a different approach
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -528,8 +530,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Verify current password using the same method as auth.ts
-      const { scrypt, randomBytes, timingSafeEqual } = require("crypto");
-      const { promisify } = require("util");
       const scryptAsync = promisify(scrypt);
       
       const [hashed, salt] = user.password.split(".");
