@@ -39,6 +39,7 @@ export interface IStorage {
   getAiInstructions(): Promise<AiInstruction[]>;
   getActiveAiInstructions(): Promise<AiInstruction[]>;
   getWelcomeMessage(): Promise<string>;
+  getGreetingMessage(): Promise<string>;
   getAiInstruction(id: number): Promise<AiInstruction | undefined>;
   createAiInstruction(instruction: InsertAiInstruction): Promise<AiInstruction>;
   updateAiInstruction(id: number, instruction: Partial<InsertAiInstruction>): Promise<AiInstruction | undefined>;
@@ -289,6 +290,22 @@ export class DatabaseStorage implements IStorage {
     }
     
     // Return empty string if no welcome message is configured
+    return "";
+  }
+
+  async getGreetingMessage(): Promise<string> {
+    const results = await db
+      .select()
+      .from(aiInstructions)
+      .where(sql`${aiInstructions.isActive} = true AND ${aiInstructions.category} = 'greeting'`)
+      .orderBy(desc(aiInstructions.priority))
+      .limit(1);
+    
+    if (results.length > 0) {
+      return results[0].instruction;
+    }
+    
+    // Return empty string if no greeting message is configured
     return "";
   }
 

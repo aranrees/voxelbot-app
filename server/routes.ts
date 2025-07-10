@@ -107,6 +107,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Greeting message endpoint
+  app.get("/api/greeting-message", async (req, res) => {
+    try {
+      const greetingMessage = await storage.getGreetingMessage();
+      res.json({ message: greetingMessage });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch greeting message" });
+    }
+  });
+
+  // Add greeting message to chat
+  app.post("/api/greeting", async (req, res) => {
+    try {
+      const { sessionId, content } = req.body;
+      
+      if (!content || !content.trim()) {
+        return res.status(400).json({ message: "Content is required" });
+      }
+
+      // Set session ID if provided
+      if (sessionId) {
+        (req.session as any).chatSessionId = sessionId;
+      }
+
+      const message = await storage.createChatMessage({
+        content: content.trim(),
+        role: "assistant",
+        sessionId: sessionId || (req.session as any).chatSessionId
+      });
+
+      res.json(message);
+    } catch (error) {
+      console.error("Error adding greeting message:", error);
+      res.status(500).json({ message: "Failed to add greeting message" });
+    }
+  });
+
   // Smart suggestions endpoint
   app.get("/api/smart-suggestions", async (req, res) => {
     try {

@@ -1218,7 +1218,7 @@ export default function AdminDashboard() {
                       <Label htmlFor="instruction-category">Category</Label>
                       <Select
                         value={instructionForm.category}
-                        onValueChange={(value) => setInstructionForm({ ...instructionForm, category: value as "general" | "tone" | "behavior" | "knowledge" | "restrictions" })}
+                        onValueChange={(value) => setInstructionForm({ ...instructionForm, category: value as "general" | "tone" | "behavior" | "knowledge" | "restrictions" | "welcome" | "greeting" })}
                       >
                         <SelectTrigger>
                           <SelectValue />
@@ -1229,6 +1229,8 @@ export default function AdminDashboard() {
                           <SelectItem value="behavior">Behavior</SelectItem>
                           <SelectItem value="knowledge">Knowledge</SelectItem>
                           <SelectItem value="restrictions">Restrictions</SelectItem>
+                          <SelectItem value="welcome">Welcome</SelectItem>
+                          <SelectItem value="greeting">Greeting (Auto-loads when page opens)</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>

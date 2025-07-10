@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Moon, Sun, Send, Phone, Mail, MapPin, Clock, Download, Calendar, Mic, Heart, Settings, RotateCcw } from "lucide-react";
+import { Moon, Sun, Send, Phone, Mail, MapPin, Clock, Download, Calendar, Heart, Settings, RotateCcw } from "lucide-react";
 import type { QuickAction } from "@shared/schema";
 
 interface ChatMessage {
@@ -73,6 +73,11 @@ export function ChatInterface() {
   // Fetch welcome message
   const { data: welcomeData } = useQuery<{ message: string }>({
     queryKey: ["/api/welcome-message"],
+  });
+
+  // Fetch greeting message
+  const { data: greetingData } = useQuery<{ message: string }>({
+    queryKey: ["/api/greeting-message"],
   });
 
   // Fetch smart suggestions based on conversation context
@@ -170,7 +175,7 @@ export function ChatInterface() {
     },
   });
 
-  // Initialize chat session
+  // Initialize chat session and add greeting message
   useEffect(() => {
     const sessionId = `chat-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     setChatSessionId(sessionId);
@@ -178,6 +183,27 @@ export function ChatInterface() {
     setLastActivity(now);
     startInactivityTimer();
   }, []);
+
+  // Add greeting message when it loads and there are no messages
+  useEffect(() => {
+    if (greetingData?.message && greetingData.message.trim() && messages.length === 0 && chatSessionId) {
+      // Create greeting message directly via API
+      const addGreeting = async () => {
+        try {
+          await apiRequest("POST", "/api/greeting", {
+            sessionId: chatSessionId,
+            content: greetingData.message
+          });
+          // Refetch messages to include the greeting
+          queryClient.invalidateQueries({ queryKey: ["/api/messages"] });
+        } catch (error) {
+          console.error("Failed to add greeting message:", error);
+        }
+      };
+      
+      addGreeting();
+    }
+  }, [greetingData, messages.length, chatSessionId]);
 
   const startInactivityTimer = () => {
     // Clear existing timer
@@ -583,17 +609,10 @@ export function ChatInterface() {
                 placeholder="Type your message here..."
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                className={`${sizeClasses.input} pr-12 rounded-xl ${bonkersColors ? bonkersColors.buttonBg : 'bg-gray-50 dark:bg-gray-700'} border-0 shadow-inner`}
+                className={`${sizeClasses.input} rounded-xl ${bonkersColors ? bonkersColors.buttonBg : 'bg-gray-50 dark:bg-gray-700'} border-0 shadow-inner`}
                 style={{ fontSize: interfaceSize === 'extra-large' ? '1.25rem' : interfaceSize === 'large' ? '1.125rem' : '1rem' }}
               />
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className={`absolute right-2 top-1/2 transform -translate-y-1/2 ${sizeClasses.icon}`}
-              >
-                <Mic className={`${sizeClasses.icon} text-gray-400`} />
-              </Button>
+
             </div>
             <Button
               type="submit"
