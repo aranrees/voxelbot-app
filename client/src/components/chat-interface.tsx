@@ -513,8 +513,8 @@ export function ChatInterface() {
                   {formatTime(msg.timestamp)}
                 </span>
                 
-                {/* Action Buttons for specific bot responses */}
-                {msg.role === "assistant" && (
+                {/* Action Buttons for specific bot responses - exclude first message (greeting) */}
+                {msg.role === "assistant" && msg.id !== messages[0]?.id && (
                   <div className={`${sizeClasses.spacing} mt-3`}>
                     {/* Admin Dashboard Button */}
                     {(msg.content.toLowerCase().includes("admin dashboard") || msg.content.toLowerCase().includes("admin access")) && (

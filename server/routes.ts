@@ -117,7 +117,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Add greeting message to chat
+  // Add greeting message to chat (direct, no AI processing)
   app.post("/api/greeting", async (req, res) => {
     try {
       const { sessionId, content } = req.body;
@@ -131,8 +131,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         (req.session as any).chatSessionId = sessionId;
       }
 
+      // Add greeting message directly without AI processing
       const message = await storage.createChatMessage({
-        content: content.trim(),
+        content: content.trim(), // Use exact content from greeting instruction
         role: "assistant",
         sessionId: sessionId || (req.session as any).chatSessionId
       });
