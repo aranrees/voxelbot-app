@@ -65,7 +65,7 @@ export function setupAuth(app: Express) {
       if (!adminUser) {
         await storage.createUser({
           username: "owner",
-          password: await hashPassword("owner123"),
+          password: await hashPassword("rAzqi8-wiqmab-qicjox"),
         });
       }
     } catch (error) {

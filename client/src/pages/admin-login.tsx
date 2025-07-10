@@ -15,7 +15,7 @@ export default function AdminLogin() {
   
   const [credentials, setCredentials] = useState({
     username: "owner",
-    password: "owner123"
+    password: "rAzqi8-wiqmab-qicjox"
   });
 
   useEffect(() => {
@@ -89,6 +89,12 @@ export default function AdminLogin() {
               >
                 {loginMutation.isPending ? "Signing in..." : "Sign In"}
               </Button>
+              
+              {loginMutation.error && (
+                <div className="text-red-600 dark:text-red-400 text-sm text-center mt-2">
+                  {loginMutation.error.message}
+                </div>
+              )}
             </form>
             
             <div className="mt-6 text-center">
