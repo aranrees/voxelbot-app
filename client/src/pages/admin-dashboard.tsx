@@ -15,7 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Moon, Sun, Plus, Edit, Trash2, FileText, Brain, LogOut, MessageSquare, Zap, Heart, Upload, Download, Image, File, Calendar, Settings, RotateCcw } from "lucide-react";
-import type { Document, AiInstruction, QuickAction, Availability, StandardResponse, InsertDocument, InsertAiInstruction, InsertQuickAction, InsertAvailability, InsertStandardResponse, FileAsset, InsertFileAsset } from "@shared/schema";
+import type { Document, AiInstruction, QuickAction, StandardResponse, InsertDocument, InsertAiInstruction, InsertQuickAction, InsertStandardResponse, FileAsset, InsertFileAsset } from "@shared/schema";
 
 export default function AdminDashboard() {
   const { user, logoutMutation } = useAuth();
@@ -27,12 +27,10 @@ export default function AdminDashboard() {
   const [showFileUploadDialog, setShowFileUploadDialog] = useState(false);
   const [showInstructionDialog, setShowInstructionDialog] = useState(false);
   const [showQuickActionDialog, setShowQuickActionDialog] = useState(false);
-  const [showAvailabilityDialog, setShowAvailabilityDialog] = useState(false);
   const [showStandardResponseDialog, setShowStandardResponseDialog] = useState(false);
   const [editingDocument, setEditingDocument] = useState<Document | null>(null);
   const [editingInstruction, setEditingInstruction] = useState<AiInstruction | null>(null);
   const [editingQuickAction, setEditingQuickAction] = useState<QuickAction | null>(null);
-  const [editingAvailability, setEditingAvailability] = useState<Availability | null>(null);
   const [editingStandardResponse, setEditingStandardResponse] = useState<StandardResponse | null>(null);
 
   const [quickActionForm, setQuickActionForm] = useState<{
@@ -51,25 +49,7 @@ export default function AdminDashboard() {
     isActive: true
   });
 
-  const [availabilityForm, setAvailabilityForm] = useState<{
-    type: "specific" | "recurring";
-    date: string;
-    dayOfWeek: "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
-    daysOfWeek: string[];
-    startTime: string;
-    endTime: string;
-    isAvailable: boolean;
-    note: string;
-  }>({
-    type: "specific",
-    date: "",
-    dayOfWeek: "monday",
-    daysOfWeek: [],
-    startTime: "09:00",
-    endTime: "17:00",
-    isAvailable: true,
-    note: ""
-  });
+
 
   const [standardResponseForm, setStandardResponseForm] = useState<{
     title: string;
@@ -125,6 +105,17 @@ export default function AdminDashboard() {
 
 
   const [showArchivedDocuments, setShowArchivedDocuments] = useState(false);
+  
+  // Filtering state for Infomage Data tab
+  const [dataFilter, setDataFilter] = useState<{
+    type: "all" | "knowledge" | "instructions";
+    sortBy: "recent" | "priority" | "active" | "type";
+    status: "all" | "active" | "inactive";
+  }>({
+    type: "all",
+    sortBy: "recent", 
+    status: "all"
+  });
 
   // Fetch documents
   const { data: allDocuments = [] } = useQuery<Document[]>({
@@ -155,19 +146,9 @@ export default function AdminDashboard() {
     queryKey: ["/api/admin/quick-actions"],
   });
 
-  // Fetch availability
-  const { data: availability = [] } = useQuery<Availability[]>({
-    queryKey: ["/api/admin/availability"],
-  });
-
   // Fetch standard responses
   const { data: standardResponses = [] } = useQuery<StandardResponse[]>({
     queryKey: ["/api/admin/standard-responses"],
-  });
-
-  // Fetch meeting requests
-  const { data: meetingRequests = [] } = useQuery<any[]>({
-    queryKey: ["/api/admin/meeting-requests"],
   });
 
   // Document mutations
@@ -756,17 +737,222 @@ export default function AdminDashboard() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Tabs defaultValue="documents" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-8 bg-gray-100 dark:bg-gray-800 border border-gray-400 dark:border-gray-600">
-            <TabsTrigger value="documents" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">Documents</TabsTrigger>
+        <Tabs defaultValue="infomage-data" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-5 bg-gray-100 dark:bg-gray-800 border border-gray-400 dark:border-gray-600">
+            <TabsTrigger value="infomage-data" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">Infomage Data</TabsTrigger>
             <TabsTrigger value="files" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">Downloads</TabsTrigger>
-            <TabsTrigger value="instructions" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">AI Instructions</TabsTrigger>
-            <TabsTrigger value="chats" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">Chats</TabsTrigger>
             <TabsTrigger value="quick-actions" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">Quick Actions</TabsTrigger>
-            <TabsTrigger value="availability" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">Availability</TabsTrigger>
             <TabsTrigger value="standard-responses" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">Standard Responses</TabsTrigger>
-            <TabsTrigger value="meeting-requests" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">Meeting Requests</TabsTrigger>
+            <TabsTrigger value="chats" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">Chat History</TabsTrigger>
           </TabsList>
+
+          {/* Combined Infomage Data Tab - Knowledge + Instructions */}
+          <TabsContent value="infomage-data" className="space-y-6">
+            {/* Filter Controls */}
+            <div className="flex flex-wrap gap-4 items-center justify-between">
+              <div className="flex flex-wrap gap-4 items-center">
+                <div className="flex items-center space-x-2">
+                  <Label htmlFor="data-type-filter">Type:</Label>
+                  <Select value={dataFilter.type} onValueChange={(value: any) => setDataFilter({ ...dataFilter, type: value })}>
+                    <SelectTrigger className="w-40">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Items</SelectItem>
+                      <SelectItem value="knowledge">Knowledge Only</SelectItem>
+                      <SelectItem value="instructions">Instructions Only</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Label htmlFor="data-sort-filter">Sort by:</Label>
+                  <Select value={dataFilter.sortBy} onValueChange={(value: any) => setDataFilter({ ...dataFilter, sortBy: value })}>
+                    <SelectTrigger className="w-40">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="recent">Recently Updated</SelectItem>
+                      <SelectItem value="priority">Priority</SelectItem>
+                      <SelectItem value="active">Active Status</SelectItem>
+                      <SelectItem value="type">Type</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Label htmlFor="data-status-filter">Status:</Label>
+                  <Select value={dataFilter.status} onValueChange={(value: any) => setDataFilter({ ...dataFilter, status: value })}>
+                    <SelectTrigger className="w-40">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Status</SelectItem>
+                      <SelectItem value="active">Active Only</SelectItem>
+                      <SelectItem value="inactive">Inactive Only</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              
+              <div className="flex gap-2">
+                <Dialog open={showDocumentDialog} onOpenChange={setShowDocumentDialog}>
+                  <DialogTrigger asChild>
+                    <Button 
+                      onClick={() => {
+                        resetDocumentForm();
+                        setShowDocumentDialog(true);
+                      }}
+                      className="bg-black hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-black"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Knowledge
+                    </Button>
+                  </DialogTrigger>
+                </Dialog>
+                
+                <Dialog open={showInstructionDialog} onOpenChange={setShowInstructionDialog}>
+                  <DialogTrigger asChild>
+                    <Button 
+                      onClick={() => {
+                        resetInstructionForm();
+                        setShowInstructionDialog(true);
+                      }}
+                      className="bg-black hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-black"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Instruction
+                    </Button>
+                  </DialogTrigger>
+                </Dialog>
+              </div>
+            </div>
+
+            <div className="grid gap-6">
+              {(() => {
+                // Combine documents and instructions into a single filtered list
+                const knowledgeItems = documents
+                  .filter(doc => dataFilter.status === "all" || (dataFilter.status === "active" ? doc.isActive : !doc.isActive))
+                  .map(doc => ({ ...doc, itemType: "knowledge" as const, updatedAt: doc.updatedAt || doc.createdAt }));
+                
+                const instructionItems = aiInstructions
+                  .filter(inst => dataFilter.status === "all" || (dataFilter.status === "active" ? inst.isActive : !inst.isActive))
+                  .map(inst => ({ ...inst, itemType: "instructions" as const, updatedAt: inst.updatedAt || inst.createdAt }));
+                
+                let combinedItems = [...knowledgeItems, ...instructionItems];
+                
+                // Apply type filter
+                if (dataFilter.type !== "all") {
+                  combinedItems = combinedItems.filter(item => item.itemType === dataFilter.type);
+                }
+                
+                // Apply sorting
+                combinedItems.sort((a, b) => {
+                  switch (dataFilter.sortBy) {
+                    case "recent":
+                      return new Date(b.updatedAt || b.createdAt).getTime() - new Date(a.updatedAt || a.createdAt).getTime();
+                    case "priority":
+                      const aPriority = "priority" in a ? a.priority : 1;
+                      const bPriority = "priority" in b ? b.priority : 1;
+                      return bPriority - aPriority;
+                    case "active":
+                      return Number(b.isActive) - Number(a.isActive);
+                    case "type":
+                      return a.itemType.localeCompare(b.itemType);
+                    default:
+                      return 0;
+                  }
+                });
+                
+                return combinedItems.length > 0 ? combinedItems.map((item) => (
+                  <Card key={`${item.itemType}-${item.id}`} className="border-gray-400 dark:border-gray-600 bg-white dark:bg-gray-800">
+                    <CardHeader>
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <CardTitle className="text-lg font-medium text-gray-800 dark:text-gray-200">
+                            {item.title}
+                          </CardTitle>
+                          <div className="flex items-center space-x-2 mt-1">
+                            <Badge variant="outline" className={item.itemType === "knowledge" ? "bg-blue-50 text-blue-700 border-blue-200" : "bg-purple-50 text-purple-700 border-purple-200"}>
+                              {item.itemType === "knowledge" ? "Knowledge" : "AI Instruction"}
+                            </Badge>
+                            {item.itemType === "knowledge" && (
+                              <Badge variant="outline">{(item as any).type}</Badge>
+                            )}
+                            {item.itemType === "instructions" && (
+                              <>
+                                <Badge variant="outline">{(item as any).category || "general"}</Badge>
+                                <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">
+                                  Priority: {(item as any).priority}
+                                </Badge>
+                              </>
+                            )}
+                            <span className={`text-xs px-2 py-1 rounded ${item.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>
+                              {item.isActive ? 'Active' : 'Inactive'}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex space-x-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => item.itemType === "knowledge" ? editDocument(item as any) : editInstruction(item as any)}
+                            className="border-gray-400 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          {item.itemType === "knowledge" ? (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => toggleDocumentArchiveMutation.mutate(item.id)}
+                              disabled={toggleDocumentArchiveMutation.isPending}
+                              className="border-gray-400 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          ) : (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => deleteInstructionMutation.mutate(item.id)}
+                              disabled={deleteInstructionMutation.isPending}
+                              className="border-gray-400 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-gray-700 dark:text-gray-300 mb-3 line-clamp-3">
+                        {item.itemType === "knowledge" ? (item as any).content : (item as any).instruction}
+                      </p>
+                      {item.itemType === "knowledge" && (item as any).tags && (item as any).tags.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                          {(item as any).tags.map((tag: string, index: number) => (
+                            <Badge key={index} variant="outline">
+                              {tag}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                )) : (
+                  <Card className="border-gray-400 dark:border-gray-600 bg-white dark:bg-gray-800">
+                    <CardContent className="text-center py-8">
+                      <Brain className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                      <p className="text-gray-600 dark:text-gray-400">
+                        No {dataFilter.type === "all" ? "data" : dataFilter.type} found with the current filters.
+                      </p>
+                    </CardContent>
+                  </Card>
+                );
+              })()}
+            </div>
+          </TabsContent>
 
           <TabsContent value="documents" className="space-y-6">
             <div className="flex justify-between items-center">
