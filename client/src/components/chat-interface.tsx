@@ -603,9 +603,9 @@ export function ChatInterface() {
                 className={`${sizeClasses.input} rounded-xl border shadow-inner px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50`}
                 style={{ 
                   fontSize: interfaceSize === 'extra-large' ? '1.25rem' : interfaceSize === 'large' ? '1.125rem' : '1rem',
-                  backgroundColor: bonkersColors ? bonkersColors.buttonBg : (theme === 'dark' ? '#374151' : '#ffffff'),
-                  color: bonkersColors ? '#000000' : (theme === 'dark' ? '#f3f4f6' : '#111827'),
-                  borderColor: theme === 'dark' ? '#4b5563' : '#d1d5db'
+                  backgroundColor: bonkersColors ? bonkersColors.buttonBg : '#ffffff',
+                  color: bonkersColors ? '#000000' : '#111827',
+                  borderColor: '#d1d5db'
                 }}
               />
 
