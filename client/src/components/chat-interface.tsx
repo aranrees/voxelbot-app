@@ -595,13 +595,18 @@ export function ChatInterface() {
         <CardContent className={`${sizeClasses.padding} ${bonkersColors ? bonkersColors.inputBg : 'bg-white dark:bg-gray-800'} rounded-b-lg shadow-sm`}>
           <form onSubmit={handleSendMessage} className="flex space-x-3">
             <div className="flex-1 relative">
-              <Input
+              <input
                 type="text"
                 placeholder="Type your message here..."
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                className={`${sizeClasses.input} rounded-xl ${bonkersColors ? bonkersColors.buttonBg : 'bg-background text-gray-900 dark:text-gray-100'} border border-input shadow-inner`}
-                style={{ fontSize: interfaceSize === 'extra-large' ? '1.25rem' : interfaceSize === 'large' ? '1.125rem' : '1rem' }}
+                className={`${sizeClasses.input} rounded-xl border shadow-inner px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50`}
+                style={{ 
+                  fontSize: interfaceSize === 'extra-large' ? '1.25rem' : interfaceSize === 'large' ? '1.125rem' : '1rem',
+                  backgroundColor: bonkersColors ? bonkersColors.buttonBg : (theme === 'dark' ? '#374151' : '#ffffff'),
+                  color: bonkersColors ? '#000000' : (theme === 'dark' ? '#f3f4f6' : '#111827'),
+                  borderColor: theme === 'dark' ? '#4b5563' : '#d1d5db'
+                }}
               />
 
             </div>
