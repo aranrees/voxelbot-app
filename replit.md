@@ -25,6 +25,11 @@ Preferred communication style: Simple, everyday language.
 - **Session Storage**: PostgreSQL-backed sessions using connect-pg-simple
 - **API Design**: RESTful endpoints with comprehensive CRUD operations
 
+### Recent Changes (Jan 14, 2025)
+- **Fixed Authentication Timing Issue**: Resolved session synchronization problem where admin queries executed before authentication was fully established
+- **Enhanced Query Invalidation**: Added automatic cache invalidation after login to ensure all admin data loads properly
+- **Added Contact Info Management**: New admin tab for managing chat interface contact information and download buttons
+
 ### Database Strategy
 - **ORM**: Drizzle ORM for type-safe database operations
 - **Database**: PostgreSQL (configured for Neon serverless)
