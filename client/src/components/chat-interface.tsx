@@ -11,6 +11,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Moon, Sun, Send, Phone, Mail, MapPin, Clock, Download, Calendar, Heart, Settings, RotateCcw } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import type { QuickAction } from "@shared/schema";
 
 interface ChatMessage {
@@ -480,9 +482,9 @@ export function ChatInterface() {
                 <Heart className={`${sizeClasses.icon} text-white dark:text-black`} />
               </div>
               <div className={`${bonkersColors ? bonkersColors.messageBg : 'bg-white dark:bg-gray-800'} rounded-2xl rounded-tl-md ${sizeClasses.padding} shadow-lg ${getMessageBubbleWidth()}`}>
-                <p className={`text-gray-800 dark:text-gray-200 ${sizeClasses.text} leading-relaxed`}>
-                  {welcomeData?.message}
-                </p>
+                <div className={`text-gray-800 dark:text-gray-200 ${sizeClasses.text} leading-relaxed prose prose-sm dark:prose-invert max-w-none`}>
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{welcomeData?.message || ""}</ReactMarkdown>
+                </div>
                 <span className={`${sizeClasses.textXs} text-gray-500 dark:text-gray-400 mt-2 block`}>Just now</span>
               </div>
             </div>
@@ -506,7 +508,9 @@ export function ChatInterface() {
                     : `${bonkersColors ? bonkersColors.messageBg : 'bg-white dark:bg-gray-800'} text-gray-800 dark:text-gray-200 rounded-tl-md`
                 }`}
               >
-                <p className={`${sizeClasses.text} leading-relaxed`}>{msg.content}</p>
+                <div className={`${sizeClasses.text} leading-relaxed prose prose-sm dark:prose-invert max-w-none`}>
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
+                </div>
                 <span className={`${sizeClasses.textXs} mt-2 block ${
                   msg.role === "user" ? "text-gray-300" : "text-gray-500 dark:text-gray-400"
                 }`}>
