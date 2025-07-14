@@ -504,9 +504,12 @@ export function ChatInterface() {
               <div
                 className={`rounded-2xl ${sizeClasses.padding} shadow-lg ${getMessageBubbleWidth()} ${
                   msg.role === "user"
-                    ? `${bonkersColors ? bonkersColors.userMessageBg : 'bg-black dark:bg-gray-700'} text-white rounded-tr-md`
+                    ? `${bonkersColors ? bonkersColors.userMessageBg : 'bg-black dark:bg-gray-700'} rounded-tr-md`
                     : `${bonkersColors ? bonkersColors.messageBg : 'bg-white dark:bg-gray-800'} text-gray-800 dark:text-gray-200 rounded-tl-md`
                 }`}
+                style={{
+                  color: msg.role === "user" ? (bonkersColors ? '#000000' : '#ffffff') : undefined
+                }}
               >
                 <div className={`${sizeClasses.text} leading-relaxed prose prose-sm dark:prose-invert max-w-none`}>
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
