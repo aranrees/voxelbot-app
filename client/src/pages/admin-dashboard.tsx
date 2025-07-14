@@ -120,6 +120,7 @@ export default function AdminDashboard() {
   // Fetch documents
   const { data: allDocuments = [] } = useQuery<Document[]>({
     queryKey: ["/api/admin/documents"],
+    enabled: !!user, // Only fetch when user is authenticated
   });
 
   // Separate active and archived documents
@@ -129,26 +130,31 @@ export default function AdminDashboard() {
   // Fetch file assets
   const { data: fileAssets = [] } = useQuery<FileAsset[]>({
     queryKey: ["/api/admin/files"],
+    enabled: !!user, // Only fetch when user is authenticated
   });
 
   // Fetch AI instructions
   const { data: aiInstructions = [] } = useQuery<AiInstruction[]>({
     queryKey: ["/api/admin/ai-instructions"],
+    enabled: !!user, // Only fetch when user is authenticated
   });
 
   // Fetch completed chats
   const { data: completedChats = [] } = useQuery<any[]>({
     queryKey: ["/api/admin/completed-chats"],
+    enabled: !!user, // Only fetch when user is authenticated
   });
 
   // Fetch quick actions
   const { data: quickActions = [] } = useQuery<QuickAction[]>({
     queryKey: ["/api/admin/quick-actions"],
+    enabled: !!user, // Only fetch when user is authenticated
   });
 
   // Fetch standard responses
   const { data: standardResponses = [] } = useQuery<StandardResponse[]>({
     queryKey: ["/api/admin/standard-responses"],
+    enabled: !!user, // Only fetch when user is authenticated
   });
 
   // Document mutations
