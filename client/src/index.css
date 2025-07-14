@@ -122,3 +122,16 @@
 .chat-message {
   animation: slideUp 0.3s ease-out;
 }
+
+/* Force chat input field colors */
+.chat-input-field {
+  background-color: #ffffff !important;
+  color: #111827 !important;
+  border-color: #d1d5db !important;
+}
+
+.dark .chat-input-field {
+  background-color: #374151 !important;
+  color: #f3f4f6 !important;
+  border-color: #4b5563 !important;
+}
