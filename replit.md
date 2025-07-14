@@ -25,12 +25,14 @@ Preferred communication style: Simple, everyday language.
 - **Session Storage**: PostgreSQL-backed sessions using connect-pg-simple
 - **API Design**: RESTful endpoints with comprehensive CRUD operations
 
-### Recent Changes (Jan 14, 2025)
+### Recent Changes (July 14, 2025)
 - **Fixed Authentication Timing Issue**: Resolved session synchronization problem where admin queries executed before authentication was fully established
 - **Enhanced Query Invalidation**: Added automatic cache invalidation after login to ensure all admin data loads properly
 - **Added Contact Info Management**: New admin tab for managing chat interface contact information and download buttons
 - **Implemented Markdown Rendering**: Added ReactMarkdown with remark-gfm for rich text formatting in chat messages
 - **Increased Chat Window Height**: Changed default chat window from h-96 (384px) to h-[42rem] (672px) for better conversation visibility
+- **Fixed User Message Bubble Text Visibility**: Resolved dark text on dark background issue in light mode with dedicated CSS classes and !important declarations
+- **Added Download Button Toggle Controls**: Implemented individual on/off switches for Download Service Guide and Get Contact Information buttons in admin interface, with localStorage persistence
 
 ### Database Strategy
 - **ORM**: Drizzle ORM for type-safe database operations
