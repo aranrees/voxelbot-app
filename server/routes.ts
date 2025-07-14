@@ -643,13 +643,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Contact information endpoint
-  app.get("/api/contact", (req, res) => {
-    res.json({
-      phone: "(555) 123-4567",
-      email: "info@company.com",
-      address: "123 Business St, Suite 100\nCity, State 12345",
-      businessHours: "Mon-Fri: 9:00 AM - 6:00 PM\nSat: 10:00 AM - 4:00 PM"
-    });
+  app.get("/api/contact", async (req, res) => {
+    try {
+      // Try to get contact info from storage, fallback to defaults
+      const contactInfo = await storage.getContactInfo?.() || {
+        phone: "(555) 123-4567",
+        email: "info@company.com",
+        address: "123 Business St, Suite 100\nCity, State 12345",
+        businessHours: "Mon-Fri: 9:00 AM - 6:00 PM\nSat: 10:00 AM - 4:00 PM"
+      };
+      res.json(contactInfo);
+    } catch (error) {
+      // Fallback to defaults if no storage method exists
+      res.json({
+        phone: "(555) 123-4567",
+        email: "info@company.com",
+        address: "123 Business St, Suite 100\nCity, State 12345",
+        businessHours: "Mon-Fri: 9:00 AM - 6:00 PM\nSat: 10:00 AM - 4:00 PM"
+      });
+    }
   });
 
   // Admin middleware to check authentication
@@ -659,6 +671,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     next();
   };
+
+  // Admin contact management endpoints
+  app.put("/api/admin/contact", requireAuth, async (req, res) => {
+    try {
+      const contactData = req.body;
+      if (storage.updateContactInfo) {
+        const updated = await storage.updateContactInfo(contactData);
+        res.json(updated);
+      } else {
+        res.status(501).json({ error: "Contact info management not implemented" });
+      }
+    } catch (error) {
+      console.error("Error updating contact info:", error);
+      res.status(500).json({ error: "Failed to update contact info" });
+    }
+  });
 
   // Change password endpoint
   app.post("/api/admin/change-password", requireAuth, async (req, res) => {

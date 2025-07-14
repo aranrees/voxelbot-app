@@ -1,4 +1,4 @@
-import { users, chatMessages, appointments, documents, archivedDocuments, aiInstructions, quickActions, availability, standardResponses, fileAssets, completedChats, meetingRequests, type User, type InsertUser, type ChatMessage, type InsertChatMessage, type Appointment, type InsertAppointment, type Document, type InsertDocument, type ArchivedDocument, type InsertArchivedDocument, type AiInstruction, type InsertAiInstruction, type QuickAction, type InsertQuickAction, type Availability, type InsertAvailability, type StandardResponse, type InsertStandardResponse, type FileAsset, type InsertFileAsset, type CompletedChat, type InsertCompletedChat, type MeetingRequest, type InsertMeetingRequest } from "@shared/schema";
+import { users, chatMessages, appointments, documents, archivedDocuments, aiInstructions, quickActions, availability, standardResponses, fileAssets, completedChats, meetingRequests, contactInfo, type User, type InsertUser, type ChatMessage, type InsertChatMessage, type Appointment, type InsertAppointment, type Document, type InsertDocument, type ArchivedDocument, type InsertArchivedDocument, type AiInstruction, type InsertAiInstruction, type QuickAction, type InsertQuickAction, type Availability, type InsertAvailability, type StandardResponse, type InsertStandardResponse, type FileAsset, type InsertFileAsset, type CompletedChat, type InsertCompletedChat, type MeetingRequest, type InsertMeetingRequest, type ContactInfo, type InsertContactInfo } from "@shared/schema";
 import { db } from "./db";
 import { eq, sql, desc, and } from "drizzle-orm";
 import session from "express-session";
@@ -89,6 +89,10 @@ export interface IStorage {
   createMeetingRequest(request: InsertMeetingRequest): Promise<MeetingRequest>;
   updateMeetingRequest(id: number, request: Partial<InsertMeetingRequest>): Promise<MeetingRequest | undefined>;
   deleteMeetingRequest(id: number): Promise<boolean>;
+  
+  // Contact Information
+  getContactInfo(): Promise<ContactInfo | undefined>;
+  updateContactInfo(contactData: Partial<InsertContactInfo>): Promise<ContactInfo>;
   
   sessionStore: session.Store;
 }
@@ -578,6 +582,34 @@ export class DatabaseStorage implements IStorage {
   async deleteMeetingRequest(id: number): Promise<boolean> {
     const result = await db.delete(meetingRequests).where(eq(meetingRequests.id, id));
     return (result.rowCount || 0) > 0;
+  }
+
+  // Contact Information methods
+  async getContactInfo(): Promise<ContactInfo | undefined> {
+    const [contact] = await db.select().from(contactInfo).orderBy(desc(contactInfo.updatedAt)).limit(1);
+    return contact || undefined;
+  }
+
+  async updateContactInfo(contactData: Partial<InsertContactInfo>): Promise<ContactInfo> {
+    // Check if contact info already exists
+    const existing = await this.getContactInfo();
+    
+    if (existing) {
+      // Update existing record
+      const [updated] = await db
+        .update(contactInfo)
+        .set({ ...contactData, updatedAt: sql`now()` })
+        .where(eq(contactInfo.id, existing.id))
+        .returning();
+      return updated;
+    } else {
+      // Create new record
+      const [created] = await db
+        .insert(contactInfo)
+        .values(contactData as InsertContactInfo)
+        .returning();
+      return created;
+    }
   }
 }
 

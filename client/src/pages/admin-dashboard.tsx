@@ -666,11 +666,12 @@ export default function AdminDashboard() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs defaultValue="infomage-data" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 bg-gray-100 dark:bg-gray-800 border border-gray-400 dark:border-gray-600">
+          <TabsList className="grid w-full grid-cols-6 bg-gray-100 dark:bg-gray-800 border border-gray-400 dark:border-gray-600">
             <TabsTrigger value="infomage-data" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">Infomage Data</TabsTrigger>
             <TabsTrigger value="files" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">Downloads</TabsTrigger>
             <TabsTrigger value="quick-actions" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">Quick Actions</TabsTrigger>
             <TabsTrigger value="standard-responses" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">Standard Responses</TabsTrigger>
+            <TabsTrigger value="contact-info" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">Contact Info</TabsTrigger>
             <TabsTrigger value="chats" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">Chat History</TabsTrigger>
           </TabsList>
 
@@ -1961,6 +1962,89 @@ export default function AdminDashboard() {
                   </CardContent>
                 </Card>
               )}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="contact-info" className="space-y-6">
+            <div className="max-w-2xl">
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
+                Contact Information Management
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+                Update the contact information that appears when customers click "Get Contact Information" in the chat.
+              </p>
+              
+              <Card className="border-gray-400 dark:border-gray-600 bg-white dark:bg-gray-800">
+                <CardHeader>
+                  <CardTitle className="text-gray-800 dark:text-gray-200">Current Contact Information</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="contact-phone">Phone Number</Label>
+                      <Input
+                        id="contact-phone"
+                        value="(555) 123-4567"
+                        readOnly
+                        className="border-gray-400 dark:border-gray-600 bg-gray-50 dark:bg-gray-700"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="contact-email">Email Address</Label>
+                      <Input
+                        id="contact-email"
+                        value="info@company.com"
+                        readOnly
+                        className="border-gray-400 dark:border-gray-600 bg-gray-50 dark:bg-gray-700"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="contact-address">Address</Label>
+                    <Textarea
+                      id="contact-address"
+                      value="123 Business St, Suite 100&#10;City, State 12345"
+                      readOnly
+                      rows={2}
+                      className="border-gray-400 dark:border-gray-600 bg-gray-50 dark:bg-gray-700"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="contact-hours">Business Hours</Label>
+                    <Textarea
+                      id="contact-hours"
+                      value="Mon-Fri: 9:00 AM - 6:00 PM&#10;Sat: 10:00 AM - 4:00 PM"
+                      readOnly
+                      rows={2}
+                      className="border-gray-400 dark:border-gray-600 bg-gray-50 dark:bg-gray-700"
+                    />
+                  </div>
+                  <div className="pt-4 border-t border-gray-200 dark:border-gray-600">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      <strong>Note:</strong> Contact information editing is currently read-only. This information appears in the chat interface when customers request contact details.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-gray-400 dark:border-gray-600 bg-white dark:bg-gray-800 mt-6">
+                <CardHeader>
+                  <CardTitle className="text-gray-800 dark:text-gray-200">Download Button Management</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      The "Download Service Guide" button in the chat interface is linked to the files in the Downloads tab. Upload files there to make them available for download.
+                    </p>
+                    <div className="flex items-center space-x-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                      <p className="text-sm text-blue-800 dark:text-blue-200">
+                        <strong>Tip:</strong> Manage downloadable files in the Downloads tab. Files marked as "Public" will be available through the chat interface.
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
 

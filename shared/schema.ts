@@ -249,9 +249,26 @@ export const insertMeetingRequestSchema = createInsertSchema(meetingRequests).om
   updatedAt: true,
 });
 
+// Contact information for the business
+export const contactInfo = pgTable("contact_info", {
+  id: serial("id").primaryKey(),
+  phone: text("phone").notNull(),
+  email: text("email").notNull(),
+  address: text("address").notNull(),
+  businessHours: text("business_hours").notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertContactInfoSchema = createInsertSchema(contactInfo).omit({
+  id: true,
+  updatedAt: true,
+});
+
 export type FileAsset = typeof fileAssets.$inferSelect;
 export type InsertFileAsset = z.infer<typeof insertFileAssetSchema>;
 export type CompletedChat = typeof completedChats.$inferSelect;
 export type InsertCompletedChat = z.infer<typeof insertCompletedChatSchema>;
 export type MeetingRequest = typeof meetingRequests.$inferSelect;
 export type InsertMeetingRequest = z.infer<typeof insertMeetingRequestSchema>;
+export type ContactInfo = typeof contactInfo.$inferSelect;
+export type InsertContactInfo = z.infer<typeof insertContactInfoSchema>;
