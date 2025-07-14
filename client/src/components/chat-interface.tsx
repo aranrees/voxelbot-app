@@ -536,34 +536,48 @@ export function ChatInterface() {
                       </Button>
                     )}
                     
-                    {/* Standard action buttons - removed meeting scheduling */}
+                    {/* Standard action buttons - conditionally shown based on settings */}
                     {(msg.content.toLowerCase().includes("download") || msg.content.toLowerCase().includes("contact")) && (
                       <>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className={`w-full justify-start h-auto ${sizeClasses.padding} border-0 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 shadow-sm hover:shadow-md transition-all duration-200`}
-                          onClick={handleDownloadPDF}
-                        >
-                          <Download className={`${sizeClasses.icon} mr-2 text-gray-600 dark:text-gray-300`} />
-                          <div className="text-left">
-                            <p className={`${sizeClasses.textSm} font-medium`}>Download Service Guide</p>
-                            <p className={`${sizeClasses.textXs} text-gray-500 dark:text-gray-400`}>Complete overview of our offerings</p>
-                          </div>
-                        </Button>
+                        {/* Download button - only show if enabled and conditions met */}
+                        {(() => {
+                          const showDownload = localStorage.getItem('showDownloadButton');
+                          const isEnabled = showDownload !== null ? JSON.parse(showDownload) : false;
+                          return isEnabled && msg.content.toLowerCase().includes("download");
+                        })() && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className={`w-full justify-start h-auto ${sizeClasses.padding} border-0 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 shadow-sm hover:shadow-md transition-all duration-200`}
+                            onClick={handleDownloadPDF}
+                          >
+                            <Download className={`${sizeClasses.icon} mr-2 text-gray-600 dark:text-gray-300`} />
+                            <div className="text-left">
+                              <p className={`${sizeClasses.textSm} font-medium`}>Download Service Guide</p>
+                              <p className={`${sizeClasses.textXs} text-gray-500 dark:text-gray-400`}>Complete overview of our offerings</p>
+                            </div>
+                          </Button>
+                        )}
                         
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className={`w-full justify-start h-auto ${sizeClasses.padding} border-0 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 shadow-sm hover:shadow-md transition-all duration-200`}
-                          onClick={() => setShowContactModal(true)}
-                        >
-                          <Phone className={`${sizeClasses.icon} mr-2 text-gray-600 dark:text-gray-300`} />
-                          <div className="text-left">
-                            <p className={`${sizeClasses.textSm} font-medium`}>Get Contact Information</p>
-                            <p className={`${sizeClasses.textXs} text-gray-500 dark:text-gray-400`}>Phone, email, and office details</p>
-                          </div>
-                        </Button>
+                        {/* Contact button - only show if enabled and conditions met */}
+                        {(() => {
+                          const showContact = localStorage.getItem('showContactButton');
+                          const isEnabled = showContact !== null ? JSON.parse(showContact) : true;
+                          return isEnabled && msg.content.toLowerCase().includes("contact");
+                        })() && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className={`w-full justify-start h-auto ${sizeClasses.padding} border-0 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 shadow-sm hover:shadow-md transition-all duration-200`}
+                            onClick={() => setShowContactModal(true)}
+                          >
+                            <Phone className={`${sizeClasses.icon} mr-2 text-gray-600 dark:text-gray-300`} />
+                            <div className="text-left">
+                              <p className={`${sizeClasses.textSm} font-medium`}>Get Contact Information</p>
+                              <p className={`${sizeClasses.textXs} text-gray-500 dark:text-gray-400`}>Phone, email, and office details</p>
+                            </div>
+                          </Button>
+                        )}
                       </>
                     )}
                   </div>

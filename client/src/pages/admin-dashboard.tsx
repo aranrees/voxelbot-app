@@ -117,6 +117,16 @@ export default function AdminDashboard() {
     status: "all"
   });
 
+  // Button toggle states
+  const [showDownloadButton, setShowDownloadButton] = useState(() => {
+    const saved = localStorage.getItem('showDownloadButton');
+    return saved !== null ? JSON.parse(saved) : false; // Default to false (disabled)
+  });
+  const [showContactButton, setShowContactButton] = useState(() => {
+    const saved = localStorage.getItem('showContactButton');
+    return saved !== null ? JSON.parse(saved) : true; // Default to true (enabled)
+  });
+
   // Fetch documents
   const { data: allDocuments = [] } = useQuery<Document[]>({
     queryKey: ["/api/admin/documents"],
@@ -2035,18 +2045,53 @@ export default function AdminDashboard() {
 
               <Card className="border-gray-400 dark:border-gray-600 bg-white dark:bg-gray-800 mt-6">
                 <CardHeader>
-                  <CardTitle className="text-gray-800 dark:text-gray-200">Download Button Management</CardTitle>
+                  <CardTitle className="text-gray-800 dark:text-gray-200">Chat Button Controls</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      The "Download Service Guide" button in the chat interface is linked to the files in the Downloads tab. Upload files there to make them available for download.
-                    </p>
-                    <div className="flex items-center space-x-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                      <p className="text-sm text-blue-800 dark:text-blue-200">
-                        <strong>Tip:</strong> Manage downloadable files in the Downloads tab. Files marked as "Public" will be available through the chat interface.
-                      </p>
+                  <div className="space-y-6">
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <div>
+                          <h4 className="font-medium text-gray-800 dark:text-gray-200">Download Service Guide Button</h4>
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                            Shows "Download Service Guide" button when AI mentions downloads
+                          </p>
+                        </div>
+                        <Switch
+                          checked={showDownloadButton}
+                          onCheckedChange={(checked) => {
+                            setShowDownloadButton(checked);
+                            localStorage.setItem('showDownloadButton', JSON.stringify(checked));
+                          }}
+                          className="ml-4"
+                        />
+                      </div>
+                      
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <div>
+                          <h4 className="font-medium text-gray-800 dark:text-gray-200">Get Contact Information Button</h4>
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                            Shows "Get Contact Information" button when AI mentions contact details
+                          </p>
+                        </div>
+                        <Switch
+                          checked={showContactButton}
+                          onCheckedChange={(checked) => {
+                            setShowContactButton(checked);
+                            localStorage.setItem('showContactButton', JSON.stringify(checked));
+                          }}
+                          className="ml-4"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="pt-4 border-t border-gray-200 dark:border-gray-600">
+                      <div className="flex items-center space-x-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                        <p className="text-sm text-blue-800 dark:text-blue-200">
+                          <strong>Tip:</strong> Turn off download buttons if you have no files to offer. Manage downloadable files in the Downloads tab.
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </CardContent>

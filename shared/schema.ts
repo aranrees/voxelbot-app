@@ -256,6 +256,8 @@ export const contactInfo = pgTable("contact_info", {
   email: text("email").notNull(),
   address: text("address").notNull(),
   businessHours: text("business_hours").notNull(),
+  showDownloadButton: boolean("show_download_button").default(true).notNull(),
+  showContactButton: boolean("show_contact_button").default(true).notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
