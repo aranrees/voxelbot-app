@@ -29,6 +29,8 @@ Preferred communication style: Simple, everyday language.
 - **Fixed Authentication Timing Issue**: Resolved session synchronization problem where admin queries executed before authentication was fully established
 - **Enhanced Query Invalidation**: Added automatic cache invalidation after login to ensure all admin data loads properly
 - **Added Contact Info Management**: New admin tab for managing chat interface contact information and download buttons
+- **Implemented Markdown Rendering**: Added ReactMarkdown with remark-gfm for rich text formatting in chat messages
+- **Increased Chat Window Height**: Changed default chat window from h-96 (384px) to h-[42rem] (672px) for better conversation visibility
 
 ### Database Strategy
 - **ORM**: Drizzle ORM for type-safe database operations

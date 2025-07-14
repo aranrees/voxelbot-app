@@ -475,7 +475,7 @@ export function ChatInterface() {
         </div>
 
         {/* Chat Messages */}
-        <div className={`h-96 overflow-y-auto ${sizeClasses.padding} ${sizeClasses.spacing} bg-gray-50 dark:bg-gray-900`}>
+        <div className={`h-[42rem] overflow-y-auto ${sizeClasses.padding} ${sizeClasses.spacing} bg-gray-50 dark:bg-gray-900`}>
           {messages.length === 0 && (
             <div className="flex items-start space-x-4">
               <div className={`w-10 h-10 bg-black dark:bg-white rounded-full flex items-center justify-center flex-shrink-0 shadow-md`}>
