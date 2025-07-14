@@ -38,6 +38,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     onSuccess: (user: SelectUser) => {
       queryClient.setQueryData(["/api/user"], user);
+      // Invalidate all admin queries to refetch with authenticated session
+      queryClient.invalidateQueries({ queryKey: ["/api/admin"] });
     },
     onError: (error: Error) => {
       toast({
