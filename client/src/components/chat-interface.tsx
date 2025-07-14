@@ -600,7 +600,7 @@ export function ChatInterface() {
                 placeholder="Type your message here..."
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                className={`${sizeClasses.input} rounded-xl ${bonkersColors ? bonkersColors.buttonBg : ''} border border-input shadow-inner`}
+                className={`${sizeClasses.input} rounded-xl ${bonkersColors ? bonkersColors.buttonBg : 'bg-background text-gray-900 dark:text-gray-100'} border border-input shadow-inner`}
                 style={{ fontSize: interfaceSize === 'extra-large' ? '1.25rem' : interfaceSize === 'large' ? '1.125rem' : '1rem' }}
               />
 
