@@ -1,0 +1,24 @@
+{
+  "sessionId": "chat-1752499214970-yh69hsxhl",
+  "startTime": "2025-07-14T13:20:20.099Z",
+  "endTime": "2025-07-14T13:20:32.469Z",
+  "duration": "0 minutes",
+  "messageCount": 3,
+  "messages": [
+    {
+      "timestamp": "2025-07-14T13:20:20.099Z",
+      "role": "assistant",
+      "content": "Hi, you can ask me for information about stuff Aran Rees does, including Waycraft, Sabre Tooth Panda, and Performance Simulation Environments. I'm designed to help prospective clients and collaborators, educators, and others seeking factual information about services, programs, and business activities.\n\nIf a question requires human input I'll provide the appropriate contact information."
+    },
+    {
+      "timestamp": "2025-07-14T13:20:26.478Z",
+      "role": "user",
+      "content": "How do I pay for waycraft?"
+    },
+    {
+      "timestamp": "2025-07-14T13:20:32.302Z",
+      "role": "assistant",
+      "content": "Waycraft is currently in the pre-launch development phase, so payment details and options haven't been finalized yet. If you're interested in staying updated or have specific questions about pricing, I recommend reaching out to Aran directly at aran@sabretoothpanda.com for the most up-to-date information."
+    }
+  ]
+}

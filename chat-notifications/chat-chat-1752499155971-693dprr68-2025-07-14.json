@@ -1,0 +1,24 @@
+{
+  "sessionId": "chat-1752499155971-693dprr68",
+  "startTime": "2025-07-14T13:18:11.143Z",
+  "endTime": "2025-07-14T13:19:15.971Z",
+  "duration": "1 minutes",
+  "messageCount": 3,
+  "messages": [
+    {
+      "timestamp": "2025-07-14T13:18:11.143Z",
+      "role": "assistant",
+      "content": "Hi, you can ask me for information about stuff Aran Rees does, including Waycraft, Sabre Tooth Panda, and Performance Simulation Environments. I'm designed to help prospective clients and collaborators, educators, and others seeking factual information about services, programs, and business activities.\n\nIf a question requires human input I'll provide the appropriate contact information."
+    },
+    {
+      "timestamp": "2025-07-14T13:18:43.806Z",
+      "role": "user",
+      "content": "Is Waycraft safe for my 14 year old?"
+    },
+    {
+      "timestamp": "2025-07-14T13:18:46.672Z",
+      "role": "assistant",
+      "content": "Yes, Waycraft is designed with safety as a top priority. All programmes operate under strict safeguarding protocols. Staff members are enhanced DBS checked, which means they have undergone background checks to ensure they are suitable to work with young people. Additionally, the programme includes comprehensive coverage for all activities and adheres to professional standards in education and youth work. If you have any more specific concerns or questions, feel free to ask!"
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "sessionId": "chat-1752499086099-67vmlnllp",
+  "startTime": "2025-07-14T13:16:10.821Z",
+  "endTime": "2025-07-14T13:18:06.099Z",
+  "duration": "2 minutes",
+  "messageCount": 3,
+  "messages": [
+    {
+      "timestamp": "2025-07-14T13:16:10.821Z",
+      "role": "assistant",
+      "content": "Hi, you can ask me for information about stuff Aran Rees does, including Waycraft, Sabre Tooth Panda, and Performance Simulation Environments. I'm designed to help prospective clients and collaborators, educators, and others seeking factual information about services, programs, and business activities.\n\nIf a question requires human input I'll provide the appropriate contact information."
+    },
+    {
+      "timestamp": "2025-07-14T13:16:21.936Z",
+      "role": "user",
+      "content": "Hi - who is Aran?"
+    },
+    {
+      "timestamp": "2025-07-14T13:16:23.909Z",
+      "role": "assistant",
+      "content": "Aran Rees is a professional focused on innovative approaches to career development and performance improvement. He leads Waycraft, a career development service for young people, and is involved with Sabre Tooth Panda, the company delivering these initiatives. Aran has a background in learning and development, youth engagement, and education, and is based in Farnham, England. If you'd like more detailed information or have specific questions, feel free to ask!"
+    }
+  ]
+}
