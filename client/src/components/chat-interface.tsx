@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Moon, Sun, Send, Phone, Mail, MapPin, Clock, Download, Calendar, Heart, Settings, RotateCcw } from "lucide-react";
+import { Moon, Sun, Send, Phone, Mail, MapPin, Clock, Download, Calendar, Heart, Settings, RotateCcw, CalendarCheck } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { QuickAction } from "@shared/schema";
@@ -319,6 +319,28 @@ export function ChatInterface() {
     }
   };
 
+  const handleCalendlyPopup = () => {
+    const calendlyUrl = localStorage.getItem('calendlyUrl');
+    if (calendlyUrl) {
+      // Open Calendly in a popup window
+      const width = 700;
+      const height = 700;
+      const left = (window.innerWidth - width) / 2;
+      const top = (window.innerHeight - height) / 2;
+      window.open(
+        calendlyUrl,
+        'calendly-popup',
+        `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes`
+      );
+    } else {
+      toast({
+        title: "Not Available",
+        description: "Scheduling is not currently available. Please contact us directly.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleAppointmentSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     createAppointmentMutation.mutate(appointmentForm);
@@ -579,6 +601,31 @@ export function ChatInterface() {
                           </Button>
                         )}
                       </>
+                    )}
+                    
+                    {/* Calendly button - show when scheduling/meeting/appointment is mentioned */}
+                    {(msg.content.toLowerCase().includes("schedule") || 
+                      msg.content.toLowerCase().includes("meeting") || 
+                      msg.content.toLowerCase().includes("appointment") ||
+                      msg.content.toLowerCase().includes("book") ||
+                      msg.content.toLowerCase().includes("calendly")) && (() => {
+                      const showCalendly = localStorage.getItem('showCalendlyButton');
+                      const isEnabled = showCalendly !== null ? JSON.parse(showCalendly) : false;
+                      const calendlyUrl = localStorage.getItem('calendlyUrl');
+                      return isEnabled && calendlyUrl;
+                    })() && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className={`w-full justify-start h-auto ${sizeClasses.padding} border-0 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 shadow-sm hover:shadow-md transition-all duration-200`}
+                        onClick={handleCalendlyPopup}
+                      >
+                        <CalendarCheck className={`${sizeClasses.icon} mr-2 text-gray-600 dark:text-gray-300`} />
+                        <div className="text-left">
+                          <p className={`${sizeClasses.textSm} font-medium`}>Schedule a Meeting</p>
+                          <p className={`${sizeClasses.textXs} text-gray-500 dark:text-gray-400`}>Book a time that works for you</p>
+                        </div>
+                      </Button>
                     )}
                   </div>
                 )}

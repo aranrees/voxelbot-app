@@ -126,6 +126,13 @@ export default function AdminDashboard() {
     const saved = localStorage.getItem('showContactButton');
     return saved !== null ? JSON.parse(saved) : true; // Default to true (enabled)
   });
+  const [showCalendlyButton, setShowCalendlyButton] = useState(() => {
+    const saved = localStorage.getItem('showCalendlyButton');
+    return saved !== null ? JSON.parse(saved) : false; // Default to false (disabled)
+  });
+  const [calendlyUrl, setCalendlyUrl] = useState(() => {
+    return localStorage.getItem('calendlyUrl') || '';
+  });
 
   // Fetch documents
   const { data: allDocuments = [] } = useQuery<Document[]>({
@@ -2083,7 +2090,51 @@ export default function AdminDashboard() {
                           className="ml-4"
                         />
                       </div>
+
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <div>
+                          <h4 className="font-medium text-gray-800 dark:text-gray-200">Schedule a Meeting Button (Calendly)</h4>
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                            Shows "Schedule a Meeting" button when AI mentions scheduling, meeting, or appointment
+                          </p>
+                        </div>
+                        <Switch
+                          checked={showCalendlyButton}
+                          onCheckedChange={(checked) => {
+                            setShowCalendlyButton(checked);
+                            localStorage.setItem('showCalendlyButton', JSON.stringify(checked));
+                          }}
+                          className="ml-4"
+                        />
+                      </div>
                     </div>
+
+                    {showCalendlyButton && (
+                      <div className="space-y-3 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <div>
+                          <Label htmlFor="calendly-url" className="text-gray-800 dark:text-gray-200">Calendly URL</Label>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 mb-2">
+                            Enter your Calendly scheduling link (e.g., https://calendly.com/your-username)
+                          </p>
+                          <Input
+                            id="calendly-url"
+                            value={calendlyUrl}
+                            onChange={(e) => {
+                              setCalendlyUrl(e.target.value);
+                              localStorage.setItem('calendlyUrl', e.target.value);
+                            }}
+                            placeholder="https://calendly.com/your-username"
+                            className="border-gray-400 dark:border-gray-600 bg-white dark:bg-gray-800"
+                          />
+                        </div>
+                        {calendlyUrl && (
+                          <div className="flex items-center space-x-2 p-2 bg-green-50 dark:bg-green-900/20 rounded">
+                            <Calendar className="w-4 h-4 text-green-600 dark:text-green-400" />
+                            <span className="text-sm text-green-700 dark:text-green-300">Calendly integration active</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
                     
                     <div className="pt-4 border-t border-gray-200 dark:border-gray-600">
                       <div className="flex items-center space-x-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
