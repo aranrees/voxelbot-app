@@ -266,13 +266,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         content: msg.content
       }));
       
-      // Get documents, AI instructions, and file assets for enhanced context
+      // Get documents, AI instructions, file assets, and contact info for enhanced context
       const documents = await storage.getDocuments();
       const aiInstructions = await storage.getActiveAiInstructions();
       const fileAssets = await storage.getPublicFileAssets();
+      const contactInfoData = await storage.getContactInfo();
       
-      // Get AI response with enhanced context including downloadable files
-      const aiResponse = await getChatResponse(validatedData.content, conversationHistory, documents, aiInstructions, fileAssets, sessionId);
+      // Get AI response with enhanced context including downloadable files and contact info
+      const aiResponse = await getChatResponse(validatedData.content, conversationHistory, documents, aiInstructions, fileAssets, sessionId, contactInfoData);
       
       // Save AI response with session ID
       const aiMessage = await storage.createChatMessage({

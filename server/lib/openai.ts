@@ -39,8 +39,21 @@ function parseInstructionPriorities(text: string, basePriority: number = 5): Arr
   return sections;
 }
 
-export async function getChatResponse(message: string, conversationHistory: Array<{role: string, content: string}> = [], documents: any[] = [], aiInstructions: any[] = [], fileAssets: any[] = [], sessionId?: string): Promise<string> {
+interface ContactInfoData {
+  phone: string;
+  email: string;
+  address: string;
+  businessHours: string;
+}
+
+export async function getChatResponse(message: string, conversationHistory: Array<{role: string, content: string}> = [], documents: any[] = [], aiInstructions: any[] = [], fileAssets: any[] = [], sessionId?: string, contactInfo?: ContactInfoData): Promise<string> {
   try {
+    // Use provided contact info or fallback to defaults
+    const phone = contactInfo?.phone || "(555) 123-4567";
+    const email = contactInfo?.email || "info@company.com";
+    const address = contactInfo?.address || "123 Business St, Suite 100, City, State 12345";
+    const businessHours = contactInfo?.businessHours || "Mon-Fri 9:00 AM - 6:00 PM, Sat 10:00 AM - 4:00 PM";
+
     // Build enhanced system prompt with admin-defined content
     let systemPrompt = `You are a helpful AI assistant for a business. You can help customers with:
     - Information about products and services
@@ -52,10 +65,10 @@ export async function getChatResponse(message: string, conversationHistory: Arra
     Be friendly, professional, and helpful. If someone asks about downloading PDFs, contact information, or scheduling appointments, acknowledge their request and let them know you can help with that.
 
     Company Information:
-    - Phone: (555) 123-4567
-    - Email: info@company.com
-    - Address: 123 Business St, Suite 100, City, State 12345
-    - Business Hours: Mon-Fri 9:00 AM - 6:00 PM, Sat 10:00 AM - 4:00 PM
+    - Phone: ${phone}
+    - Email: ${email}
+    - Address: ${address}
+    - Business Hours: ${businessHours}
 
     Keep responses conversational and concise.`;
 

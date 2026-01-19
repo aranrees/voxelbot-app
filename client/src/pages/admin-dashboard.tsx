@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -133,6 +133,37 @@ export default function AdminDashboard() {
   const [calendlyUrl, setCalendlyUrl] = useState(() => {
     return localStorage.getItem('calendlyUrl') || '';
   });
+
+  // Contact info form state
+  const [contactForm, setContactForm] = useState({
+    phone: "(555) 123-4567",
+    email: "info@company.com",
+    address: "123 Business St, Suite 100\nCity, State 12345",
+    businessHours: "Mon-Fri: 9:00 AM - 6:00 PM\nSat: 10:00 AM - 4:00 PM"
+  });
+
+  // Fetch contact info
+  const { data: contactInfoData } = useQuery<{
+    phone: string;
+    email: string;
+    address: string;
+    businessHours: string;
+  }>({
+    queryKey: ["/api/contact"],
+    enabled: !!user,
+  });
+
+  // Update contact form when data loads
+  useEffect(() => {
+    if (contactInfoData) {
+      setContactForm({
+        phone: contactInfoData.phone || "(555) 123-4567",
+        email: contactInfoData.email || "info@company.com",
+        address: contactInfoData.address || "123 Business St, Suite 100\nCity, State 12345",
+        businessHours: contactInfoData.businessHours || "Mon-Fri: 9:00 AM - 6:00 PM\nSat: 10:00 AM - 4:00 PM"
+      });
+    }
+  }, [contactInfoData]);
 
   // Fetch documents
   const { data: allDocuments = [] } = useQuery<Document[]>({
@@ -365,7 +396,20 @@ export default function AdminDashboard() {
     },
   });
 
-
+  // Contact Info mutation
+  const updateContactInfoMutation = useMutation({
+    mutationFn: async (data: { phone: string; email: string; address: string; businessHours: string }) => {
+      const response = await apiRequest("PUT", "/api/admin/contact", data);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/contact"] });
+      toast({ title: "Success", description: "Contact information updated successfully!" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to update contact information", variant: "destructive" });
+    },
+  });
 
   // Standard Response mutations
   const createStandardResponseMutation = useMutation({
@@ -1999,54 +2043,70 @@ export default function AdminDashboard() {
               
               <Card className="border-gray-400 dark:border-gray-600 bg-white dark:bg-gray-800">
                 <CardHeader>
-                  <CardTitle className="text-gray-800 dark:text-gray-200">Current Contact Information</CardTitle>
+                  <CardTitle className="text-gray-800 dark:text-gray-200">Contact Information</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="contact-phone">Phone Number</Label>
-                      <Input
-                        id="contact-phone"
-                        value="(555) 123-4567"
-                        readOnly
-                        className="border-gray-400 dark:border-gray-600 bg-gray-50 dark:bg-gray-700"
-                      />
+                  <form onSubmit={(e) => {
+                    e.preventDefault();
+                    updateContactInfoMutation.mutate(contactForm);
+                  }}>
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="contact-phone">Phone Number</Label>
+                          <Input
+                            id="contact-phone"
+                            value={contactForm.phone}
+                            onChange={(e) => setContactForm({ ...contactForm, phone: e.target.value })}
+                            placeholder="(555) 123-4567"
+                            className="border-gray-400 dark:border-gray-600 bg-white dark:bg-gray-800"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="contact-email">Email Address</Label>
+                          <Input
+                            id="contact-email"
+                            type="email"
+                            value={contactForm.email}
+                            onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
+                            placeholder="info@company.com"
+                            className="border-gray-400 dark:border-gray-600 bg-white dark:bg-gray-800"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <Label htmlFor="contact-address">Address</Label>
+                        <Textarea
+                          id="contact-address"
+                          value={contactForm.address}
+                          onChange={(e) => setContactForm({ ...contactForm, address: e.target.value })}
+                          placeholder="123 Business St, Suite 100&#10;City, State 12345"
+                          rows={2}
+                          className="border-gray-400 dark:border-gray-600 bg-white dark:bg-gray-800"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="contact-hours">Business Hours</Label>
+                        <Textarea
+                          id="contact-hours"
+                          value={contactForm.businessHours}
+                          onChange={(e) => setContactForm({ ...contactForm, businessHours: e.target.value })}
+                          placeholder="Mon-Fri: 9:00 AM - 6:00 PM&#10;Sat: 10:00 AM - 4:00 PM"
+                          rows={2}
+                          className="border-gray-400 dark:border-gray-600 bg-white dark:bg-gray-800"
+                        />
+                      </div>
+                      <div className="flex justify-end pt-4 border-t border-gray-200 dark:border-gray-600">
+                        <Button
+                          type="submit"
+                          disabled={updateContactInfoMutation.isPending}
+                          className="bg-black hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-black"
+                        >
+                          {updateContactInfoMutation.isPending ? "Saving..." : "Save Contact Info"}
+                        </Button>
+                      </div>
                     </div>
-                    <div>
-                      <Label htmlFor="contact-email">Email Address</Label>
-                      <Input
-                        id="contact-email"
-                        value="info@company.com"
-                        readOnly
-                        className="border-gray-400 dark:border-gray-600 bg-gray-50 dark:bg-gray-700"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <Label htmlFor="contact-address">Address</Label>
-                    <Textarea
-                      id="contact-address"
-                      value="123 Business St, Suite 100&#10;City, State 12345"
-                      readOnly
-                      rows={2}
-                      className="border-gray-400 dark:border-gray-600 bg-gray-50 dark:bg-gray-700"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="contact-hours">Business Hours</Label>
-                    <Textarea
-                      id="contact-hours"
-                      value="Mon-Fri: 9:00 AM - 6:00 PM&#10;Sat: 10:00 AM - 4:00 PM"
-                      readOnly
-                      rows={2}
-                      className="border-gray-400 dark:border-gray-600 bg-gray-50 dark:bg-gray-700"
-                    />
-                  </div>
-                  <div className="pt-4 border-t border-gray-200 dark:border-gray-600">
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      <strong>Note:</strong> Contact information editing is currently read-only. This information appears in the chat interface when customers request contact details.
-                    </p>
-                  </div>
+                  </form>
                 </CardContent>
               </Card>
 
