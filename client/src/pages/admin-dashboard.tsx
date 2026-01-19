@@ -807,20 +807,16 @@ export default function AdminDashboard() {
                   </DialogTrigger>
                 </Dialog>
                 
-                <Dialog open={showInstructionDialog} onOpenChange={setShowInstructionDialog}>
-                  <DialogTrigger asChild>
-                    <Button 
-                      onClick={() => {
-                        resetInstructionForm();
-                        setShowInstructionDialog(true);
-                      }}
-                      className="bg-black hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-black"
-                    >
-                      <Plus className="w-4 h-4 mr-2" />
-                      Add Instruction
-                    </Button>
-                  </DialogTrigger>
-                </Dialog>
+                <Button 
+                    onClick={() => {
+                      resetInstructionForm();
+                      setShowInstructionDialog(true);
+                    }}
+                    className="bg-black hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-black"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Instruction
+                  </Button>
               </div>
             </div>
 
