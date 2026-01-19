@@ -1362,108 +1362,16 @@ export default function AdminDashboard() {
               <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
                 AI Instructions
               </h3>
-              <Dialog open={showInstructionDialog} onOpenChange={setShowInstructionDialog}>
-                <DialogTrigger asChild>
-                  <Button onClick={resetInstructionForm} className="bg-black hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-black">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add AI Instruction
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto bg-white dark:bg-gray-800 border border-gray-400 dark:border-gray-600">
-                  <DialogHeader>
-                    <DialogTitle className="text-gray-800 dark:text-gray-200">
-                      {editingInstruction ? "Edit AI Instruction" : "Add New AI Instruction"}
-                    </DialogTitle>
-                  </DialogHeader>
-                  <form onSubmit={(e) => {
-                    e.preventDefault();
-                    if (editingInstruction) {
-                      updateInstructionMutation.mutate({ id: editingInstruction.id, data: instructionForm });
-                    } else {
-                      createInstructionMutation.mutate(instructionForm);
-                    }
-                  }} className="space-y-4">
-                    <div>
-                      <Label htmlFor="instruction-title">Title</Label>
-                      <Input
-                        id="instruction-title"
-                        value={instructionForm.title}
-                        onChange={(e) => setInstructionForm({ ...instructionForm, title: e.target.value })}
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="instruction-category">Category</Label>
-                      <Select
-                        value={instructionForm.category}
-                        onValueChange={(value) => setInstructionForm({ ...instructionForm, category: value as "general" | "tone" | "behavior" | "knowledge" | "restrictions" | "welcome" | "greeting" })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="general">General</SelectItem>
-                          <SelectItem value="tone">Tone & Style</SelectItem>
-                          <SelectItem value="behavior">Behavior</SelectItem>
-                          <SelectItem value="knowledge">Knowledge</SelectItem>
-                          <SelectItem value="restrictions">Restrictions</SelectItem>
-                          <SelectItem value="welcome">Welcome</SelectItem>
-                          <SelectItem value="greeting">Greeting (Auto-loads when page opens)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label htmlFor="instruction-priority">Priority (1-10)</Label>
-                      <Input
-                        id="instruction-priority"
-                        type="number"
-                        min="1"
-                        max="10"
-                        value={instructionForm.priority}
-                        onChange={(e) => setInstructionForm({ ...instructionForm, priority: parseInt(e.target.value) || 1 })}
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="instruction-content">Instruction</Label>
-                      <Textarea
-                        id="instruction-content"
-                        value={instructionForm.instruction}
-                        onChange={(e) => setInstructionForm({ ...instructionForm, instruction: e.target.value })}
-                        rows={8}
-                        className="min-h-[200px]"
-                        placeholder="Enter detailed instructions for the AI assistant..."
-                        required
-                      />
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Switch
-                        id="instruction-active"
-                        checked={instructionForm.isActive}
-                        onCheckedChange={(checked) => setInstructionForm({ ...instructionForm, isActive: checked })}
-                      />
-                      <Label htmlFor="instruction-active">Active</Label>
-                    </div>
-                    <div className="flex justify-end space-x-2">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => setShowInstructionDialog(false)}
-                        className="border-gray-400 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
-                      >
-                        Cancel
-                      </Button>
-                      <Button
-                        type="submit"
-                        disabled={createInstructionMutation.isPending || updateInstructionMutation.isPending}
-                        className="bg-black hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-black"
-                      >
-                        {editingInstruction ? "Update" : "Create"}
-                      </Button>
-                    </div>
-                  </form>
-                </DialogContent>
-              </Dialog>
+              <Button 
+                onClick={() => {
+                  resetInstructionForm();
+                  setShowInstructionDialog(true);
+                }} 
+                className="bg-black hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-black"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add AI Instruction
+              </Button>
             </div>
 
             <div className="grid gap-6">
@@ -2209,6 +2117,103 @@ export default function AdminDashboard() {
         </Tabs>
       </div>
 
+      {/* AI Instruction Dialog - mounted at top level so it's always accessible */}
+      <Dialog open={showInstructionDialog} onOpenChange={setShowInstructionDialog}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto bg-white dark:bg-gray-800 border border-gray-400 dark:border-gray-600">
+          <DialogHeader>
+            <DialogTitle className="text-gray-800 dark:text-gray-200">
+              {editingInstruction ? "Edit AI Instruction" : "Add New AI Instruction"}
+            </DialogTitle>
+          </DialogHeader>
+          <form onSubmit={(e) => {
+            e.preventDefault();
+            if (editingInstruction) {
+              updateInstructionMutation.mutate({ id: editingInstruction.id, data: instructionForm });
+            } else {
+              createInstructionMutation.mutate(instructionForm);
+            }
+          }} className="space-y-4">
+            <div>
+              <Label htmlFor="instruction-title">Title</Label>
+              <Input
+                id="instruction-title"
+                value={instructionForm.title}
+                onChange={(e) => setInstructionForm({ ...instructionForm, title: e.target.value })}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="instruction-category">Category</Label>
+              <Select
+                value={instructionForm.category}
+                onValueChange={(value) => setInstructionForm({ ...instructionForm, category: value as "general" | "tone" | "behavior" | "knowledge" | "restrictions" | "welcome" | "greeting" })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="general">General</SelectItem>
+                  <SelectItem value="tone">Tone & Style</SelectItem>
+                  <SelectItem value="behavior">Behavior</SelectItem>
+                  <SelectItem value="knowledge">Knowledge</SelectItem>
+                  <SelectItem value="restrictions">Restrictions</SelectItem>
+                  <SelectItem value="welcome">Welcome</SelectItem>
+                  <SelectItem value="greeting">Greeting (Auto-loads when page opens)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="instruction-priority">Priority (1-10)</Label>
+              <Input
+                id="instruction-priority"
+                type="number"
+                min="1"
+                max="10"
+                value={instructionForm.priority}
+                onChange={(e) => setInstructionForm({ ...instructionForm, priority: parseInt(e.target.value) || 1 })}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="instruction-content">Instruction</Label>
+              <Textarea
+                id="instruction-content"
+                value={instructionForm.instruction}
+                onChange={(e) => setInstructionForm({ ...instructionForm, instruction: e.target.value })}
+                rows={8}
+                className="min-h-[200px]"
+                placeholder="Enter detailed instructions for the AI assistant..."
+                required
+              />
+            </div>
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="instruction-active"
+                checked={instructionForm.isActive}
+                onCheckedChange={(checked) => setInstructionForm({ ...instructionForm, isActive: checked })}
+              />
+              <Label htmlFor="instruction-active">Active</Label>
+            </div>
+            <div className="flex justify-end space-x-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowInstructionDialog(false)}
+                className="border-gray-400 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={createInstructionMutation.isPending || updateInstructionMutation.isPending}
+                className="bg-black hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-black"
+              >
+                {editingInstruction ? "Update" : "Create"}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
 
     </div>
   );
