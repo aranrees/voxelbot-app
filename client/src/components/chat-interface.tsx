@@ -466,10 +466,10 @@ export function ChatInterface() {
         {/* Chat Header */}
         <div className={`${bonkersColors ? bonkersColors.headerBg : 'bg-white dark:bg-gray-800'} ${sizeClasses.padding} text-black dark:text-white rounded-t-lg shadow-sm`}>
           <div className="flex items-center space-x-4">
-            <div className={`w-12 h-12 bg-black dark:bg-white rounded-full flex items-center justify-center shadow-lg`}>
+            <div className={`hidden sm:flex w-12 h-12 bg-black dark:bg-white rounded-full items-center justify-center shadow-lg flex-shrink-0`}>
               <Heart className={`${sizeClasses.icon} text-white dark:text-black`} />
             </div>
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <h2 className={`${sizeClasses.heading} font-semibold`}>VoxelBot</h2>
               <p className={`text-gray-600 dark:text-gray-300 ${sizeClasses.textSm}`}>here to help</p>
             </div>
