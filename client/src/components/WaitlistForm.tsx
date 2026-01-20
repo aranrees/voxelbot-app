@@ -1,4 +1,11 @@
 import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { CheckCircle } from 'lucide-react';
 
 interface WaitlistFormProps {
   onSuccess?: () => void;
@@ -52,74 +59,104 @@ export function WaitlistForm({ onSuccess }: WaitlistFormProps) {
 
   if (submitStatus === 'success') {
     return (
-      <div className="success-message">
-        <h3>Thank you for joining our waitlist!</h3>
-        <p>We'll keep you updated as The Voxel Programme develops.</p>
-      </div>
+      <Card className="border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
+        <CardContent className="pt-6 text-center">
+          <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+            Thank you for joining our waitlist!
+          </h3>
+          <p className="text-gray-600 dark:text-gray-400">
+            We'll keep you updated as The Voxel Programme develops.
+          </p>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="waitlist-form">
-      <h3>Join Our Waitlist</h3>
-      <p>Stay informed as we develop The Voxel Programme</p>
+    <Card className="border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
+      <CardHeader>
+        <CardTitle className="text-gray-900 dark:text-gray-100">Join Our Waitlist</CardTitle>
+        <CardDescription className="text-gray-600 dark:text-gray-400">
+          Stay informed as we develop The Voxel Programme
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="name" className="text-gray-700 dark:text-gray-300">Name *</Label>
+            <Input
+              type="text"
+              id="name"
+              required
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              className="border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+              placeholder="Your name"
+            />
+          </div>
 
-      <div className="form-group">
-        <label htmlFor="name">Name *</label>
-        <input
-          type="text"
-          id="name"
-          required
-          value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-        />
-      </div>
+          <div className="space-y-2">
+            <Label htmlFor="email" className="text-gray-700 dark:text-gray-300">Email *</Label>
+            <Input
+              type="email"
+              id="email"
+              required
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              className="border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+              placeholder="your@email.com"
+            />
+          </div>
 
-      <div className="form-group">
-        <label htmlFor="email">Email *</label>
-        <input
-          type="email"
-          id="email"
-          required
-          value={formData.email}
-          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-        />
-      </div>
+          <div className="space-y-2">
+            <Label htmlFor="position" className="text-gray-700 dark:text-gray-300">I am a... *</Label>
+            <Select
+              value={formData.position}
+              onValueChange={(value) => setFormData({ ...formData, position: value })}
+            >
+              <SelectTrigger className="border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                <SelectValue placeholder="Select your position" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Parent/Guardian">Parent/Guardian</SelectItem>
+                <SelectItem value="Teacher">Teacher</SelectItem>
+                <SelectItem value="Youth Work Professional">Youth Work Professional</SelectItem>
+                <SelectItem value="Press">Press</SelectItem>
+                <SelectItem value="Partner/Other">Partner/Other</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-      <div className="form-group">
-        <label htmlFor="position">I am a... *</label>
-        <select
-          id="position"
-          required
-          value={formData.position}
-          onChange={(e) => setFormData({ ...formData, position: e.target.value })}
-        >
-          <option value="">Select your position</option>
-          <option value="Parent/Guardian">Parent/Guardian</option>
-          <option value="Teacher">Teacher</option>
-          <option value="Youth Work Professional">Youth Work Professional</option>
-          <option value="Press">Press</option>
-          <option value="Partner/Other">Partner/Other</option>
-        </select>
-      </div>
+          <div className="space-y-2">
+            <Label htmlFor="interestPrompt" className="text-gray-700 dark:text-gray-300">
+              What prompted your interest? (optional)
+            </Label>
+            <Textarea
+              id="interestPrompt"
+              rows={3}
+              value={formData.interestPrompt}
+              onChange={(e) => setFormData({ ...formData, interestPrompt: e.target.value })}
+              className="border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+              placeholder="Tell us what brought you here..."
+            />
+          </div>
 
-      <div className="form-group">
-        <label htmlFor="interestPrompt">What prompted your interest? (optional)</label>
-        <textarea
-          id="interestPrompt"
-          rows={3}
-          value={formData.interestPrompt}
-          onChange={(e) => setFormData({ ...formData, interestPrompt: e.target.value })}
-        />
-      </div>
+          {submitStatus === 'error' && (
+            <div className="text-red-600 dark:text-red-400 text-sm bg-red-50 dark:bg-red-900/20 p-3 rounded">
+              {errorMessage}
+            </div>
+          )}
 
-      {submitStatus === 'error' && (
-        <div className="error-message">{errorMessage}</div>
-      )}
-
-      <button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? 'Joining...' : 'Join Waitlist'}
-      </button>
-    </form>
+          <Button 
+            type="submit" 
+            disabled={isSubmitting || !formData.position}
+            className="w-full bg-black hover:bg-gray-800 text-white dark:bg-white dark:hover:bg-gray-200 dark:text-black"
+          >
+            {isSubmitting ? 'Joining...' : 'Join Waitlist'}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   );
 }
