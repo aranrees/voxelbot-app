@@ -1,0 +1,44 @@
+{
+  "sessionId": "chat-1768921375825-0ttkvni8o",
+  "startTime": "2026-01-20T15:02:56.579Z",
+  "endTime": "2026-01-20T15:06:12.352Z",
+  "duration": "3 minutes",
+  "messageCount": 7,
+  "messages": [
+    {
+      "timestamp": "2026-01-20T15:02:56.579Z",
+      "role": "assistant",
+      "content": "Welcome! I'm VoxelBot, here to help you learn about The Voxel Programme. How can I help you today?"
+    },
+    {
+      "timestamp": "2026-01-20T15:03:04.612Z",
+      "role": "user",
+      "content": "Hi - tell me about Voxel."
+    },
+    {
+      "timestamp": "2026-01-20T15:03:07.522Z",
+      "role": "assistant",
+      "content": "Absolutely! The Voxel Programme is a career navigation programme designed for young people aged 13-16 and their parents. It's about teaching self-directed learning through a method called the Voxel Loop. This helps young people build three key assets: Continuity of Self-Insight, Personal Performance Assets, and a Voxel Portfolio.\n\nIt's not a traditional course that ends; instead, it's a Consistent Companion that continues with young people through ages 14-24 and beyond. As they mature, their relationship with the programme evolves, allowing them to take on roles such as peer mentors or Voxel Guides.\n\nIs there anything specific you'd like to know about?"
+    },
+    {
+      "timestamp": "2026-01-20T15:03:51.885Z",
+      "role": "user",
+      "content": "Yeah, I have a teenaged son and he's been asking me about the future and careers and stuff. I don't know what to tell him."
+    },
+    {
+      "timestamp": "2026-01-20T15:03:56.229Z",
+      "role": "assistant",
+      "content": "It's completely normal to feel uncertain when guiding your son about his future, especially given how rapidly the world is changing. The Voxel Programme is designed to help with exactly this kind of situation. \n\nWe focus on equipping young people with the skills to learn independently and adaptively, allowing them to navigate the uncertainties of future career landscapes. Instead of providing fixed answers, we teach them a methodology for how to learn and creatively apply that learning in various contexts.\n\nWould you like to hear more about how the programme can support both you and your son?"
+    },
+    {
+      "timestamp": "2026-01-20T15:04:14.623Z",
+      "role": "user",
+      "content": "Yes please."
+    },
+    {
+      "timestamp": "2026-01-20T15:04:19.977Z",
+      "role": "assistant",
+      "content": "Great! The Voxel Programme involves a 12-week pilot that's absolutely free for our founding cohort. It includes weekly 30-minute coaching sessions for both you and your son. These sessions are designed to fit into your existing schedule and help your son learn how to extract more value from what he's already doing.\n\nIt's entirely online, so you don't need to worry about travel. We aim to build a long-term relationship with your family, continuing to support your son as he grows from 14 to 24 and beyond. Over time, he can even become a peer mentor or Voxel Guide, helping others while further developing his own skills.\n\nIf you're interested, how about we book a 30-minute discovery call to discuss your family's situation and see if The Voxel Programme is a good fit? There's no sales pressure, just an open conversation. Would you like to set that up?"
+    }
+  ]
+}
