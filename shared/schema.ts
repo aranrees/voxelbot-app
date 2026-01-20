@@ -283,6 +283,24 @@ export const insertBotConfigSchema = createInsertSchema(botConfig).omit({
   uploadedAt: true,
 });
 
+// Waitlist signups for interest collection
+export const waitlistSignups = pgTable("waitlist_signups", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  email: text("email").notNull(),
+  position: text("position").notNull(),
+  interestPrompt: text("interest_prompt"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+  emailIdx: index("idx_waitlist_email").on(table.email),
+  createdIdx: index("idx_waitlist_created").on(table.createdAt),
+}));
+
+export const insertWaitlistSignupSchema = createInsertSchema(waitlistSignups).omit({
+  id: true,
+  createdAt: true,
+});
+
 export type FileAsset = typeof fileAssets.$inferSelect;
 export type InsertFileAsset = z.infer<typeof insertFileAssetSchema>;
 export type CompletedChat = typeof completedChats.$inferSelect;
@@ -293,3 +311,5 @@ export type ContactInfo = typeof contactInfo.$inferSelect;
 export type InsertContactInfo = z.infer<typeof insertContactInfoSchema>;
 export type BotConfig = typeof botConfig.$inferSelect;
 export type InsertBotConfig = z.infer<typeof insertBotConfigSchema>;
+export type WaitlistSignup = typeof waitlistSignups.$inferSelect;
+export type InsertWaitlistSignup = z.infer<typeof insertWaitlistSignupSchema>;
