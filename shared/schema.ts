@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, date } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, date, jsonb, index } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -266,6 +266,23 @@ export const insertContactInfoSchema = createInsertSchema(contactInfo).omit({
   updatedAt: true,
 });
 
+// Bot configuration stored as JSON
+export const botConfig = pgTable("bot_config", {
+  id: serial("id").primaryKey(),
+  version: text("version").notNull(),
+  configJson: jsonb("config_json").notNull(),
+  uploadedAt: timestamp("uploaded_at").defaultNow(),
+  uploadedBy: text("uploaded_by"),
+  isActive: boolean("is_active").default(true)
+}, (table) => ({
+  activeIdx: index("idx_bot_config_active").on(table.isActive)
+}));
+
+export const insertBotConfigSchema = createInsertSchema(botConfig).omit({
+  id: true,
+  uploadedAt: true,
+});
+
 export type FileAsset = typeof fileAssets.$inferSelect;
 export type InsertFileAsset = z.infer<typeof insertFileAssetSchema>;
 export type CompletedChat = typeof completedChats.$inferSelect;
@@ -274,3 +291,5 @@ export type MeetingRequest = typeof meetingRequests.$inferSelect;
 export type InsertMeetingRequest = z.infer<typeof insertMeetingRequestSchema>;
 export type ContactInfo = typeof contactInfo.$inferSelect;
 export type InsertContactInfo = z.infer<typeof insertContactInfoSchema>;
+export type BotConfig = typeof botConfig.$inferSelect;
+export type InsertBotConfig = z.infer<typeof insertBotConfigSchema>;
