@@ -468,7 +468,7 @@ export function ChatInterface() {
               <Heart className={`${sizeClasses.icon} text-white dark:text-black`} />
             </div>
             <div className="flex-1">
-              <h2 className={`${sizeClasses.heading} font-semibold`}>Infomage</h2>
+              <h2 className={`${sizeClasses.heading} font-semibold`}>VoxelBot</h2>
               <p className={`text-gray-600 dark:text-gray-300 ${sizeClasses.textSm}`}>here to help</p>
             </div>
             <div className="flex items-center space-x-3">
