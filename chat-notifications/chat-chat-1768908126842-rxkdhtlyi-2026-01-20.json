@@ -1,0 +1,24 @@
+{
+  "sessionId": "chat-1768908126842-rxkdhtlyi",
+  "startTime": "2026-01-20T11:25:54.237Z",
+  "endTime": "2026-01-20T11:26:57.343Z",
+  "duration": "1 minutes",
+  "messageCount": 3,
+  "messages": [
+    {
+      "timestamp": "2026-01-20T11:25:54.237Z",
+      "role": "assistant",
+      "content": "Hi, you can ask me for information about stuff Aran Rees does, including Waycraft, Sabre Tooth Panda, and Performance Simulation Environments. I'm designed to help prospective clients and collaborators, educators, and others seeking factual information about services, programs, and business activities.\n\nIf a question requires human input I'll provide the appropriate contact information."
+    },
+    {
+      "timestamp": "2026-01-20T11:26:18.154Z",
+      "role": "user",
+      "content": "Some of the kids at my youth group are totally lost when it comes to careers. I heard about Voxel and it seemed interesting."
+    },
+    {
+      "timestamp": "2026-01-20T11:26:21.627Z",
+      "role": "assistant",
+      "content": "It's great that you're looking into options to support them! The Voxel Programme is uniquely designed to help young people navigate the uncertain career landscape. It's not just about choosing a career path; it's about teaching self-directed learning and how to apply that knowledge creatively.\n\nThe programme is ideal for young people aged 13-16, but it continues as they grow, supporting them through ages 14-24+. The focus is on building their confidence and skills to navigate a rapidly changing world.\n\nIf you think any parents might be interested, encourage them to visit our website or contact us directly. They can also book a discovery call to learn more about how the programme could benefit their child. Let me know if you have any other questions!"
+    }
+  ]
+}

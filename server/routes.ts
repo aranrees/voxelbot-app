@@ -109,13 +109,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Greeting message endpoint
+  // Get greeting message from bot config
   app.get("/api/greeting-message", async (req, res) => {
     try {
-      const greetingMessage = await storage.getGreetingMessage();
-      res.json({ message: greetingMessage });
+      const { getBotConfig } = await import("./lib/bot-config");
+      const config = getBotConfig();
+      
+      if (config && config.greeting) {
+        res.json({ message: config.greeting.message });
+      } else {
+        res.json({ message: "Hello! How can I help you today?" });
+      }
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch greeting message" });
+      console.error("Error fetching greeting:", error);
+      res.status(500).json({ error: "Failed to fetch greeting" });
     }
   });
 
