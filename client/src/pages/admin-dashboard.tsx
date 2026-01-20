@@ -145,6 +145,8 @@ export default function AdminDashboard() {
   // State for bot config
   const [currentBotConfig, setCurrentBotConfig] = useState<any>(null);
   const [configFile, setConfigFile] = useState<File | null>(null);
+  const [isEditingConfig, setIsEditingConfig] = useState(false);
+  const [configJsonText, setConfigJsonText] = useState("");
 
   // Fetch contact info
   const { data: contactInfoData } = useQuery<{
@@ -321,6 +323,60 @@ export default function AdminDashboard() {
   const handleRollback = (configId: number) => {
     if (confirm("Are you sure you want to rollback to this configuration version?")) {
       rollbackMutation.mutate(configId);
+    }
+  };
+
+  // Mutation for saving edited config
+  const saveEditedConfigMutation = useMutation({
+    mutationFn: async (editedJson: string) => {
+      const parsed = JSON.parse(editedJson);
+      
+      const response = await apiRequest("POST", "/api/bot-config/upload", {
+        version: parsed.version,
+        configJson: parsed
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/bot-config"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/bot-config/history"] });
+      setIsEditingConfig(false);
+      toast({
+        title: "Success",
+        description: "Configuration updated successfully"
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Invalid JSON or failed to save",
+        variant: "destructive"
+      });
+    }
+  });
+
+  const handleEditConfig = () => {
+    if (currentBotConfig) {
+      setConfigJsonText(JSON.stringify(currentBotConfig, null, 2));
+      setIsEditingConfig(true);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditingConfig(false);
+    setConfigJsonText("");
+  };
+
+  const handleSaveEdit = () => {
+    try {
+      JSON.parse(configJsonText);
+      saveEditedConfigMutation.mutate(configJsonText);
+    } catch (error) {
+      toast({
+        title: "Invalid JSON",
+        description: "Please fix JSON syntax errors before saving",
+        variant: "destructive"
+      });
     }
   };
 
@@ -2249,61 +2305,113 @@ export default function AdminDashboard() {
                   <CardTitle className="text-gray-800 dark:text-gray-200">Current Configuration</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label>Version</Label>
-                      <Input 
-                        value={currentBotConfig?.version || "No config loaded"}
-                        readOnly
-                        className="border-gray-400 dark:border-gray-600 bg-gray-50 dark:bg-gray-700"
-                      />
-                    </div>
-                    <div>
-                      <Label>Last Updated</Label>
-                      <Input 
-                        value={currentBotConfig?.lastUpdated ? new Date(currentBotConfig.lastUpdated).toLocaleString() : "N/A"}
-                        readOnly
-                        className="border-gray-400 dark:border-gray-600 bg-gray-50 dark:bg-gray-700"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="flex gap-4">
-                    <Button 
-                      onClick={handleDownloadConfig}
-                      variant="outline"
-                      className="border-gray-400 dark:border-gray-600"
-                    >
-                      <Download className="w-4 h-4 mr-2" />
-                      Download Current Config
-                    </Button>
-                  </div>
-                  
-                  <div className="border-t border-gray-300 dark:border-gray-600 pt-4 mt-4">
-                    <Label htmlFor="config-upload">Upload New Configuration</Label>
-                    <Input
-                      id="config-upload"
-                      type="file"
-                      accept=".json"
-                      onChange={handleConfigFileChange}
-                      className="border-gray-400 dark:border-gray-600 mt-2"
-                    />
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                      Upload a JSON file to replace the current bot configuration. The bot will use the new config immediately.
-                    </p>
-                    
-                    {configFile && (
-                      <div className="mt-4">
+                  {!isEditingConfig ? (
+                    <>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <Label>Version</Label>
+                          <Input 
+                            value={currentBotConfig?.version || "No config loaded"}
+                            readOnly
+                            className="border-gray-400 dark:border-gray-600 bg-gray-50 dark:bg-gray-700"
+                          />
+                        </div>
+                        <div>
+                          <Label>Last Updated</Label>
+                          <Input 
+                            value={currentBotConfig?.lastUpdated ? new Date(currentBotConfig.lastUpdated).toLocaleString() : "N/A"}
+                            readOnly
+                            className="border-gray-400 dark:border-gray-600 bg-gray-50 dark:bg-gray-700"
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="flex gap-4">
                         <Button 
-                          onClick={handleUploadConfig}
-                          disabled={uploadConfigMutation.isPending}
-                          className="bg-blue-600 hover:bg-blue-700 text-white"
+                          onClick={handleDownloadConfig}
+                          variant="outline"
+                          className="border-gray-400 dark:border-gray-600"
                         >
-                          {uploadConfigMutation.isPending ? "Uploading..." : "Upload & Activate Config"}
+                          <Download className="w-4 h-4 mr-2" />
+                          Download Current Config
+                        </Button>
+                        
+                        <Button 
+                          onClick={handleEditConfig}
+                          variant="outline"
+                          className="border-gray-400 dark:border-gray-600"
+                        >
+                          <Edit className="w-4 h-4 mr-2" />
+                          Edit Config
                         </Button>
                       </div>
-                    )}
-                  </div>
+                      
+                      <div className="border-t border-gray-300 dark:border-gray-600 pt-4 mt-4">
+                        <Label htmlFor="config-upload">Upload New Configuration</Label>
+                        <Input
+                          id="config-upload"
+                          type="file"
+                          accept=".json"
+                          onChange={handleConfigFileChange}
+                          className="border-gray-400 dark:border-gray-600 mt-2"
+                        />
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                          Upload a JSON file to replace the current bot configuration. The bot will use the new config immediately.
+                        </p>
+                        
+                        {configFile && (
+                          <div className="mt-4">
+                            <Button 
+                              onClick={handleUploadConfig}
+                              disabled={uploadConfigMutation.isPending}
+                              className="bg-blue-600 hover:bg-blue-700 text-white"
+                            >
+                              {uploadConfigMutation.isPending ? "Uploading..." : "Upload & Activate Config"}
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-center">
+                          <Label>Edit Configuration JSON</Label>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">
+                            Make changes and click Save to update
+                          </div>
+                        </div>
+                        <Textarea
+                          value={configJsonText}
+                          onChange={(e) => setConfigJsonText(e.target.value)}
+                          className="font-mono text-sm border-gray-400 dark:border-gray-600 min-h-[500px]"
+                          placeholder="Edit JSON configuration..."
+                        />
+                      </div>
+                      
+                      <div className="flex gap-4">
+                        <Button 
+                          onClick={handleSaveEdit}
+                          disabled={saveEditedConfigMutation.isPending}
+                          className="bg-blue-600 hover:bg-blue-700 text-white"
+                        >
+                          {saveEditedConfigMutation.isPending ? "Saving..." : "Save Changes"}
+                        </Button>
+                        
+                        <Button 
+                          onClick={handleCancelEdit}
+                          variant="outline"
+                          className="border-gray-400 dark:border-gray-600"
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                      
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        Changes will be validated and applied immediately. Invalid JSON will not be saved.
+                      </p>
+                    </>
+                  )}
                 </CardContent>
               </Card>
               
