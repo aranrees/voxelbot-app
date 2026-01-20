@@ -1633,7 +1633,7 @@ export default function AdminDashboard() {
                                 : 'bg-white dark:bg-gray-600 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-500'
                             }`}>
                               <div className="text-xs opacity-70 mb-1">
-                                {msg.role === 'user' ? 'User' : 'Infomage'} • {new Date(msg.timestamp).toLocaleTimeString()}
+                                {msg.role === 'user' ? 'User' : 'VoxelBot'} • {new Date(msg.timestamp).toLocaleTimeString()}
                               </div>
                               <div className="text-sm whitespace-pre-wrap">{msg.content}</div>
                             </div>
