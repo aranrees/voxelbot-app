@@ -709,7 +709,7 @@ export default function AdminDashboard() {
                 <Heart className="w-5 h-5 text-white dark:text-black" />
               </div>
               <h1 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
-                Infomage Admin
+                Patavox Admin
               </h1>
             </div>
             <div className="flex items-center space-x-4">
