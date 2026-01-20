@@ -28,6 +28,7 @@ export default function AdminDashboard() {
   const [showInstructionDialog, setShowInstructionDialog] = useState(false);
   const [showQuickActionDialog, setShowQuickActionDialog] = useState(false);
   const [showStandardResponseDialog, setShowStandardResponseDialog] = useState(false);
+  const [activeTab, setActiveTab] = useState("bot-config");
   const [editingDocument, setEditingDocument] = useState<Document | null>(null);
   const [editingInstruction, setEditingInstruction] = useState<AiInstruction | null>(null);
   const [editingQuickAction, setEditingQuickAction] = useState<QuickAction | null>(null);
@@ -914,8 +915,26 @@ export default function AdminDashboard() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Tabs defaultValue="bot-config" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6 bg-gray-100 dark:bg-gray-800 border border-gray-400 dark:border-gray-600">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          {/* Mobile: Dropdown menu */}
+          <div className="md:hidden">
+            <Select value={activeTab} onValueChange={setActiveTab}>
+              <SelectTrigger className="w-full bg-white dark:bg-gray-800 border-gray-400 dark:border-gray-600">
+                <SelectValue placeholder="Select section" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="bot-config">Bot Config</SelectItem>
+                <SelectItem value="files">Downloads</SelectItem>
+                <SelectItem value="quick-actions">Quick Actions</SelectItem>
+                <SelectItem value="contact-info">Contact Info</SelectItem>
+                <SelectItem value="waitlist">Waitlist</SelectItem>
+                <SelectItem value="chats">Chat History</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          {/* Desktop: Regular tabs */}
+          <TabsList className="hidden md:grid w-full grid-cols-6 bg-gray-100 dark:bg-gray-800 border border-gray-400 dark:border-gray-600">
             <TabsTrigger value="bot-config" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">Bot Config</TabsTrigger>
             <TabsTrigger value="files" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">Downloads</TabsTrigger>
             <TabsTrigger value="quick-actions" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">Quick Actions</TabsTrigger>
