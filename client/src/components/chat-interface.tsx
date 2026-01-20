@@ -10,7 +10,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Moon, Sun, Send, Phone, Mail, MapPin, Clock, Download, Calendar, Heart, Settings, RotateCcw, CalendarCheck } from "lucide-react";
+import { Moon, Sun, Send, Phone, Mail, MapPin, Clock, Download, Calendar, Heart, Settings, RotateCcw, CalendarCheck, UserPlus } from "lucide-react";
+import { WaitlistForm } from "./WaitlistForm";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { QuickAction } from "@shared/schema";
@@ -39,6 +40,7 @@ export function ChatInterface() {
   const [showContactModal, setShowContactModal] = useState(false);
   const [showAppointmentModal, setShowAppointmentModal] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [showWaitlistModal, setShowWaitlistModal] = useState(false);
   const [interfaceSize, setInterfaceSize] = useState<"normal" | "large" | "extra-large">("normal");
   const [chatWidth, setChatWidth] = useState<"narrow" | "normal" | "wide" | "extra-wide">("normal");
   const [themeMode, setThemeMode] = useState<"light" | "dark" | "bonkers">("light");
@@ -627,6 +629,25 @@ export function ChatInterface() {
                         </div>
                       </Button>
                     )}
+                    
+                    {/* Waitlist button - show when waitlist is mentioned */}
+                    {(msg.content.toLowerCase().includes("waitlist") || 
+                      msg.content.toLowerCase().includes("wait list") ||
+                      msg.content.toLowerCase().includes("sign up") ||
+                      msg.content.toLowerCase().includes("register your interest")) && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className={`w-full justify-start h-auto ${sizeClasses.padding} border-0 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 shadow-sm hover:shadow-md transition-all duration-200`}
+                        onClick={() => setShowWaitlistModal(true)}
+                      >
+                        <UserPlus className={`${sizeClasses.icon} mr-2 text-gray-600 dark:text-gray-300`} />
+                        <div className="text-left">
+                          <p className={`${sizeClasses.textSm} font-medium`}>Join Waitlist</p>
+                          <p className={`${sizeClasses.textXs} text-gray-500 dark:text-gray-400`}>Register your interest</p>
+                        </div>
+                      </Button>
+                    )}
                   </div>
                 )}
               </div>
@@ -833,6 +854,13 @@ export function ChatInterface() {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Waitlist Modal */}
+      <Dialog open={showWaitlistModal} onOpenChange={setShowWaitlistModal}>
+        <DialogContent className="max-w-md">
+          <WaitlistForm onSuccess={() => setShowWaitlistModal(false)} />
         </DialogContent>
       </Dialog>
 
