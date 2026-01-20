@@ -753,8 +753,8 @@ export function ChatInterface() {
 
       {/* Controls Section */}
       <div className="mt-6 flex flex-wrap items-center justify-center gap-6">
-        {/* Chat Width Control */}
-        <div className="flex flex-col items-center space-y-2">
+        {/* Chat Width Control - hidden on mobile */}
+        <div className="hidden md:flex flex-col items-center space-y-2">
           <Label className={`${sizeClasses.textSm} font-medium text-gray-700 dark:text-gray-300`}>
             Chat Width
           </Label>
