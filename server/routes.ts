@@ -1,7 +1,9 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertChatMessageSchema, insertAppointmentSchema, insertDocumentSchema, insertAiInstructionSchema, insertQuickActionSchema, insertAvailabilitySchema, insertStandardResponseSchema, insertMeetingRequestSchema } from "@shared/schema";
+import { insertChatMessageSchema, insertAppointmentSchema, insertDocumentSchema, insertAiInstructionSchema, insertQuickActionSchema, insertAvailabilitySchema, insertStandardResponseSchema, insertMeetingRequestSchema, botConfig } from "@shared/schema";
+import { eq } from "drizzle-orm";
+import { db } from "./db";
 import { getChatResponse } from "./lib/openai";
 import { setupAuth } from "./auth";
 import path from "path";
@@ -1184,6 +1186,105 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(responses);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch standard responses" });
+    }
+  });
+
+  // Bot Configuration API endpoints
+  app.get("/api/bot-config", async (req, res) => {
+    try {
+      const { getBotConfig } = await import("./lib/bot-config");
+      const config = getBotConfig();
+      
+      if (!config) {
+        return res.status(404).json({ error: "No active configuration found" });
+      }
+      
+      res.json(config);
+    } catch (error) {
+      console.error("Error fetching bot config:", error);
+      res.status(500).json({ error: "Failed to fetch configuration" });
+    }
+  });
+
+  app.post("/api/bot-config/upload", requireAuth, async (req, res) => {
+    try {
+      const { version, configJson } = req.body;
+      
+      // Deactivate all existing configs
+      await db
+        .update(botConfig)
+        .set({ isActive: false });
+      
+      // Insert new config
+      const newConfig = await db
+        .insert(botConfig)
+        .values({
+          version,
+          configJson,
+          uploadedBy: req.user?.username || "admin",
+          isActive: true
+        })
+        .returning();
+      
+      // Refresh cached config
+      const { refreshConfig } = await import("./lib/bot-config");
+      await refreshConfig();
+      
+      res.json(newConfig[0]);
+    } catch (error) {
+      console.error("Error uploading bot config:", error);
+      res.status(500).json({ error: "Failed to upload configuration" });
+    }
+  });
+
+  app.get("/api/bot-config/history", requireAuth, async (req, res) => {
+    try {
+      const history = await db
+        .select({
+          id: botConfig.id,
+          version: botConfig.version,
+          uploadedAt: botConfig.uploadedAt,
+          uploadedBy: botConfig.uploadedBy,
+          isActive: botConfig.isActive
+        })
+        .from(botConfig)
+        .orderBy(botConfig.uploadedAt);
+      
+      res.json(history);
+    } catch (error) {
+      console.error("Error fetching config history:", error);
+      res.status(500).json({ error: "Failed to fetch history" });
+    }
+  });
+
+  app.post("/api/bot-config/rollback/:id", requireAuth, async (req, res) => {
+    try {
+      const configId = parseInt(req.params.id);
+      
+      // Deactivate all configs
+      await db
+        .update(botConfig)
+        .set({ isActive: false });
+      
+      // Activate selected version
+      const activated = await db
+        .update(botConfig)
+        .set({ isActive: true })
+        .where(eq(botConfig.id, configId))
+        .returning();
+      
+      if (activated.length === 0) {
+        return res.status(404).json({ error: "Configuration not found" });
+      }
+      
+      // Refresh cached config
+      const { refreshConfig } = await import("./lib/bot-config");
+      await refreshConfig();
+      
+      res.json(activated[0]);
+    } catch (error) {
+      console.error("Error rolling back config:", error);
+      res.status(500).json({ error: "Failed to rollback configuration" });
     }
   });
 

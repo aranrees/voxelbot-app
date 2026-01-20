@@ -1,0 +1,123 @@
+Add API endpoints for managing bot configuration.
+
+File: `/server/routes.ts`
+
+Add these routes (place them with other API routes):
+
+// Get active bot configuration
+app.get("/api/bot-config", async (req, res) => {
+  try {
+    const { getBotConfig } = await import("./lib/bot-config");
+    const config = getBotConfig();
+    
+    if (!config) {
+      return res.status(404).json({ error: "No active configuration found" });
+    }
+    
+    res.json(config);
+  } catch (error) {
+    console.error("Error fetching bot config:", error);
+    res.status(500).json({ error: "Failed to fetch configuration" });
+  }
+});
+
+// Upload new bot configuration (admin only)
+app.post("/api/bot-config/upload", async (req, res) => {
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+  
+  try {
+    const { version, configJson } = req.body;
+    
+    // Deactivate all existing configs
+    await db
+      .update(botConfig)
+      .set({ isActive: false });
+    
+    // Insert new config
+    const newConfig = await db
+      .insert(botConfig)
+      .values({
+        version,
+        configJson,
+        uploadedBy: req.user?.username || "admin",
+        isActive: true
+      })
+      .returning();
+    
+    // Refresh cached config
+    const { refreshConfig } = await import("./lib/bot-config");
+    await refreshConfig();
+    
+    res.json(newConfig[0]);
+  } catch (error) {
+    console.error("Error uploading bot config:", error);
+    res.status(500).json({ error: "Failed to upload configuration" });
+  }
+});
+
+// Get configuration history
+app.get("/api/bot-config/history", async (req, res) => {
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+  
+  try {
+    const history = await db
+      .select({
+        id: botConfig.id,
+        version: botConfig.version,
+        uploadedAt: botConfig.uploadedAt,
+        uploadedBy: botConfig.uploadedBy,
+        isActive: botConfig.isActive
+      })
+      .from(botConfig)
+      .orderBy(botConfig.uploadedAt);
+    
+    res.json(history);
+  } catch (error) {
+    console.error("Error fetching config history:", error);
+    res.status(500).json({ error: "Failed to fetch history" });
+  }
+});
+
+// Rollback to specific version
+app.post("/api/bot-config/rollback/:id", async (req, res) => {
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+  
+  try {
+    const configId = parseInt(req.params.id);
+    
+    // Deactivate all configs
+    await db
+      .update(botConfig)
+      .set({ isActive: false });
+    
+    // Activate selected version
+    const activated = await db
+      .update(botConfig)
+      .set({ isActive: true })
+      .where(eq(botConfig.id, configId))
+      .returning();
+    
+    if (activated.length === 0) {
+      return res.status(404).json({ error: "Configuration not found" });
+    }
+    
+    // Refresh cached config
+    const { refreshConfig } = await import("./lib/bot-config");
+    await refreshConfig();
+    
+    res.json(activated[0]);
+  } catch (error) {
+    console.error("Error rolling back config:", error);
+    res.status(500).json({ error: "Failed to rollback configuration" });
+  }
+});
+
+Make sure to import botConfig at the top of routes.ts:
+import { botConfig } from "@db/schema";
+import { eq } from "drizzle-orm";
