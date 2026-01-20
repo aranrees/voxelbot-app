@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertChatMessageSchema, insertAppointmentSchema, insertDocumentSchema, insertAiInstructionSchema, insertQuickActionSchema, insertAvailabilitySchema, insertStandardResponseSchema, insertMeetingRequestSchema, botConfig } from "@shared/schema";
+import { insertChatMessageSchema, insertAppointmentSchema, insertDocumentSchema, insertAiInstructionSchema, insertQuickActionSchema, insertAvailabilitySchema, insertStandardResponseSchema, insertMeetingRequestSchema, botConfig, waitlistSignups } from "@shared/schema";
 import { eq } from "drizzle-orm";
 import { db } from "./db";
 import { getChatResponse } from "./lib/openai";
@@ -151,6 +151,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error adding greeting message:", error);
       res.status(500).json({ message: "Failed to add greeting message" });
+    }
+  });
+
+  // Waitlist signup endpoint
+  app.post("/api/waitlist", async (req, res) => {
+    try {
+      const { name, email, position, interestPrompt } = req.body;
+      
+      // Validation
+      if (!name || !email || !position) {
+        return res.status(400).json({ 
+          error: "Name, email, and position are required" 
+        });
+      }
+      
+      // Validate position is one of allowed values
+      const allowedPositions = [
+        "Parent/Guardian",
+        "Teacher",
+        "Youth Work Professional",
+        "Press",
+        "Partner/Other"
+      ];
+      
+      if (!allowedPositions.includes(position)) {
+        return res.status(400).json({ 
+          error: "Invalid position selected" 
+        });
+      }
+      
+      // Basic email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ 
+          error: "Invalid email format" 
+        });
+      }
+      
+      // Insert into database using Drizzle
+      const result = await db.insert(waitlistSignups).values({
+        name,
+        email,
+        position,
+        interestPrompt: interestPrompt || null
+      }).returning({ id: waitlistSignups.id, createdAt: waitlistSignups.createdAt });
+      
+      res.status(201).json({ 
+        success: true,
+        message: "Successfully joined the waitlist",
+        id: result[0].id
+      });
+      
+    } catch (error) {
+      console.error("Waitlist signup error:", error);
+      res.status(500).json({ 
+        error: "Failed to process waitlist signup" 
+      });
     }
   });
 
