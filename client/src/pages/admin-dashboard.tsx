@@ -142,6 +142,10 @@ export default function AdminDashboard() {
     businessHours: "Mon-Fri: 9:00 AM - 6:00 PM\nSat: 10:00 AM - 4:00 PM"
   });
 
+  // State for bot config
+  const [currentBotConfig, setCurrentBotConfig] = useState<any>(null);
+  const [configFile, setConfigFile] = useState<File | null>(null);
+
   // Fetch contact info
   const { data: contactInfoData } = useQuery<{
     phone: string;
@@ -204,6 +208,121 @@ export default function AdminDashboard() {
     queryKey: ["/api/admin/standard-responses"],
     enabled: !!user, // Only fetch when user is authenticated
   });
+
+  // Query for current bot config
+  const { data: botConfigData } = useQuery({
+    queryKey: ["/api/bot-config"],
+    enabled: !!user,
+  });
+
+  // Update currentBotConfig when data loads
+  useEffect(() => {
+    if (botConfigData) {
+      setCurrentBotConfig(botConfigData);
+    }
+  }, [botConfigData]);
+
+  // Query for config history
+  const { data: configHistory, isLoading: configHistoryLoading } = useQuery<any[]>({
+    queryKey: ["/api/bot-config/history"],
+    enabled: !!user,
+  });
+
+  // Mutation for uploading config
+  const uploadConfigMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const text = await file.text();
+      const config = JSON.parse(text);
+      
+      const response = await apiRequest("POST", "/api/bot-config/upload", {
+        version: config.version,
+        configJson: config
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/bot-config"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/bot-config/history"] });
+      setConfigFile(null);
+      toast({
+        title: "Success",
+        description: "Bot configuration updated successfully"
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to upload configuration",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Mutation for rollback
+  const rollbackMutation = useMutation({
+    mutationFn: async (configId: number) => {
+      const response = await apiRequest("POST", `/api/bot-config/rollback/${configId}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/bot-config"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/bot-config/history"] });
+      toast({
+        title: "Success",
+        description: "Rolled back to previous configuration"
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to rollback configuration",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Bot config handler functions
+  const handleDownloadConfig = () => {
+    if (!currentBotConfig) {
+      toast({
+        title: "Error",
+        description: "No configuration available to download",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    const blob = new Blob([JSON.stringify(currentBotConfig, null, 2)], {
+      type: "application/json"
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `voxelbot-config-${currentBotConfig.version || "current"}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleConfigFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setConfigFile(file);
+    }
+  };
+
+  const handleUploadConfig = () => {
+    if (configFile) {
+      uploadConfigMutation.mutate(configFile);
+    }
+  };
+
+  const handleRollback = (configId: number) => {
+    if (confirm("Are you sure you want to rollback to this configuration version?")) {
+      rollbackMutation.mutate(configId);
+    }
+  };
 
   // Document mutations
   const createDocumentMutation = useMutation({
@@ -733,12 +852,13 @@ export default function AdminDashboard() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs defaultValue="infomage-data" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6 bg-gray-100 dark:bg-gray-800 border border-gray-400 dark:border-gray-600">
+          <TabsList className="grid w-full grid-cols-7 bg-gray-100 dark:bg-gray-800 border border-gray-400 dark:border-gray-600">
             <TabsTrigger value="infomage-data" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">Infomage Data</TabsTrigger>
             <TabsTrigger value="files" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">Downloads</TabsTrigger>
             <TabsTrigger value="quick-actions" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">Quick Actions</TabsTrigger>
             <TabsTrigger value="standard-responses" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">Standard Responses</TabsTrigger>
             <TabsTrigger value="contact-info" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">Contact Info</TabsTrigger>
+            <TabsTrigger value="bot-config" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">Bot Config</TabsTrigger>
             <TabsTrigger value="chats" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">Chat History</TabsTrigger>
           </TabsList>
 
@@ -2109,6 +2229,128 @@ export default function AdminDashboard() {
                       </div>
                     </div>
                   </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="bot-config" className="space-y-6">
+            <div className="max-w-4xl">
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
+                Bot Configuration Management
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+                Upload a new JSON configuration file to update VoxelBot's behavior, knowledge base, and responses. 
+                Download the current config to edit locally.
+              </p>
+              
+              <Card className="border-gray-400 dark:border-gray-600 bg-white dark:bg-gray-800">
+                <CardHeader>
+                  <CardTitle className="text-gray-800 dark:text-gray-200">Current Configuration</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label>Version</Label>
+                      <Input 
+                        value={currentBotConfig?.version || "No config loaded"}
+                        readOnly
+                        className="border-gray-400 dark:border-gray-600 bg-gray-50 dark:bg-gray-700"
+                      />
+                    </div>
+                    <div>
+                      <Label>Last Updated</Label>
+                      <Input 
+                        value={currentBotConfig?.lastUpdated ? new Date(currentBotConfig.lastUpdated).toLocaleString() : "N/A"}
+                        readOnly
+                        className="border-gray-400 dark:border-gray-600 bg-gray-50 dark:bg-gray-700"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-4">
+                    <Button 
+                      onClick={handleDownloadConfig}
+                      variant="outline"
+                      className="border-gray-400 dark:border-gray-600"
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      Download Current Config
+                    </Button>
+                  </div>
+                  
+                  <div className="border-t border-gray-300 dark:border-gray-600 pt-4 mt-4">
+                    <Label htmlFor="config-upload">Upload New Configuration</Label>
+                    <Input
+                      id="config-upload"
+                      type="file"
+                      accept=".json"
+                      onChange={handleConfigFileChange}
+                      className="border-gray-400 dark:border-gray-600 mt-2"
+                    />
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                      Upload a JSON file to replace the current bot configuration. The bot will use the new config immediately.
+                    </p>
+                    
+                    {configFile && (
+                      <div className="mt-4">
+                        <Button 
+                          onClick={handleUploadConfig}
+                          disabled={uploadConfigMutation.isPending}
+                          className="bg-blue-600 hover:bg-blue-700 text-white"
+                        >
+                          {uploadConfigMutation.isPending ? "Uploading..." : "Upload & Activate Config"}
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="border-gray-400 dark:border-gray-600 bg-white dark:bg-gray-800 mt-6">
+                <CardHeader>
+                  <CardTitle className="text-gray-800 dark:text-gray-200">Configuration History</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {configHistoryLoading ? (
+                    <div className="text-center py-4">Loading history...</div>
+                  ) : configHistory && configHistory.length > 0 ? (
+                    <div className="space-y-2">
+                      {configHistory.map((config: any) => (
+                        <div 
+                          key={config.id}
+                          className="flex items-center justify-between p-3 border border-gray-300 dark:border-gray-600 rounded"
+                        >
+                          <div>
+                            <div className="font-medium text-gray-800 dark:text-gray-200">
+                              Version {config.version}
+                              {config.isActive && (
+                                <Badge className="ml-2 bg-green-600">Active</Badge>
+                              )}
+                            </div>
+                            <div className="text-sm text-gray-600 dark:text-gray-400">
+                              Uploaded {new Date(config.uploadedAt).toLocaleString()} by {config.uploadedBy}
+                            </div>
+                          </div>
+                          {!config.isActive && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleRollback(config.id)}
+                              disabled={rollbackMutation.isPending}
+                            >
+                              <RotateCcw className="w-4 h-4 mr-1" />
+                              Rollback
+                            </Button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-4 text-gray-600 dark:text-gray-400">
+                      No configuration history found
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
