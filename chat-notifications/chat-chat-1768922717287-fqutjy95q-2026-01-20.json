@@ -1,0 +1,24 @@
+{
+  "sessionId": "chat-1768922717287-fqutjy95q",
+  "startTime": "2026-01-20T15:32:27.716Z",
+  "endTime": "2026-01-20T15:33:53.103Z",
+  "duration": "1 minutes",
+  "messageCount": 3,
+  "messages": [
+    {
+      "timestamp": "2026-01-20T15:32:27.716Z",
+      "role": "assistant",
+      "content": "Welcome! I'm VoxelBot, here to help you learn about The Voxel Programme. How can I help you today?"
+    },
+    {
+      "timestamp": "2026-01-20T15:33:04.845Z",
+      "role": "user",
+      "content": "I have a teenager who's curious about how to get ready for life after school. I know the world is changing and I want to help him."
+    },
+    {
+      "timestamp": "2026-01-20T15:33:09.954Z",
+      "role": "assistant",
+      "content": "It sounds like you're a caring parent looking to support your teenager in navigating an uncertain future. The Voxel Programme is designed for exactly this purpose. It's not just about preparing for exams; it's about teaching young people how to learn and creatively apply that learning throughout their lives. \n\nWe focus on self-directed learning and help build essential skills that evolve as they mature, continuing to support them even beyond their school years. \n\nIs your teenager between the ages of 13-16 and genuinely motivated to explore new ways of learning? If so, I'd be happy to discuss how The Voxel Programme might be a good fit for your family. Would you like to book a discovery call or join our waitlist to learn more?"
+    }
+  ]
+}
