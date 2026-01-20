@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertChatMessageSchema, insertAppointmentSchema, insertDocumentSchema, insertAiInstructionSchema, insertQuickActionSchema, insertAvailabilitySchema, insertStandardResponseSchema, insertMeetingRequestSchema, botConfig, waitlistSignups } from "@shared/schema";
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import { db } from "./db";
 import { getChatResponse } from "./lib/openai";
 import { setupAuth } from "./auth";
@@ -427,6 +427,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching completed chats:", error);
       res.status(500).json({ error: "Failed to fetch completed chats" });
+    }
+  });
+
+  // Get waitlist signups for admin review
+  app.get("/api/admin/waitlist", async (req, res) => {
+    try {
+      const signups = await db.select().from(waitlistSignups).orderBy(desc(waitlistSignups.createdAt));
+      res.json({ signups });
+    } catch (error) {
+      console.error("Error fetching waitlist:", error);
+      res.status(500).json({ error: "Failed to fetch waitlist signups" });
     }
   });
 
