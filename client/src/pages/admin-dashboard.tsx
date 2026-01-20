@@ -106,7 +106,7 @@ export default function AdminDashboard() {
 
   const [showArchivedDocuments, setShowArchivedDocuments] = useState(false);
   
-  // Filtering state for Infomage Data tab
+  // Filtering state for Data tab
   const [dataFilter, setDataFilter] = useState<{
     type: "all" | "knowledge" | "instructions";
     sortBy: "recent" | "priority" | "active" | "type";
@@ -862,7 +862,7 @@ export default function AdminDashboard() {
             <TabsTrigger value="chats" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">Chat History</TabsTrigger>
           </TabsList>
 
-          {/* Combined Infomage Data Tab - Knowledge + Instructions */}
+          {/* Combined Data Tab - Knowledge + Instructions */}
           <TabsContent value="infomage-data" className="space-y-6">
             {/* Filter Controls */}
             <div className="flex flex-wrap gap-4 items-center justify-between">
