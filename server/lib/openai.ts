@@ -138,11 +138,14 @@ export async function getChatResponse(
 
     console.log(`Using AI Provider: ${AI_PROVIDER}, Model: ${model}`);
 
+    // Kimi K2.5 requires temperature: 1, OpenAI supports 0.7
+    const temperature = AI_PROVIDER === "moonshot" ? 1 : 0.7;
+    
     const response = await client.chat.completions.create({
       model: model,
       messages: messages as any,
       max_tokens: 500,
-      temperature: 0.7,
+      temperature: temperature,
     });
 
     return response.choices[0].message.content || "I apologize, but I'm having trouble responding right now. Please try again.";
