@@ -1,9 +1,20 @@
 import OpenAI from "openai";
 import { getBotConfig } from './bot-config';
 
+// Initialize OpenAI client
 const openai = new OpenAI({ 
   apiKey: process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY_ENV_VAR || "your-openai-api-key"
 });
+
+// Initialize Moonshot (Kimi) client - OpenAI-compatible
+const moonshot = new OpenAI({
+  apiKey: process.env.MOONSHOT_API_KEY || "your-moonshot-api-key",
+  baseURL: "https://api.moonshot.ai/v1"
+});
+
+// Model configuration
+const AI_PROVIDER = process.env.AI_PROVIDER || "openai"; // "openai" or "moonshot"
+const AI_MODEL = process.env.AI_MODEL || (AI_PROVIDER === "moonshot" ? "kimi-k2.5" : "gpt-4o");
 
 export async function getChatResponse(
   message: string, 
@@ -121,8 +132,14 @@ export async function getChatResponse(
       { role: "user", content: message }
     ];
 
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+    // Select the appropriate client and model based on environment
+    const client = AI_PROVIDER === "moonshot" ? moonshot : openai;
+    const model = AI_MODEL;
+
+    console.log(`Using AI Provider: ${AI_PROVIDER}, Model: ${model}`);
+
+    const response = await client.chat.completions.create({
+      model: model,
       messages: messages as any,
       max_tokens: 500,
       temperature: 0.7,
@@ -130,7 +147,7 @@ export async function getChatResponse(
 
     return response.choices[0].message.content || "I apologize, but I'm having trouble responding right now. Please try again.";
   } catch (error) {
-    console.error("OpenAI API Error:", error);
+    console.error("AI API Error:", error);
     return "I'm experiencing some technical difficulties right now. Please try again in a moment.";
   }
 }
